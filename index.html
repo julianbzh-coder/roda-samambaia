@@ -124,10 +124,15 @@
 </head>
 <body>
 
-    <div id="debug-console" style="display:none; position:fixed; bottom:15px; right:15px; background:rgba(231,76,60,0.95); color:white; padding:15px; border-radius:8px; z-index:10000; max-width:400px; font-family:monospace; font-size:12px; box-shadow:0 4px 15px rgba(0,0,0,0.5);">
-        <strong style="display:block; margin-bottom:5px;">⚠️ Erreur de chargement détectée :</strong>
-        <span id="debug-message"></span>
-    </div>
+    <script>
+        setTimeout(() => {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+                console.log("Sécurité : Retrait forcé de l'écran de chargement.");
+            }
+        }, 1500);
+    </script>
 
     <div id="loading-overlay">🌿 Chargement des voix de la Roda Samambaia...</div>
 
@@ -175,18 +180,7 @@
     </div>
 
     <script>
-        // Déclencheur du mouchard d'erreurs
-        window.onerror = function(message, source, lineno, colno, error) {
-            const consoleDiv = document.getElementById('debug-console');
-            const msgSpan = document.getElementById('debug-message');
-            if (consoleDiv && msgSpan) {
-                consoleDiv.style.display = 'block';
-                msgSpan.innerHTML = `${message}<br><small>Fichier: ${source} (Ligne: ${lineno})</small>`;
-            }
-            return false;
-        };
-
-        // Configuration audio de Tone.js avec Sotaque Maracatu (35%) d'entrée de jeu
+        // Injection automatique du sotaque de 35% dans le Transport
         Tone.context.lookAhead = 0.04; 
         Tone.context.latencyHint = "interactive";
         Tone.Transport.swing = 0.35; 
@@ -194,7 +188,7 @@
         const recorder = new Tone.Recorder();
         Tone.Destination.connect(recorder);
 
-        // --- STRUCTURES APPLI ---
+        // --- BUS DE MIXAGE ---
         const channels = {}; const meters = {}; const samplers = {};
 
         const instrumentsConfig = [
@@ -236,9 +230,8 @@
             loadedCount++;
             if (loadedCount >= 6) { document.getElementById('loading-overlay').style.display = 'none'; }
         }
-        setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none'; }, 2000);
 
-        // Intégration brute du Baque Virado de démarrage
+        // Chargement direct du Baque Virado d'office
         let circles = [
             { id: 1, radius: 100, steps: 4, activeSteps: ['D', 0, 'd', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
             { id: 2, radius: 135, steps: 8, activeSteps: ['D', 0, 'd', 'g', 0, 'D', 0, 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
@@ -247,7 +240,6 @@
         ];
         let isMetroOn = false;
 
-        // --- PRESETS DE REPERTOIRE ---
         function loadPreset(presetName) {
             if (!presetName) return;
             if (presetName === 'baque-virado') {
@@ -268,7 +260,7 @@
             renderMixer();
         }
 
-        // --- DESSIN DU TAMBOUR ---
+        // --- GRAPHISMES ---
         const bgImg = new Image(); bgImg.src = 'tambour.png';
         let bgLoaded = false; bgImg.onload = () => { bgLoaded = true; };
 
@@ -360,7 +352,7 @@
             requestAnimationFrame(draw);
         }
 
-        // --- SEQUENCEUR SÉCURISÉ ---
+        // --- ENTRAINEMENT AUDIO ---
         let currentStepIndex = -1;
         
         const mainLoop = new Tone.Loop((time) => {
@@ -389,7 +381,6 @@
                                 let playerGroup = samplers[inst.id];
                                 let targetKey = null;
 
-                                // Dispatcher ultra-sécurisé pour éviter les crashes de clés Tone.js
                                 if (inst.type === 'gongue') {
                                     if (state === 'GRV') targetKey = 'fort-grave';
                                     else if (state === 'grv') targetKey = 'faible-grave';
@@ -422,7 +413,7 @@
         }
         setInterval(drawMeters, 40);
 
-        // --- TABLE DE MIXAGE ---
+        // --- MIXER TABLE ---
         function renderMixer() {
             const container = document.getElementById('tracks-mixer-container'); container.innerHTML = "";
             circles.forEach((circle, index) => {
@@ -456,4 +447,44 @@
             if(c) {
                 c.volumeVal = parseInt(v);
                 let instId = instrumentsConfig[c.instrumentIdx].id;
-                let db = Tone.gainToDb(v / 10
+                let db = Tone.gainToDb(v / 100); if(v <= 4) db = -Infinity;
+                channels[instId].volume.value = db;
+            }
+        };
+        window.updateSteps = function(id, s) {
+            let c = circles.find(x => x.id === id);
+            if (c) {
+                let sn = parseInt(s) || 4; c.steps = sn;
+                let na = Array(sn).fill(0); for(let i=0; i<Math.min(sn, c.activeSteps.length); i++) na[i] = c.activeSteps[i];
+                c.activeSteps = na;
+            }
+        };
+
+        // --- CYCLES CLICS DÉTECTION SÉCURISÉE ---
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect(); 
+            const mouseX = e.clientX - rect.left; 
+            const mouseY = e.clientY - rect.top;
+            const dx = mouseX - centerX; 
+            const dy = mouseY - centerY; 
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            circles.forEach((circle) => {
+                if (Math.abs(distance - circle.radius) < 14) {
+                    let clickAngle = Math.atan2(dy, dx) + Math.PI / 2; 
+                    if (clickAngle < 0) clickAngle += Math.PI * 2;
+                    const stepAngleSize = (Math.PI * 2) / circle.steps;
+                    
+                    for (let i = 0; i < circle.steps; i++) {
+                        const targetAngle = i * stepAngleSize; 
+                        let angleDiff = Math.abs(clickAngle - targetAngle);
+                        if (angleDiff > Math.PI) { angleDiff = Math.PI * 2 - angleDiff; }
+
+                        if (angleDiff < stepAngleSize / 2) {
+                            const inst = instrumentsConfig[circle.instrumentIdx]; 
+                            let current = circle.activeSteps[i];
+                            
+                            if (inst.type === 'shake') {
+                                if (current === 0) circle.activeSteps[i] = 'p'; 
+                                else if (current === 'p') circle.activeSteps[i] = 'P'; 
+                                else if (current === 'P') circle.activeSteps[i]
