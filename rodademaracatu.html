@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Roda de Maracatu - Samambaia Engine Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --panel-bg: #1e1e1e;
+            --control-bg: #252525;
+            --text-main: #f5f5f5;
+            --text-muted: #888;
+            --accent-gold: #f1c40f;
+            --accent-green: #2ecc71;
+            --accent-red: #e74c3c;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #left-panel {
+            width: 320px;
+            background-color: var(--panel-bg);
+            border-right: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .panel-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+
+        #mixer-section { flex-grow: 1; overflow-y: auto; }
+
+        .track-mixer {
+            background-color: var(--control-bg);
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .track-mixer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .track-name { font-size: 13px; font-weight: bold; }
+        .track-mute-solo { display: flex; gap: 4px; }
+
+        .btn-mute-solo {
+            width: 24px; height: 24px; background-color: #333; color: #fff;
+            border: none; border-radius: 4px; font-weight: bold; font-size: 10px; cursor: pointer;
+        }
+        .btn-mute-solo.mute-on { background-color: var(--accent-red); }
+        .btn-mute-solo.solo-on { background-color: var(--accent-gold); color: #000; }
+
+        .fader-group { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .fader { flex-grow: 1; -webkit-appearance: none; height: 6px; border-radius: 3px; background: #444; outline: none; }
+        .fader::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #fff; cursor: pointer; }
+
+        .vol-meter-bg { width: 35px; height: 8px; background-color: #000; border-radius: 2px; position: relative; overflow: hidden; }
+        .vol-meter-bar { height: 100%; background-color: var(--accent-green); width: 0%; transition: width 0.05s linear; }
+
+        .steps-config { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); border-top: 1px dashed #444; padding-top: 6px; }
+        .steps-config input { width: 40px; background: #111; border: 1px solid #555; color: #fff; padding: 2px; border-radius: 4px; text-align: center; }
+
+        #right-panel { flex-grow: 1; display: flex; flex-direction: column; position: relative; }
+        #top-bar {
+            height: 60px; background-color: var(--panel-bg); border-bottom: 1px solid #333;
+            display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-sizing: border-box; z-index: 10;
+        }
+
+        #header-main { display: flex; align-items: center; gap: 10px; }
+        #header-title-text { font-size: 16px; font-weight: bold; letter-spacing: 1px; }
+        #global-controls { display: flex; align-items: center; gap: 10px; }
+
+        button.control-btn {
+            background-color: #333; color: #fff; border: 1px solid #444; padding: 6px 14px;
+            border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold; transition: background-color 0.2s;
+        }
+        button.control-btn:hover { background-color: #444; }
+        button#playBtn { background-color: var(--accent-green); border-color: var(--accent-green); min-width: 90px; }
+        button#playBtn.playing { background-color: var(--accent-red); border-color: var(--accent-red); }
+        button#recBtn { background-color: #d35400; border-color: #d35400; }
+        button#recBtn.recording { background-color: var(--accent-red); animation: pulse 1s infinite; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        .control-separator { width: 1px; height: 24px; background-color: #444; margin: 0 4px; }
+        label.bpm-label { font-size: 12px; display: flex; align-items: center; gap: 6px; color: var(--text-main); font-weight: bold; }
+        #bpm { width: 48px; background-color: var(--control-bg); color: var(--text-main); border: 1px solid #444; padding: 4px; border-radius: 6px; text-align: center; }
+
+        #canvas-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; background-color: var(--bg-dark); }
+        canvas { border-radius: 50%; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+        #fileInput { display: none; }
+        
+        #loading-overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(18,18,18,0.9);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;
+            font-size: 18px; font-weight: bold; color: var(--accent-gold);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading-overlay">🌿 Chargement des voix de la Roda Samambaia...</div>
+
+    <div id="left-panel">
+        <div class="panel-title">🎛️ Mixer Table</div>
+        <div id="mixer-section">
+            <div id="tracks-mixer-container"></div>
+        </div>
+    </div>
+
+    <div id="right-panel">
+        <div id="top-bar">
+            <div id="header-main">
+                <span style="color:var(--accent-green); font-size:22px;">🌿</span>
+                <span id="header-title-text">RODA DE MARACATU - SAMAMBAIA</span>
+            </div>
+            <div id="global-controls">
+                <label class="bpm-label">BPM: <input type="number" id="bpm" value="100" min="40" max="240"></label>
+                <div class="control-separator"></div>
+                <button id="addCircleBtn" class="control-btn">+ Ajouter Instrument</button>
+                <button id="clearBtn" class="control-btn">Vider</button>
+                <div class="control-separator"></div>
+                <button id="recBtn" class="control-btn">🔴 Rec Audio</button>
+                <button id="saveBtn" class="control-btn" style="background:#2980b9;">💾 Sauver</button>
+                <button id="loadBtn" class="control-btn" style="background:#2980b9;">📂 Charger</button>
+                <input type="file" id="fileInput" accept=".json">
+                <div class="control-separator"></div>
+                <button id="playBtn" class="control-btn">▶ Démarrer</button>
+            </div>
+        </div>
+
+        <div id="canvas-container">
+            <canvas id="canvas" width="760" height="760"></canvas>
+        </div>
+    </div>
+
+    <script>
+        Tone.context.lookAhead = 0.015;
+        Tone.context.latencyHint = "fastest";
+
+        const recorder = new Tone.Recorder();
+        Tone.Destination.connect(recorder);
+
+        // --- ATTRIBUTION ET CHARGEMENT DES SAMPLES AUDIO DU DOSSIER ---
+        const channels = {};
+        const meters = {};
+        const samplers = {};
+
+        const instrumentsConfig = [
+            { id: 'marcante', name: 'Alfaia Marcante', type: 'hands', path: 'Alfaia/Marcante', colors: { 'd': '#5a0000', 'D': '#8b0000', 'g': '#ff7676', 'G': '#ff4d4d', text: '#fff' } },
+            { id: 'meiao', name: 'Alfaia Meião', type: 'hands', path: 'Alfaia/Meiao', colors: { 'd': '#a04000', 'D': '#d35400', 'g': '#fbc531', 'G': '#f39c12', text: '#fff' } },
+            { id: 'repique', name: 'Alfaia Repique', type: 'hands', path: 'Alfaia/Repique', colors: { 'd': '#b59510', 'D': '#f1c40f', 'g': '#fff5cc', 'G': '#ffeaa7', text: '#121212' } },
+            { id: 'caixa', name: 'Caixa', type: 'hands', path: 'Caixa', colors: { 'd': '#320b61', 'D': '#4a148c', 'g': '#be5be0', 'G': '#9c27b0', text: '#fff' } },
+            { id: 'gongue', name: 'Gonguê', type: 'gongue', path: 'Gongue', colors: { 'grv': '#222222', 'GRV': '#000000', 'aig': '#7f8c8d', 'AIG': '#bdc3c7', text: '#fff' } },
+            { id: 'agbe', name: 'Agbê', type: 'shake', path: 'Graines/Agbe', colors: { 'p': '#113b14', 'P': '#1b5e20', 't': '#74d478', 'T': '#4caf50', text: '#fff' } },
+            { id: 'mineiro', name: 'Mineiro', type: 'shake', path: 'Graines/Mineiro', colors: { 'p': '#113b14', 'P': '#1b5e20', 't': '#74d478', 'T': '#4caf50', text: '#fff' } }
+        ];
+
+        // Boucle de construction du moteur audio
+        instrumentsConfig.forEach(inst => {
+            channels[inst.id] = new Tone.Channel({ volume: 0 }).toDestination();
+            meters[inst.id] = new Tone.Meter();
+            channels[inst.id].connect(meters[inst.id]);
+
+            // Cartographie des fichiers .wav locaux
+            let urls = {};
+            if (inst.type === 'gongue') {
+                urls = {
+                    "faible-grave": "faible-grave.wav",
+                    "fort-grave": "fort-grave.wav",
+                    "faible-aigue": "faible-aigue.wav",
+                    "fort-aigue": "fort-aigue.wav"
+                };
+            } else {
+                urls = {
+                    "faible": "faible.wav",
+                    "fort": "fort.wav"
+                };
+            }
+
+            samplers[inst.id] = new Tone.Players({
+                urls: urls,
+                baseUrl: `sons-maracatu/${inst.path}/`,
+                onload: () => checkAllLoaded()
+            }).connect(channels[inst.id]);
+        });
+
+        let loadedCount = 0;
+        function checkAllLoaded() {
+            loadedCount++;
+            // 7 instruments configurés
+            if (loadedCount >= 7) {
+                document.getElementById('loading-overlay').style.display = 'none';
+            }
+        }
+
+        // Configuration de la Roda initiale
+        let circles = [
+            { id: 1, radius: 110, steps: 4, activeSteps: ['D', 0, 'd', 0], instrumentIdx: 0, isMute: false, isSolo: false, volumeVal: 100 },   
+            { id: 2, radius: 150, steps: 8, activeSteps: ['D', 0, 'd', 'g', 0, 'D', 0, 'G'], instrumentIdx: 1, isMute: false, isSolo: false, volumeVal: 100 }, 
+            { id: 3, radius: 190, steps: 4, activeSteps: ['GRV', 0, 'AIG', 0], instrumentIdx: 4, isMute: false, isSolo: false, volumeVal: 100 }, 
+            { id: 4, radius: 230, steps: 8, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, isMute: false, isSolo: false, volumeVal: 100 }
+        ];
+
+        // --- IMAGE FOND ---
+        const bgImg = new Image(); bgImg.src = 'tambour.png';
+        let bgLoaded = false; bgImg.onload = () => { bgLoaded = true; };
+
+        const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
+        const centerX = canvas.width / 2; const centerY = canvas.height / 2;
+        let isPlaying = false; let isRecording = false;
+
+        // --- FONCTION DE DESSIN ---
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (bgLoaded) {
+                ctx.save(); ctx.beginPath(); ctx.arc(centerX, centerY, 310, 0, Math.PI * 2); ctx.clip();
+                ctx.drawImage(bgImg, centerX - 310, centerY - 310, 620, 620); ctx.restore();
+                ctx.beginPath(); ctx.arc(centerX, centerY, 310, 0, Math.PI * 2); ctx.fillStyle = 'rgba(15, 15, 15, 0.45)'; ctx.fill();
+            } else {
+                ctx.fillStyle = '#161616'; ctx.beginPath(); ctx.arc(centerX, centerY, 310, 0, Math.PI * 2); ctx.fill();
+            }
+
+            ctx.beginPath(); ctx.arc(centerX, centerY, 315, 0, Math.PI * 2); ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 8; ctx.stroke();
+
+            let currentAngle = -Math.PI / 2;
+            if (isPlaying) {
+                const bpm = Tone.Transport.bpm.value;
+                const progressInMeasure = (Tone.Transport.seconds % ((60 / bpm) * 4)) / ((60 / bpm) * 4);
+                currentAngle = -Math.PI / 2 + (progressInMeasure * Math.PI * 2);
+            }
+
+            circles.forEach((circle) => {
+                let hasActiveSolo = circles.some(c => c.isSolo);
+                let isTargeted = hasActiveSolo ? circle.isSolo : !circle.isMute;
+                
+                ctx.save(); ctx.globalAlpha = isTargeted ? 1.0 : 0.15;
+                ctx.beginPath(); ctx.arc(centerX, centerY, circle.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = circle.isSolo ? '#f1c40f' : 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+                const inst = instrumentsConfig[circle.instrumentIdx];
+                for (let i = 0; i < circle.steps; i++) {
+                    const stepAngle = -Math.PI / 2 + (i * (Math.PI * 2 / circle.steps));
+                    const x = centerX + Math.cos(stepAngle) * circle.radius; const y = centerY + Math.sin(stepAngle) * circle.radius;
+                    
+                    let state = circle.activeSteps[i];
+                    let fillColor = 'rgba(40,40,40,0.6)';
+                    let radiusSize = 5;
+                    let isAccent = false;
+
+                    if (state !== 0) {
+                        fillColor = inst.colors[state] || '#fff';
+                        // Si la lettre est en majuscule, c'est un Accent (coup fort)
+                        isAccent = (state === state.toUpperCase());
+                        radiusSize = isAccent ? 12 : 9;
+                    }
+
+                    // Dessin de l'accent (Gros contour blanc extérieur)
+                    if (isAccent) {
+                        ctx.beginPath(); ctx.arc(x, y, radiusSize + 4, 0, Math.PI * 2);
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'; ctx.lineWidth = 2; ctx.stroke();
+                    }
+
+                    ctx.beginPath(); ctx.arc(x, y, radiusSize, 0, Math.PI * 2); ctx.fillStyle = fillColor; ctx.fill();
+                    ctx.strokeStyle = '#121212'; ctx.lineWidth = 1.5; ctx.stroke();
+                    
+                    if (state !== 0) {
+                        ctx.fillStyle = inst.colors.text || '#fff';
+                        ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        // On n'affiche qu'une seule lettre ou abréviation lisible
+                        let shortText = state.substring(0,3);
+                        ctx.fillText(shortText, x, y);
+                    }
+
+                    if (i === 0) {
+                        ctx.save(); ctx.globalAlpha = 1.0; ctx.fillStyle = '#aaa'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'left';
+                        ctx.fillText(inst.name, x + 15, y + 3); ctx.restore();
+                    }
+                }
+                ctx.restore();
+            });
+
+            // Aiguille
+            ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(currentAngle);
+            const stickLength = circles.length > 0 ? circles[circles.length - 1].radius + 35 : 120;
+            ctx.beginPath(); ctx.moveTo(0, -2); ctx.lineTo(stickLength - 15, -1); ctx.lineTo(stickLength - 15, 1); ctx.lineTo(0, 2);
+            ctx.closePath(); ctx.fillStyle = '#e0ae6f'; ctx.fill();
+            ctx.beginPath(); ctx.ellipse(stickLength - 10, 0, 7, 3.5, 0, 0, Math.PI * 2); ctx.fillStyle = '#c69552'; ctx.fill();
+            ctx.restore();
+
+            requestAnimationFrame(draw);
+        }
+
+        // --- LOGIQUE DECLENCHEMENT AUDIO DES SAMPLES ---
+        const pulseResolution = 96; let currentPulse = 0;
+        Tone.Transport.scheduleRepeat((time) => {
+            const hasActiveSolo = circles.some(c => c.isSolo);
+            circles.forEach(circle => {
+                let canPlay = hasActiveSolo ? circle.isSolo : !circle.isMute;
+                if (canPlay) {
+                    const pulsePerStep = pulseResolution / circle.steps;
+                    if (currentPulse % pulsePerStep === 0) {
+                        const stepIndex = Math.floor(currentPulse / pulsePerStep);
+                        let state = circle.activeSteps[stepIndex];
+                        
+                        if (state !== 0) {
+                            let instId = instrumentsConfig[circle.instrumentIdx].id;
+                            let player = samplers[instId];
+                            
+                            // Sélection du bon fichier en fonction de la technique et de l'accent
+                            if (state === 'D' || state === 'G' || state === 'P' || state === 'T' || state === 'GRV') {
+                                player.player("fort").start(time);
+                            } else if (state === 'd' || state === 'g' || state === 'p' || state === 't' || state === 'grv') {
+                                player.player("faible").start(time);
+                            } else if (state === 'AIG') {
+                                player.player("fort-aigue").start(time);
+                            } else if (state === 'aig') {
+                                player.player("faible-aigue").start(time);
+                            }
+                        }
+                    }
+                }
+            });
+            currentPulse = (currentPulse + 1) % pulseResolution;
+        }, "96n");
+
+        // --- VU-METRES ---
+        function drawMeters() {
+            if (!isPlaying) return;
+            const dbToPct = (db) => { if (db < -60) return 0; if (db > 0) return 100; return Math.floor(((db + 60) / 60) * 100); };
+            circles.forEach(c => {
+                let inst = instrumentsConfig[c.instrumentIdx];
+                let bar = document.getElementById(`meter-bar-${c.id}`);
+                let meter = meters[inst.id];
+                if(bar && meter) { bar.style.width = dbToPct(meter.getValue()) + '%'; }
+            });
+        }
+        setInterval(drawMeters, 40);
+
+        // --- RENDU PANNEAU GAUCHE ---
+        function renderMixer() {
+            const container = document.getElementById('tracks-mixer-container'); container.innerHTML = "";
+            circles.forEach((circle, index) => {
+                const inst = instrumentsConfig[circle.instrumentIdx];
+                const div = document.createElement('div'); div.className = "track-mixer";
+                div.innerHTML = `
+                    <div class="track-mixer-header">
+                        <span class="track-name">${index + 1}. ${inst.name}</span>
+                        <div class="track-mute-solo">
+                            <button class="btn-mute-solo ${circle.isMute ? 'mute-on' : ''}" onclick="toggleMute(${circle.id})">M</button>
+                            <button class="btn-mute-solo ${circle.isSolo ? 'solo-on' : ''}" onclick="toggleSolo(${circle.id})">S</button>
+                        </div>
+                    </div>
+                    <div class="fader-group">
+                        <input type="range" class="fader" min="0" max="100" value="${circle.volumeVal}" oninput="updateVolume(${circle.id}, this.value)">
+                        <div class="vol-meter-bg"><div class="vol-meter-bar" id="meter-bar-${circle.id}"></div></div>
+                    </div>
+                    <div class="steps-config">
+                        <span>Nombre de pas :</span>
+                        <input type="number" value="${circle.steps}" min="2" max="32" onchange="updateSteps(${circle.id}, this.value)">
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        window.toggleMute = function(id) { let c = circles.find(x => x.id === id); if(c) c.isMute = !c.isMute; renderMixer(); };
+        window.toggleSolo = function(id) { let c = circles.find(x => x.id === id); if(c) c.isSolo = !c.isSolo; renderMixer(); };
+        window.updateVolume = function(id, v) {
+            let c = circles.find(x => x.id === id);
+            if(c) {
+                c.volumeVal = parseInt(v);
+                let instId = instrumentsConfig[c.instrumentIdx].id;
+                let db = Tone.gainToDb(v / 100); if(v <= 4) db = -Infinity;
+                channels[instId].volume.value = db;
+            }
+        };
+        window.updateSteps = function(id, s) {
+            let c = circles.find(x => x.id === id);
+            if (c) {
+                let sn = parseInt(s) || 4; c.steps = sn;
+                let na = Array(sn).fill(0); for(let i=0; i<Math.min(sn, c.activeSteps.length); i++) na[i] = c.activeSteps[i];
+                c.activeSteps = na;
+            }
+        };
+
+        // --- CYCLES DE CLIC ET LOGIQUE DES ACCENTS ---
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect(); const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top;
+            const dx = mouseX - centerX; const dy = mouseY - centerY; const distance = Math.sqrt(dx * dx + dy * dy);
+
+            circles.forEach((circle) => {
+                if (Math.abs(distance - circle.radius) < 14) {
+                    let clickAngle = Math.atan2(dy, dx) + Math.PI / 2; if (clickAngle < 0) clickAngle += Math.PI * 2;
+                    const stepAngleSize = (Math.PI * 2) / circle.steps;
+                    
+                    for (let i = 0; i < circle.steps; i++) {
+                        const targetAngle = i * stepAngleSize; let angleDiff = Math.abs(clickAngle - targetAngle);
+                        if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
+
+                        if (angleDiff < stepAngleSize / 2) {
+                            const inst = instrumentsConfig[circle.instrumentIdx];
+                            let current = circle.activeSteps[i];
+
+                            if (inst.type === 'shake') {
+                                // Cycle Agbê / Mineiro : Inactif -> p (faible) -> P (FORT) -> t (faible) -> T (FORT)
+                                if (current === 0) circle.activeSteps[i] = 'p';
+                                else if (current === 'p') circle.activeSteps[i] = 'P';
+                                else if (current === 'P') circle.activeSteps[i] = 't';
+                                else if (current === 't') circle.activeSteps[i] = 'T';
+                                else circle.activeSteps[i] = 0;
+                            } else if (inst.type === 'gongue') {
+                                // Cycle Gonguê : Inactif -> grv (faible) -> GRV (FORT) -> aig (Gris faible) -> AIG (Gris FORT)
+                                if (current === 0) circle.activeSteps[i] = 'grv';
+                                else if (current === 'grv') circle.activeSteps[i] = 'GRV';
+                                else if (current === 'GRV') circle.activeSteps[i] = 'aig';
+                                else if (current === 'aig') circle.activeSteps[i] = 'AIG';
+                                else circle.activeSteps[i] = 0;
+                            } else {
+                                // Cycle Mains (Alfaia, Caixa) : Inactif -> d -> D (Accent) -> g -> G (Accent)
+                                if (current === 0) circle.activeSteps[i] = 'd';
+                                else if (current === 'd') circle.activeSteps[i] = 'D';
+                                else if (current === 'D') circle.activeSteps[i] = 'g';
+                                else if (current === 'g') circle.activeSteps[i] = 'G';
+                                else circle.activeSteps[i] = 0;
+                            }
+                            return;
+                        }
+                    }
+                }
+            });
+        });
+
+        // --- ACTIONS DU HAUT ---
+        const playBtn = document.getElementById('playBtn');
+        playBtn.addEventListener('click', async () => {
+            if (!isPlaying) {
+                await Tone.start(); currentPulse = 0; Tone.Transport.start();
+                playBtn.textContent = "Pause"; playBtn.classList.add('playing'); isPlaying = true;
+            } else {
+                Tone.Transport.stop(); playBtn.textContent = "Démarrer"; playBtn.classList.remove('playing'); isPlaying = false;
+            }
+        });
+
+        document.getElementById('bpm').addEventListener('input', (e) => { Tone.Transport.bpm.value = e.target.value; });
+        document.getElementById('clearBtn').addEventListener('click', () => { circles = []; renderMixer(); });
+
+        document.getElementById('addCircleBtn').addEventListener('click', () => {
+            const lastRadius = circles.length > 0 ? circles[circles.length - 1].radius : 70;
+            if (lastRadius >= 280) return alert("Roda pleine !");
+            const steps = parseInt(prompt("Nombre de pas :", "8")) || 4;
+            let pText = "Sélectionnez l'instrument :\n";
+            instrumentsConfig.forEach((inst, idx) => pText += `${idx} : ${inst.name}\n`);
+            const choice = parseInt(prompt(pText, "0"));
+            const instIdx = (choice >= 0 && choice < instrumentsConfig.length) ? choice : 0;
+            circles.push({ id: Date.now(), radius: lastRadius + 32, steps: steps, activeSteps: Array(steps).fill(0), instrumentIdx: instIdx, isMute: false, isSolo: false, volumeVal: 100 });
+            renderMixer();
+        });
+
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ bpm: Tone.Transport.bpm.value, circles: circles }));
+            const downloadAnchor = document.createElement('a'); downloadAnchor.setAttribute("href", dataStr); downloadAnchor.setAttribute("download", "rythme_samambaia_audio.json");
+            document.body.appendChild(downloadAnchor); downloadAnchor.click(); downloadAnchor.remove();
+        });
+
+        const fileInput = document.getElementById('fileInput');
+        document.getElementById('loadBtn').addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const loadedData = JSON.parse(evt.target.result);
+                    if (loadedData.bpm) { document.getElementById('bpm').value = loadedData.bpm; Tone.Transport.bpm.value = loadedData.bpm; }
+                    if (loadedData.circles) { circles = loadedData.circles; renderMixer(); }
+                } catch (err) { alert("Fichier invalide !"); }
+            };
+            reader.readAsText(file);
+        });
+
+        const recBtn = document.getElementById('recBtn');
+        recBtn.addEventListener('click', async () => {
+            if (!isRecording) {
+                await Tone.start(); recorder.start();
+                if (!isPlaying) { currentPulse = 0; Tone.Transport.start(); playBtn.textContent = "Pause"; playBtn.classList.add('playing'); isPlaying = true; }
+                recBtn.textContent = "Stop & Télécharger"; recBtn.classList.add('recording'); isRecording = true;
+            } else {
+                const recording = await recorder.stop();
+                const url = URL.createObjectURL(recording);
+                const anchor = document.createElement("a"); anchor.download = "groove_samambaia.webm"; anchor.href = url; anchor.click();
+                recBtn.textContent = "🔴 Rec Audio"; recBtn.classList.remove('recording'); isRecording = false;
+            }
+        });
+
+        renderMixer();
+        draw();
+    </script>
+</body>
+</html>
