@@ -321,7 +321,7 @@
     </div>
 
     <script>
-        // --- SYSTÈME DE DÉBOGAGE (Affiche les erreurs directement à l'écran si besoin) ---
+        // --- SYSTÈME DE DÉBOGAGE ---
         window.onerror = function(msg, url, line) {
             const d = document.getElementById('debug-log');
             if(d) d.innerHTML += "⚠️ ERREUR : " + msg + " (Ligne " + line + ")<br>";
@@ -391,7 +391,6 @@
             meters[inst.id] = new Tone.Meter();
             channels[inst.id].connect(meters[inst.id]);
 
-            // --- CORRECTION CRITIQUE DU BUG AUDIO ---
             if (inst.type === 'voice') {
                 bChantSynth.connect(channels[inst.id]);
             } else {
@@ -419,7 +418,10 @@
 
         const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
         const centerX = canvas.width / 2; const centerY = canvas.height / 2;
+        
+        // --- CORRECTION DE LA VARIABLE MANQUANTE ---
         let isPlaying = false;
+        let isMetroOn = false;
 
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -541,7 +543,6 @@
                 ctx.restore();
             });
 
-            // Baguette
             ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(currentAngle);
             const stickLength = circles.length > 0 ? circles[circles.length - 1].radius + 35 : 120;
             ctx.beginPath(); ctx.moveTo(0, -2); ctx.lineTo(stickLength - 15, -1); ctx.lineTo(stickLength - 15, 1); ctx.lineTo(0, 2);
@@ -552,7 +553,6 @@
             requestAnimationFrame(draw);
         }
 
-        // --- SEQUENCEUR AUDIO ---
         let currentStepIndex = -1;
         const mainLoop = new Tone.Loop((time) => {
             currentStepIndex = (currentStepIndex + 1) % 96;
