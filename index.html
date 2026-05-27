@@ -27,7 +27,7 @@
         }
 
         #left-panel {
-            width: 320px;
+            width: 340px;
             background-color: var(--panel-bg);
             border-right: 1px solid #333;
             display: flex;
@@ -59,7 +59,18 @@
         }
 
         .track-mixer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .track-name { font-size: 13px; font-weight: bold; }
+        .track-name { font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        
+        .track-name select {
+            background-color: #111;
+            color: #fff;
+            border: 1px solid #555;
+            font-size: 11px;
+            padding: 2px 4px;
+            border-radius: 4px;
+            max-width: 130px;
+        }
+
         .track-mute-solo { display: flex; gap: 4px; }
 
         .btn-mute-solo {
@@ -68,6 +79,8 @@
         }
         .btn-mute-solo.mute-on { background-color: var(--accent-red); }
         .btn-mute-solo.solo-on { background-color: var(--accent-gold); color: #000; }
+        .btn-delete { background-color: #444; }
+        .btn-delete:hover { background-color: var(--accent-red); }
 
         .fader-group { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
         .fader { flex-grow: 1; -webkit-appearance: none; height: 6px; border-radius: 3px; background: #444; outline: none; }
@@ -111,6 +124,10 @@
         label.control-label { font-size: 12px; display: flex; align-items: center; gap: 4px; color: var(--text-main); font-weight: bold; }
         #bpm { width: 44px; background-color: var(--control-bg); color: var(--text-main); border: 1px solid #444; padding: 4px; border-radius: 6px; text-align: center; }
 
+        /* Style pour le fader de volume master */
+        .master-vol-fader { -webkit-appearance: none; height: 6px; border-radius: 3px; background: #444; outline: none; width: 70px; }
+        .master-vol-fader::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-gold); cursor: pointer; }
+
         #canvas-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; background-color: var(--bg-dark); }
         canvas { border-radius: 50%; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
         #fileInput { display: none; }
@@ -151,6 +168,10 @@
                 <label class="control-label">BPM: <input type="number" id="bpm" value="80" min="40" max="240"></label>
                 <div class="control-separator"></div>
                 
+                <!-- Contrôle de Volume Master -->
+                <label class="control-label">Vol: <input type="range" id="masterVol" class="master-vol-fader" min="-40" max="6" value="-6"></label>
+                <div class="control-separator"></div>
+
                 <button id="metroBtn" class="control-btn">⏱️ Métronome</button>
                 <button id="addCircleBtn" class="control-btn">+ Ajouter</button>
                 <button id="clearBtn" class="control-btn">Vider</button>
@@ -170,10 +191,13 @@
     </div>
 
     <script>
-        // --- CONFIGURATION AUDIO DROITE ET CARRÉE (SWING À 0%) ---
+        // --- CONFIGURATION AUDIO DROITE ET CARRÉE ---
         Tone.context.lookAhead = 0.04; 
         Tone.context.latencyHint = "interactive";
-        Tone.Transport.swing = 0.0; // Désactivé pour stabiliser la boucle
+        Tone.Transport.swing = 0.0; 
+
+        // Volume initial global
+        Tone.Destination.volume.value = -6;
 
         const recorder = new Tone.Recorder();
         Tone.Destination.connect(recorder);
@@ -222,7 +246,7 @@
         }
         setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none'; }, 1500);
 
-        // Configuration par défaut (Baque Virado) au démarrage immédiat
+        // Configuration par défaut (Baque Virado)
         let circles = [
             { id: 1, radius: 100, steps: 4, activeSteps: ['D', 0, 'd', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
             { id: 2, radius: 135, steps: 8, activeSteps: ['D', 0, 'd', 'g', 0, 'D', 0, 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
@@ -231,7 +255,7 @@
         ];
         let isMetroOn = false;
 
-        // --- 2. GESTIONNAIRE DES RYTHMES (Ajoute tes patterns ici) ---
+        // --- GESTIONNAIRE DES RYTHMES ---
         function loadPreset(presetName) {
             if (!presetName) return;
             
@@ -251,7 +275,6 @@
                     { id: 4, radius: 205, steps: 8, activeSteps: ['P', 0, 'T', 'P', 0, 'T', 'P', 'T'], instrumentIdx: 6, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }
                 ];
             }
-            // EXEMPLE : Pour ajouter un nouveau rythme, duplique le bloc ci-dessous et change les notes !
             else if (presetName === 'baque-luanda') {
                 circles = [
                     { id: 1, radius: 100, steps: 4, activeSteps: ['D', 0, 'D', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
@@ -279,7 +302,7 @@
                 ctx.drawImage(bgImg, centerX - 310, centerY - 310, 620, 620); ctx.restore();
                 ctx.beginPath(); ctx.arc(centerX, centerY, 310, 0, Math.PI * 2); ctx.fillStyle = 'rgba(15, 15, 15, 0.5)'; ctx.fill();
             } else {
-                ctx.fillStyle = '#1c1c1c'; ctx.beginPath(); ctx.arc(centerX, centerY, 310, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#1c1c1c'; ctx.beginPath(); ctx.arc(centerX, centerY, 310, 0, Math.PI * 2); fill();
                 ctx.strokeStyle = '#2d2d2d'; ctx.lineWidth = 4; ctx.stroke();
             }
 
@@ -306,6 +329,11 @@
                 ctx.strokeStyle = circle.isSolo ? '#f1c40f' : 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1.5; ctx.stroke();
 
                 const inst = instrumentsConfig[circle.instrumentIdx];
+                
+                // Calcul du pas actif actuel pour ce cercle
+                const pulsePerStep = 96 / circle.steps;
+                const currentStep = (isPlaying && currentStepIndex >= 0) ? Math.floor(currentStepIndex / pulsePerStep) : -1;
+
                 for (let i = 0; i < circle.steps; i++) {
                     const stepAngle = -Math.PI / 2 + (i * (Math.PI * 2 / circle.steps));
                     const x = centerX + Math.cos(stepAngle) * circle.radius; const y = centerY + Math.sin(stepAngle) * circle.radius;
@@ -323,6 +351,12 @@
                             isAccent = (state === state.toUpperCase());
                             radiusSize = isAccent ? 12 : 9;
                         }
+                    }
+
+                    // --- AJOUT : Surlignage dynamique du pas actif lors de la lecture ---
+                    if (i === currentStep) {
+                        ctx.beginPath(); ctx.arc(x, y, radiusSize + 5, 0, Math.PI * 2);
+                        ctx.strokeStyle = 'rgba(46, 204, 113, 0.7)'; ctx.lineWidth = 2.5; ctx.stroke();
                     }
 
                     if (isAccent) {
@@ -414,13 +448,23 @@
             container.innerHTML = "";
             circles.forEach((circle, index) => {
                 const inst = instrumentsConfig[circle.instrumentIdx];
+                
+                // --- AJOUT : Construction du sélecteur d'instrument pour le changement en direct ---
+                let instSelectHtml = `<select onchange="updateInstrument(${circle.id}, this.value)">`;
+                instrumentsConfig.forEach((opt, idx) => {
+                    const isSelected = idx === circle.instrumentIdx ? 'selected' : '';
+                    instSelectHtml += `<option value="${idx}" ${isSelected}>${opt.name}</option>`;
+                });
+                instSelectHtml += `</select>`;
+
                 const div = document.createElement('div'); div.className = "track-mixer";
                 div.innerHTML = `
                     <div class="track-mixer-header">
-                        <span class="track-name">${index + 1}. ${inst.name}</span>
+                        <span class="track-name">${index + 1}. ${instSelectHtml}</span>
                         <div class="track-mute-solo">
                             <button class="btn-mute-solo ${circle.isMute ? 'mute-on' : ''}" onclick="toggleMute(${circle.id})">M</button>
                             <button class="btn-mute-solo ${circle.isSolo ? 'solo-on' : ''}" onclick="toggleSolo(${circle.id})">S</button>
+                            <button class="btn-mute-solo btn-delete" onclick="deleteCircle(${circle.id})">🗑️</button>
                         </div>
                     </div>
                     <div class="fader-group">
@@ -438,6 +482,32 @@
 
         window.toggleMute = function(id) { let c = circles.find(x => x.id === id); if(c) c.isMute = !c.isMute; renderMixer(); };
         window.toggleSolo = function(id) { let c = circles.find(x => x.id === id); if(c) c.isSolo = !c.isSolo; renderMixer(); };
+        
+        // --- AJOUT : Suppression d'un cercle spécifique ---
+        window.deleteCircle = function(id) {
+            circles = circles.filter(x => x.id !== id);
+            renderMixer();
+        };
+
+        // --- AJOUT : Changement d'instrument d'un cercle existant en direct ---
+        window.updateInstrument = function(id, instIdx) {
+            let c = circles.find(x => x.id === id);
+            if (c) {
+                c.instrumentIdx = parseInt(instIdx);
+                // On réinitialise les pas pour éviter les incohérences de notes d'un instrument à l'autre (ex: d/g vers grave/aigue)
+                c.activeSteps = Array(c.steps).fill(0);
+                c.lyrics = Array(c.steps).fill("");
+                
+                // Mettre à jour le volume associé pour le nouvel instrument
+                let instId = instrumentsConfig[c.instrumentIdx].id;
+                let db = Tone.gainToDb(c.volumeVal / 100); 
+                if (c.volumeVal <= 4) db = -Infinity;
+                channels[instId].volume.value = db;
+                
+                renderMixer();
+            }
+        };
+
         window.updateVolume = function(id, v) {
             let c = circles.find(x => x.id === id);
             if(c) {
@@ -522,6 +592,13 @@
         });
 
         document.getElementById('bpm').addEventListener('input', (e) => { Tone.Transport.bpm.value = e.target.value; });
+        
+        // --- AJOUT : Listener pour le volume général ---
+        document.getElementById('masterVol').addEventListener('input', (e) => {
+            let val = parseFloat(e.target.value);
+            Tone.Destination.volume.value = val === -40 ? -Infinity : val;
+        });
+
         const metroBtn = document.getElementById('metroBtn');
         metroBtn.addEventListener('click', () => { isMetroOn = !isMetroOn; metroBtn.classList.toggle('metro-on', isMetroOn); });
         document.getElementById('clearBtn').addEventListener('click', () => { circles = []; renderMixer(); });
