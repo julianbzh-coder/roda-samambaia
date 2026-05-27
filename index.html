@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Roda de Maracatu - Samambaia Pro Engine</title>
+    <title>Les cycles du maracatu</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         :root {
@@ -282,9 +282,9 @@
             <div id="tracks-mixer-container"></div>
         </div>
 
-        <!-- --- SECTION LÉGENDE PÉDAGOGIQUE --- -->
+        <!-- --- SECTION LÉGENDE --- -->
         <div id="legend-section">
-            <div class="panel-title" style="margin-bottom: 6px;">📖 Guide des Sons (Élèves)</div>
+            <div class="panel-title" style="margin-bottom: 6px;">📖 Légende</div>
             <div class="legend-container">
                 <div style="font-size: 11px; margin-bottom: 4px; color: var(--accent-gold); line-height: 1.35;">
                     💡 <strong>Règle d'or :</strong><br>
@@ -336,7 +336,6 @@
                     </div>
                 </div>
 
-                <!-- --- AJOUT : SECTION DISTINCTE POUR LE MINEIRO (FLECHES VERTICALES) --- -->
                 <div class="legend-group">
                     <span class="legend-group-title">🌾 Mineiro (Secoué Vertical)</span>
                     <div class="legend-item">
@@ -362,9 +361,11 @@
 
     <div id="right-panel">
         <div id="top-bar">
-            <div id="header-main">
-                <span style="color:var(--accent-green); font-size:22px;">🌿</span>
-                <span id="header-title-text">MARACATU SAMAMBAIA</span>
+            <!-- --- SECTION TITRE & LOGO INTEGRÉ (AVEC EMOTE DE SECOURS) --- -->
+            <div id="header-main" style="display: flex; align-items: center; gap: 12px;">
+                <img src="logo-samambaia.png" alt="Samambaia" style="height: 36px; width: auto; max-height: 100%; border-radius: 4px;" onerror="this.style.display='none'; document.getElementById('fallback-emoji').style.display='inline';">
+                <span id="fallback-emoji" style="display:none; color:var(--accent-green); font-size:22px;">🌿</span>
+                <span id="header-title-text">Les cycles du maracatu</span>
             </div>
             <div id="global-controls">
                 
@@ -435,7 +436,6 @@
 
         const bChantSynth = new Tone.Synth({ volume: -10, envelope: { attack: 0.05, decay: 0.2 } });
         
-        // --- MISE À JOUR : Synthétiseur de clave/bois précis et très léger pour le métronome ---
         const bMetroClick = new Tone.Synth({
             oscillator: { type: "sine" },
             envelope: { attack: 0.001, decay: 0.04, sustain: 0, release: 0.04 },
@@ -469,65 +469,69 @@
         }
         setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none'; }, 1500);
 
-        // Rythme par défaut : "Vou vadiar carnaval" (8 instruments)
+        // --- FICHIERS IMAGES ---
+        const bgImg = new Image(); bgImg.src = 'tambour.png';
+        let bgLoaded = false; bgImg.onload = () => { bgLoaded = true; };
+
+        // --- AJOUT : Chargement de l'image d'atelier pour le fond ---
+        const bgAtelier = new Image(); bgAtelier.src = 'atelier.png';
+        let bgAtelierLoaded = false; bgAtelier.onload = () => { bgAtelierLoaded = true; };
+
+        // --- ÉCHELLE ENRICHIE (Épaisseur 30px au lieu de 25px, départ à 100px) ---
         let circles = [
-            { id: 1, radius: 85, steps: 16, activeSteps: ['D', 0, 0, 0, 'd', 0, 'D', 0, 'D', 0, 0, 0, 'd', 0, 'D', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },   
-            { id: 2, radius: 110, steps: 16, activeSteps: [0, 0, 'D', 0, 0, 0, 'D', 'G', 0, 0, 'D', 0, 0, 0, 'D', 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-            { id: 3, radius: 135, steps: 16, activeSteps: ['d', 'g', 0, 'D', 0, 'g', 'D', 0, 'd', 'g', 0, 'D', 0, 'g', 'D', 0], instrumentIdx: 2, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-            { id: 4, radius: 160, steps: 16, activeSteps: ['D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G'], instrumentIdx: 3, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 90 }, 
-            { id: 5, radius: 185, steps: 16, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0, 'GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-            { id: 6, radius: 210, steps: 16, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-            { id: 7, radius: 235, steps: 16, activeSteps: ['p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't'], instrumentIdx: 6, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-            { id: 8, radius: 260, steps: 16, activeSteps: ['X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0], instrumentIdx: 7, lyrics: ['Vou', '', 'va', '', 'di', '', 'ar', '', 'Car', '', 'na', '', 'val', '', '!', ''], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }
+            { id: 1, radius: 100, steps: 16, activeSteps: ['D', 0, 0, 0, 'd', 0, 'D', 0, 'D', 0, 0, 0, 'd', 0, 'D', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },   
+            { id: 2, radius: 130, steps: 16, activeSteps: [0, 0, 'D', 0, 0, 0, 'D', 'G', 0, 0, 'D', 0, 0, 0, 'D', 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+            { id: 3, radius: 160, steps: 16, activeSteps: ['d', 'g', 0, 'D', 0, 'g', 'D', 0, 'd', 'g', 0, 'D', 0, 'g', 'D', 0], instrumentIdx: 2, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+            { id: 4, radius: 190, steps: 16, activeSteps: ['D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G'], instrumentIdx: 3, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 90 }, 
+            { id: 5, radius: 220, steps: 16, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0, 'GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+            { id: 6, radius: 250, steps: 16, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+            { id: 7, radius: 280, steps: 16, activeSteps: ['p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't'], instrumentIdx: 6, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+            { id: 8, radius: 310, steps: 16, activeSteps: ['X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0], instrumentIdx: 7, lyrics: ['Vou', '', 'va', '', 'di', '', 'ar', '', 'Car', '', 'na', '', 'val', '', '!', ''], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }
         ];
         let isMetroOn = false;
 
-        // --- GESTIONNAIRE DES RYTHMES ---
+        // --- GESTIONNAIRE DES RYTHMES (MAINTENANT À LA NOUVELLE ÉCHELLE DE SPACING) ---
         function loadPreset(presetName) {
             if (!presetName) return;
             
             if (presetName === 'vou-vadiar') {
                 circles = [
-                    { id: 1, radius: 85, steps: 16, activeSteps: ['D', 0, 0, 0, 'd', 0, 'D', 0, 'D', 0, 0, 0, 'd', 0, 'D', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },   
-                    { id: 2, radius: 110, steps: 16, activeSteps: [0, 0, 'D', 0, 0, 0, 'D', 'G', 0, 0, 'D', 0, 0, 0, 'D', 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-                    { id: 3, radius: 135, steps: 16, activeSteps: ['d', 'g', 0, 'D', 0, 'g', 'D', 0, 'd', 'g', 0, 'D', 0, 'g', 'D', 0], instrumentIdx: 2, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-                    { id: 4, radius: 160, steps: 16, activeSteps: ['D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G'], instrumentIdx: 3, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 90 }, 
-                    { id: 5, radius: 185, steps: 16, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0, 'GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-                    { id: 6, radius: 210, steps: 16, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-                    { id: 7, radius: 235, steps: 16, activeSteps: ['p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't'], instrumentIdx: 6, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-                    { id: 8, radius: 260, steps: 16, activeSteps: ['X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0], instrumentIdx: 7, lyrics: ['Vou', '', 'va', '', 'di', '', 'ar', '', 'Car', '', 'na', '', 'val', '', '!', ''], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }
+                    { id: 1, radius: 100, steps: 16, activeSteps: ['D', 0, 0, 0, 'd', 0, 'D', 0, 'D', 0, 0, 0, 'd', 0, 'D', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },   
+                    { id: 2, radius: 130, steps: 16, activeSteps: [0, 0, 'D', 0, 0, 0, 'D', 'G', 0, 0, 'D', 0, 0, 0, 'D', 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+                    { id: 3, radius: 160, steps: 16, activeSteps: ['d', 'g', 0, 'D', 0, 'g', 'D', 0, 'd', 'g', 0, 'D', 0, 'g', 'D', 0], instrumentIdx: 2, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+                    { id: 4, radius: 190, steps: 16, activeSteps: ['D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G'], instrumentIdx: 3, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 90 }, 
+                    { id: 5, radius: 220, steps: 16, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0, 'GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+                    { id: 6, radius: 250, steps: 16, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+                    { id: 7, radius: 280, steps: 16, activeSteps: ['p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't'], instrumentIdx: 6, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+                    { id: 8, radius: 310, steps: 16, activeSteps: ['X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0], instrumentIdx: 7, lyrics: ['Vou', '', 'va', '', 'di', '', 'ar', '', 'Car', '', 'na', '', 'val', '', '!', ''], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }
                 ];
             }
             else if (presetName === 'baque-virado') {
                 circles = [
                     { id: 1, radius: 100, steps: 4, activeSteps: ['D', 0, 'd', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },   
-                    { id: 2, radius: 135, steps: 8, activeSteps: ['D', 0, 'd', 'g', 0, 'D', 0, 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-                    { id: 3, radius: 170, steps: 8, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-                    { id: 4, radius: 205, steps: 8, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }
+                    { id: 2, radius: 130, steps: 8, activeSteps: ['D', 0, 'd', 'g', 0, 'D', 0, 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+                    { id: 3, radius: 160, steps: 8, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+                    { id: 4, radius: 190, steps: 8, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }
                 ];
             } 
             else if (presetName === 'baque-arrasto') {
                 circles = [
                     { id: 1, radius: 100, steps: 4, activeSteps: ['D', 'd', 0, 'D'], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },   
-                    { id: 2, radius: 135, steps: 4, activeSteps: ['D', 0, 'D', 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-                    { id: 3, radius: 170, steps: 4, activeSteps: ['GRV', 'AIG', 'GRV', 'AIG'], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },
-                    { id: 4, radius: 205, steps: 8, activeSteps: ['P', 0, 'T', 'P', 0, 'T', 'P', 'T'], instrumentIdx: 6, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }
+                    { id: 2, radius: 130, steps: 4, activeSteps: ['D', 0, 'D', 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+                    { id: 3, radius: 160, steps: 4, activeSteps: ['GRV', 'AIG', 'GRV', 'AIG'], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },
+                    { id: 4, radius: 190, steps: 8, activeSteps: ['P', 0, 'T', 'P', 0, 'T', 'P', 'T'], instrumentIdx: 6, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }
                 ];
             }
             else if (presetName === 'baque-luanda') {
                 circles = [
                     { id: 1, radius: 100, steps: 4, activeSteps: ['D', 0, 'D', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },   
-                    { id: 2, radius: 135, steps: 8, activeSteps: ['D', 'g', 'd', 0, 'D', 0, 'G', 0], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-                    { id: 3, radius: 170, steps: 8, activeSteps: ['GRV', 'AIG', 0, 'GRV', 'AIG', 0, 'GRV', 'AIG'], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }
+                    { id: 2, radius: 130, steps: 8, activeSteps: ['D', 'g', 'd', 0, 'D', 0, 'G', 0], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+                    { id: 3, radius: 160, steps: 8, activeSteps: ['GRV', 'AIG', 0, 'GRV', 'AIG', 0, 'GRV', 'AIG'], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }
                 ];
             }
             
             renderMixer();
         }
-
-        // --- GRAPHISMES ---
-        const bgImg = new Image(); bgImg.src = 'tambour.png';
-        let bgLoaded = false; bgImg.onload = () => { bgLoaded = true; };
 
         const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
         const centerX = canvas.width / 2; const centerY = canvas.height / 2;
@@ -536,21 +540,30 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            if (bgLoaded) {
-                ctx.save(); ctx.beginPath(); ctx.arc(centerX, centerY, 310, 0, Math.PI * 2); ctx.clip();
-                ctx.drawImage(bgImg, centerX - 310, centerY - 310, 620, 620); ctx.restore();
-                ctx.beginPath(); ctx.arc(centerX, centerY, 310, 0, Math.PI * 2); ctx.fillStyle = 'rgba(15, 15, 15, 0.5)'; ctx.fill();
+            // --- AJOUT : Dessin de l'image de fond atelier.png si elle est chargée ---
+            if (bgAtelierLoaded) {
+                ctx.drawImage(bgAtelier, 0, 0, canvas.width, canvas.height);
             } else {
-                ctx.fillStyle = '#1c1c1c'; ctx.beginPath(); ctx.arc(centerX, centerY, 310, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#121212';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // --- MISE À JOUR : Le tambour de fond (cercle central) passe à 350px de rayon ---
+            if (bgLoaded) {
+                ctx.save(); ctx.beginPath(); ctx.arc(centerX, centerY, 350, 0, Math.PI * 2); ctx.clip();
+                ctx.drawImage(bgImg, centerX - 350, centerY - 350, 700, 700); ctx.restore();
+                ctx.beginPath(); ctx.arc(centerX, centerY, 350, 0, Math.PI * 2); ctx.fillStyle = 'rgba(15, 15, 15, 0.5)'; ctx.fill();
+            } else {
+                ctx.fillStyle = '#1c1c1c'; ctx.beginPath(); ctx.arc(centerX, centerY, 350, 0, Math.PI * 2); ctx.fill();
                 ctx.strokeStyle = '#2d2d2d'; ctx.lineWidth = 4; ctx.stroke();
             }
 
             if (isMetroOn && isPlaying && currentStepIndex % 24 === 0) {
-                ctx.beginPath(); ctx.arc(centerX, centerY, 325, 0, Math.PI * 2);
+                ctx.beginPath(); ctx.arc(centerX, centerY, 365, 0, Math.PI * 2);
                 ctx.strokeStyle = 'rgba(241, 196, 15, 0.5)'; ctx.lineWidth = 5; ctx.stroke();
             }
 
-            ctx.beginPath(); ctx.arc(centerX, centerY, 315, 0, Math.PI * 2); ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 8; ctx.stroke();
+            ctx.beginPath(); ctx.arc(centerX, centerY, 355, 0, Math.PI * 2); ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 8; ctx.stroke();
 
             let currentAngle = -Math.PI / 2;
             if (isPlaying && Tone.Transport.state === "started") {
@@ -560,7 +573,6 @@
             }
 
             circles.forEach((circle) => {
-                // --- MODIFICATION : On masque complètement le cercle s'il est coché comme masqué ---
                 if (circle.isHidden) return;
 
                 let hasActiveSolo = circles.some(c => c.isSolo);
@@ -592,14 +604,11 @@
                             isAccent = (state === state.toUpperCase());
                             radiusSize = isAccent ? 12 : 9;
                             
-                            // --- REMPLACEMENT PAR DES FLÈCHES SELON L'INSTRUMENT DE SECOUÉ ---
                             if (inst.type === 'shake') {
                                 if (inst.id === 'mineiro') {
-                                    // Mineiro : Flèches verticales
                                     if (state.toLowerCase() === 'p') textSymbol = '↑';
                                     else if (state.toLowerCase() === 't') textSymbol = '↓';
                                 } else {
-                                    // Agbê : Flèches horizontales
                                     if (state.toLowerCase() === 'p') textSymbol = '←';
                                     else if (state.toLowerCase() === 't') textSymbol = '→';
                                 }
@@ -661,7 +670,6 @@
         const mainLoop = new Tone.Loop((time) => {
             currentStepIndex = (currentStepIndex + 1) % 96;
             if (isMetroOn && currentStepIndex % 24 === 0) {
-                // Pitch haut pour un son de Clave boisée précis (A5 = 880Hz)
                 bMetroClick.triggerAttackRelease("A5", "32n", time);
             }
 
@@ -692,10 +700,9 @@
                                 }
                                 
                                 if (targetKey && playerGroup.has(targetKey)) {
-                                    // --- COMPENSATION ANTI-DECALAGE D'ATTAQUE (shakers faibles) ---
                                     let startTimeOffset = 0;
                                     if (inst.type === 'shake' && targetKey === 'faible') {
-                                        startTimeOffset = 0.02; // Saute les 20 premières ms de blanc d'attaque pour aligner le son
+                                        startTimeOffset = 0.02; 
                                     }
                                     playerGroup.player(targetKey).start(time, startTimeOffset);
                                 }
@@ -740,7 +747,6 @@
                         <div class="track-mute-solo">
                             <button class="btn-mute-solo ${circle.isMute ? 'mute-on' : ''}" onclick="toggleMute(${circle.id})">M</button>
                             <button class="btn-mute-solo ${circle.isSolo ? 'solo-on' : ''}" onclick="toggleSolo(${circle.id})">S</button>
-                            <!-- --- BOUTON DE MASQUAGE VISUEL (👁️) --- -->
                             <button class="btn-mute-solo ${circle.isHidden ? 'hidden-on' : ''}" onclick="toggleHide(${circle.id})">${circle.isHidden ? '🙈' : '👁️'}</button>
                             <button class="btn-mute-solo btn-delete" onclick="deleteCircle(${circle.id})">🗑️</button>
                         </div>
@@ -761,7 +767,6 @@
         window.toggleMute = function(id) { let c = circles.find(x => x.id === id); if(c) c.isMute = !c.isMute; renderMixer(); };
         window.toggleSolo = function(id) { let c = circles.find(x => x.id === id); if(c) c.isSolo = !c.isSolo; renderMixer(); };
         
-        // --- CHANGER DE VISIBILITÉ ---
         window.toggleHide = function(id) {
             let c = circles.find(x => x.id === id);
             if (c) c.isHidden = !c.isHidden;
@@ -817,7 +822,6 @@
             const dx = mouseX - centerX; const dy = mouseY - centerY; const distance = Math.sqrt(dx * dx + dy * dy);
 
             circles.forEach((circle) => {
-                // --- ON IGNORE LES CLICS SUR LES CERCLES MASQUÉS ---
                 if (circle.isHidden) return;
 
                 if (Math.abs(distance - circle.radius) < 14) {
@@ -898,7 +902,8 @@
             const choice = selectElem ? parseInt(selectElem.value) : 0;
             const instIdx = (choice >= 0 && choice < instrumentsConfig.length) ? choice : 0;
             
-            const nextRadius = circles.length > 0 ? circles[circles.length - 1].radius + 25 : 85;
+            // --- MISE À JOUR : Échelle augmentée à 30px d'intervalle ---
+            const nextRadius = circles.length > 0 ? circles[circles.length - 1].radius + 30 : 100;
             
             circles.push({ 
                 id: Date.now(), 
@@ -909,7 +914,7 @@
                 lyrics: Array(steps).fill(""), 
                 isMute: false, 
                 isSolo: false, 
-                isHidden: false, // Initialisé visible
+                isHidden: false, 
                 volumeVal: 100 
             });
             renderMixer();
