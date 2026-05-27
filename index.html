@@ -206,10 +206,21 @@
         .master-vol-fader { -webkit-appearance: none; height: 6px; border-radius: 3px; background: #444; outline: none; width: 70px; }
         .master-vol-fader::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-gold); cursor: pointer; }
 
-        #canvas-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; background-color: var(--bg-dark); }
+        /* --- CONFIGURATION DU CONTENEUR : Image d'atelier sur tout le fond rectangulaire --- */
+        #canvas-container { 
+            flex-grow: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background-color: var(--bg-dark); 
+            background-image: url('atelier.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* --- CONFIGURATION DU CANEVAS : Transparent, sans rognage de bordure --- */
         canvas { 
-            border-radius: 50%; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8); 
             max-width: 100%;
             height: auto;
             aspect-ratio: 1 / 1;
@@ -361,7 +372,7 @@
 
     <div id="right-panel">
         <div id="top-bar">
-            <!-- --- SECTION TITRE & LOGO INTEGRÉ (AVEC EMOTE DE SECOURS) --- -->
+            <!-- SECTION TITRE & LOGO INTEGRÉ (AVEC EMOTE DE SECOURS) -->
             <div id="header-main" style="display: flex; align-items: center; gap: 12px;">
                 <img src="logo-samambaia.png" alt="Samambaia" style="height: 36px; width: auto; max-height: 100%; border-radius: 4px;" onerror="this.style.display='none'; document.getElementById('fallback-emoji').style.display='inline';">
                 <span id="fallback-emoji" style="display:none; color:var(--accent-green); font-size:22px;">🌿</span>
@@ -473,11 +484,7 @@
         const bgImg = new Image(); bgImg.src = 'tambour.png';
         let bgLoaded = false; bgImg.onload = () => { bgLoaded = true; };
 
-        // --- AJOUT : Chargement de l'image d'atelier pour le fond ---
-        const bgAtelier = new Image(); bgAtelier.src = 'atelier.png';
-        let bgAtelierLoaded = false; bgAtelier.onload = () => { bgAtelierLoaded = true; };
-
-        // --- ÉCHELLE ENRICHIE (Épaisseur 30px au lieu de 25px, départ à 100px) ---
+        // --- ÉCHELLE ENRICHIE (Épaisseur 30px d'intervalle, départ à 100px) ---
         let circles = [
             { id: 1, radius: 100, steps: 16, activeSteps: ['D', 0, 0, 0, 'd', 0, 'D', 0, 'D', 0, 0, 0, 'd', 0, 'D', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },   
             { id: 2, radius: 130, steps: 16, activeSteps: [0, 0, 'D', 0, 0, 0, 'D', 'G', 0, 0, 'D', 0, 0, 0, 'D', 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
@@ -490,7 +497,7 @@
         ];
         let isMetroOn = false;
 
-        // --- GESTIONNAIRE DES RYTHMES (MAINTENANT À LA NOUVELLE ÉCHELLE DE SPACING) ---
+        // --- GESTIONNAIRE DES RYTHMES (ÉCHELLE DE SPACING ÉLARGIE) ---
         function loadPreset(presetName) {
             if (!presetName) return;
             
@@ -538,17 +545,22 @@
         let isPlaying = false; let isRecording = false;
 
         function draw() {
+            // Le canevas est entièrement transparent pour laisser apparaître "atelier.png" en arrière-plan rectangulaire (CSS)
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // --- AJOUT : Dessin de l'image de fond atelier.png si elle est chargée ---
-            if (bgAtelierLoaded) {
-                ctx.drawImage(bgAtelier, 0, 0, canvas.width, canvas.height);
-            } else {
-                ctx.fillStyle = '#121212';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            }
+            // --- CORRECTION : Ombre portée 2D réaliste sous le tambour central ---
+            ctx.save();
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+            ctx.shadowBlur = 32;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 12;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 350, 0, Math.PI * 2);
+            ctx.fillStyle = '#000000'; // Remplissage noir opaque pour projeter l'ombre
+            ctx.fill();
+            ctx.restore();
 
-            // --- MISE À JOUR : Le tambour de fond (cercle central) passe à 350px de rayon ---
+            // Dessin du tambour circulaire par-dessus son ombre
             if (bgLoaded) {
                 ctx.save(); ctx.beginPath(); ctx.arc(centerX, centerY, 350, 0, Math.PI * 2); ctx.clip();
                 ctx.drawImage(bgImg, centerX - 350, centerY - 350, 700, 700); ctx.restore();
@@ -902,7 +914,6 @@
             const choice = selectElem ? parseInt(selectElem.value) : 0;
             const instIdx = (choice >= 0 && choice < instrumentsConfig.length) ? choice : 0;
             
-            // --- MISE À JOUR : Échelle augmentée à 30px d'intervalle ---
             const nextRadius = circles.length > 0 ? circles[circles.length - 1].radius + 30 : 100;
             
             circles.push({ 
