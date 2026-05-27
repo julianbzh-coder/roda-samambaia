@@ -2,158 +2,143 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Roda de Maracatu - Samambaia Pro Engine</title>
+    <title>Roda de Maracatu - Samambaia Engine</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
-        :root {
-            --bg-dark: #121212; --panel-bg: #1e1e1e; --control-bg: #252525;
-            --text-main: #f5f5f5; --text-muted: #888;
-            --accent-gold: #f1c40f; --accent-green: #2ecc71; --accent-red: #e74c3c;
-            --accent-blue: #3498db; --accent-puxador: #5dade2;
-        }
-        body { margin: 0; background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; overflow: hidden; }
-        
-        #left-panel { width: 350px; background-color: var(--panel-bg); border-right: 1px solid #333; display: flex; flex-direction: column; padding: 15px; box-sizing: border-box; }
-        .panel-title { font-size: 13px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px; }
-        
-        #mixer-section { flex-grow: 1; overflow-y: auto; }
-        .track-mixer { background-color: var(--control-bg); border: 1px solid #3a3a3a; border-radius: 8px; padding: 10px; margin-bottom: 8px; }
-        .track-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        
-        #legend-section { background: #151515; padding: 10px; border-radius: 6px; font-size: 11px; margin-top: 10px; border: 1px solid #333; }
-        .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-        .dot { width: 10px; height: 10px; border-radius: 50%; }
-
-        #right-panel { flex-grow: 1; display: flex; flex-direction: column; }
-        #top-bar { height: 60px; background-color: var(--panel-bg); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
-        button.control-btn { background-color: #333; color: #fff; border: 1px solid #444; padding: 6px 12px; border-radius: 20px; cursor: pointer; }
-        #add-modal { display: none; position: fixed; top: 30%; left: 35%; width: 300px; background: #252525; padding: 20px; border: 1px solid #555; z-index: 1000; border-radius: 8px; box-shadow: 0 5px 15px #000; }
+        :root { --bg-dark: #121212; --panel-bg: #1e1e1e; --text-main: #f5f5f5; }
+        body { margin: 0; background-color: var(--bg-dark); color: var(--text-main); font-family: sans-serif; display: flex; height: 100vh; overflow: hidden; }
+        #left-panel { width: 350px; background-color: var(--panel-bg); padding: 15px; border-right: 1px solid #333; }
+        .track-mixer { background: #252525; padding: 10px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #444; }
+        #canvas { cursor: pointer; }
+        #add-modal { display: none; position: fixed; top: 30%; left: 35%; background: #333; padding: 20px; z-index: 1000; border-radius: 8px; border: 1px solid #555; }
     </style>
 </head>
 <body>
-
     <div id="add-modal">
         <h3>Ajouter un instrument</h3>
-        <select id="instSelect" style="width: 100%; padding: 8px; margin-bottom: 15px;"></select>
-        <button onclick="confirmAdd()" class="control-btn" style="background:var(--accent-green)">Ajouter</button>
-        <button onclick="document.getElementById('add-modal').style.display='none'" class="control-btn">Annuler</button>
+        <select id="instSelect" style="width: 100%; padding: 8px;"></select><br><br>
+        <button onclick="confirmAdd()" style="background:green; color:white; padding:8px; border:none; cursor:pointer;">Ajouter</button>
+        <button onclick="document.getElementById('add-modal').style.display='none'">Annuler</button>
     </div>
 
     <div id="left-panel">
-        <div class="panel-title">🎛️ Mixer</div>
+        <h3>🎛️ Mixer</h3>
         <div id="mixer-section"></div>
-        <div id="legend-section">
-            <div class="panel-title">📚 Légende</div>
-            <div id="legend-content">Ajoutez des instruments.</div>
-        </div>
+        <div id="legend-section" style="font-size: 11px; margin-top: 20px; color: #aaa;"></div>
     </div>
 
-    <div id="right-panel">
-        <div id="top-bar">
-            <div><strong>MARACATU SAMAMBAIA</strong></div>
-            <div>
-                <button id="addBtn" class="control-btn">+ Instrument</button>
-                <button id="playBtn" class="control-btn" style="background:var(--accent-green)">▶ Play</button>
-            </div>
+    <div style="flex-grow:1; display:flex; flex-direction:column;">
+        <div style="padding:20px;">
+            <button onclick="document.getElementById('add-modal').style.display='block'">+ Ajouter Instrument</button>
+            <button id="playBtn" onclick="togglePlay()" style="background:green; color:white;">▶ Play</button>
         </div>
-        <div style="flex-grow:1; display:flex; align-items:center; justify-content:center;">
-            <canvas id="canvas" width="700" height="700"></canvas>
-        </div>
+        <canvas id="canvas" width="700" height="700"></canvas>
     </div>
 
-    <script>
-        const synthChant = new Tone.Synth({ volume: -10 }).toDestination();
-        const synthPuxador = new Tone.Synth({ volume: -10, oscillator: { type: 'sine' } }).toDestination();
-        
-        let instrumentsConfig = [
-            { id: 'marcante', name: 'Alfaia Marcante', color: '#8b0000', legend: "d/D: Droite, g/G: Gauche. Maj=Fort." },
-            { id: 'gongue', name: 'Gonguê', color: '#bdc3c7', legend: "grv/GRV: Grave, aig/AIG: Aigu." },
-            { id: 'agbe', name: 'Agbê', color: '#4caf50', legend: "p/P: Poussé, t/T: Tiré." },
-            { id: 'chant', name: 'Chant', color: '#3498db', legend: "Chant séquentiel (1 après l'autre)." },
-            { id: 'puxador', name: 'Puxador', color: '#5dade2', legend: "Puxador séquentiel (1 après l'autre)." }
-        ];
+<script>
+    const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+    let circles = [];
+    let isPlaying = false;
+    let currentStep = 0;
+    let chantIndex = 0;
 
-        let circles = [];
-        let chantIndex = 0;
-        let isPlaying = false;
+    let instrumentsConfig = [
+        { id: 'marcante', name: 'Alfaia Marcante', color: '#8b0000', type: 'perc' },
+        { id: 'gongue', name: 'Gonguê', color: '#bdc3c7', type: 'perc' },
+        { id: 'agbe', name: 'Agbê', color: '#4caf50', type: 'perc' },
+        { id: 'chant', name: 'Chant', color: '#3498db', type: 'voice' },
+        { id: 'puxador', name: 'Puxador', color: '#5dade2', type: 'voice' }
+    ];
 
-        function renderMixer() {
-            const container = document.getElementById('mixer-section');
-            container.innerHTML = "";
-            circles.forEach((c, index) => {
-                const inst = instrumentsConfig.find(i => i.id === c.instId);
-                const div = document.createElement('div');
-                div.className = "track-mixer";
-                div.innerHTML = `
-                    <div class="track-header">
-                        <span>${index + 1}. ${inst.name}</span>
-                        <button onclick="removeTrack(${index})" style="background:transparent; border:none; color:var(--accent-red); cursor:pointer;">🗑️</button>
-                    </div>
-                    <input type="number" value="${c.steps}" onchange="updateSteps(${index}, this.value)" style="width:50px"> pas
-                `;
-                container.appendChild(div);
-            });
-            updateLegend();
-        }
+    function renderMixer() {
+        const container = document.getElementById('mixer-section');
+        container.innerHTML = "";
+        circles.forEach((c, index) => {
+            const inst = instrumentsConfig.find(i => i.id === c.instId);
+            const div = document.createElement('div');
+            div.className = "track-mixer";
+            div.innerHTML = `<div>${inst.name}</div>
+                             <button onclick="circles.splice(${index},1); renderMixer();">🗑️ Supprimer</button>`;
+            container.appendChild(div);
+        });
+    }
 
-        function removeTrack(index) { circles.splice(index, 1); renderMixer(); }
-        function updateSteps(index, val) { circles[index].steps = parseInt(val); renderMixer(); }
-
-        document.getElementById('addBtn').onclick = () => {
-            const select = document.getElementById('instSelect');
-            select.innerHTML = instrumentsConfig.map((i, idx) => `<option value="${idx}">${i.name}</option>`).join('');
-            document.getElementById('add-modal').style.display = 'block';
-        };
-
-        function confirmAdd() {
-            const instIdx = document.getElementById('instSelect').value;
-            const inst = instrumentsConfig[instIdx];
-            circles.push({ instId: inst.id, steps: 16, radius: 80 + (circles.length * 30) });
-            document.getElementById('add-modal').style.display = 'none';
-            renderMixer();
-        }
-
-        function updateLegend() {
-            const container = document.getElementById('legend-content');
-            container.innerHTML = circles.map(c => {
-                const inst = instrumentsConfig.find(i => i.id === c.instId);
-                return `<div class="legend-item"><div class="dot" style="background:${inst.color}"></div><strong>${inst.name}:</strong> ${inst.legend}</div>`;
-            }).join('');
-        }
-
-        // --- MOTEUR DE JEU ---
-        let currentStep = 0;
-        new Tone.Loop((time) => {
-            // Séquençage chant
-            if (currentStep % 16 === 0) {
-                let chants = circles.filter(c => ['chant', 'puxador'].includes(c.instId));
-                if (chants.length > 0) chantIndex = (chantIndex + 1) % chants.length;
-            }
-            currentStep++;
-        }, "16n").start(0);
-
-        // Visuals (Canvas) - Toujours dessiner les cercles actuels
-        const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
-        function draw() {
-            ctx.clearRect(0,0,700,700);
-            circles.forEach((c, index) => {
-                const inst = instrumentsConfig.find(i => i.id === c.instId);
-                ctx.beginPath(); ctx.arc(350, 350, c.radius, 0, Math.PI*2);
-                ctx.strokeStyle = inst.color; ctx.lineWidth = 3; ctx.stroke();
-                // Texte nom
-                ctx.fillStyle = "#fff"; ctx.fillText(inst.name, 350 + c.radius, 350);
-            });
-            requestAnimationFrame(draw);
-        }
-        draw();
-
-        document.getElementById('playBtn').onclick = async () => {
-            await Tone.start();
-            if(!isPlaying) { Tone.Transport.start(); playBtn.textContent = "Stop"; isPlaying = true; }
-            else { Tone.Transport.stop(); playBtn.textContent = "Play"; isPlaying = false; }
-        };
-        
+    function confirmAdd() {
+        const instId = document.getElementById('instSelect').value;
+        circles.push({ instId: instId, steps: 16, activeSteps: new Array(16).fill(false), radius: 80 + (circles.length * 30) });
+        document.getElementById('add-modal').style.display = 'none';
         renderMixer();
-    </script>
+    }
+
+    // Initialisation modal
+    document.getElementById('instSelect').innerHTML = instrumentsConfig.map(i => `<option value="${i.id}">${i.name}</option>`).join('');
+
+    // --- MOTEUR DE DESSIN ---
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    function draw() {
+        ctx.clearRect(0,0,700,700);
+        circles.forEach(c => {
+            const inst = instrumentsConfig.find(i => i.id === c.instId);
+            ctx.beginPath(); ctx.arc(350, 350, c.radius, 0, Math.PI*2);
+            ctx.strokeStyle = inst.color; ctx.stroke();
+            
+            for(let i=0; i<c.steps; i++) {
+                let angle = (i/c.steps) * Math.PI * 2 - Math.PI/2;
+                let x = 350 + Math.cos(angle) * c.radius;
+                let y = 350 + Math.sin(angle) * c.radius;
+                ctx.fillStyle = c.activeSteps[i] ? inst.color : "#333";
+                ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI*2); ctx.fill();
+            }
+        });
+        requestAnimationFrame(draw);
+    }
+    draw();
+
+    // --- MOTEUR AUDIO ---
+    new Tone.Loop((time) => {
+        let voiceChants = circles.filter(c => ['chant', 'puxador'].includes(c.instId));
+        
+        circles.forEach(c => {
+            if(c.activeSteps[currentStep % c.steps]) {
+                if(['chant', 'puxador'].includes(c.instId)) {
+                    if (c === voiceChants[chantIndex % voiceChants.length]) {
+                        synth.triggerAttackRelease("C4", "16n", time);
+                    }
+                } else {
+                    synth.triggerAttackRelease("C3", "16n", time);
+                }
+            }
+        });
+
+        if (currentStep % 16 === 0) chantIndex++;
+        currentStep++;
+    }, "16n").start(0);
+
+    // Interaction clic pour activer les pas
+    canvas.addEventListener('click', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left - 350;
+        const my = e.clientY - rect.top - 350;
+        const dist = Math.sqrt(mx*mx + my*my);
+        
+        circles.forEach(c => {
+            if (Math.abs(dist - c.radius) < 20) {
+                let angle = Math.atan2(my, mx) + Math.PI/2;
+                if(angle < 0) angle += Math.PI * 2;
+                let step = Math.floor((angle / (Math.PI * 2)) * c.steps);
+                c.activeSteps[step] = !c.activeSteps[step];
+            }
+        });
+    });
+
+    function togglePlay() {
+        Tone.start();
+        isPlaying ? Tone.Transport.stop() : Tone.Transport.start();
+        isPlaying = !isPlaying;
+        document.getElementById('playBtn').textContent = isPlaying ? "Stop" : "▶ Play";
+    }
+</script>
 </body>
 </html>
