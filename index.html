@@ -140,9 +140,11 @@
                 <span id="header-title-text">MARACATU SAMAMBAIA</span>
             </div>
             <div id="global-controls">
+                
                 <select id="presetSelect" class="preset-select" onchange="loadPreset(this.value)">
                     <option value="baque-virado">Baque Virado Traditionnel</option>
                     <option value="baque-arrasto">Baque Arrasto / Agalo</option>
+                    <option value="baque-luanda">Baque de Luanda (Exemple)</option>
                 </select>
                 
                 <div class="control-separator"></div>
@@ -168,10 +170,10 @@
     </div>
 
     <script>
-        // Moteur Audio & Swing constant à 35% d'office
+        // --- CONFIGURATION AUDIO DROITE ET CARRÉE (SWING À 0%) ---
         Tone.context.lookAhead = 0.04; 
         Tone.context.latencyHint = "interactive";
-        Tone.Transport.swing = 0.35; 
+        Tone.Transport.swing = 0.0; // Désactivé pour stabiliser la boucle
 
         const recorder = new Tone.Recorder();
         Tone.Destination.connect(recorder);
@@ -217,9 +219,9 @@
             loadedCount++;
             if (loadedCount >= 6) { document.getElementById('loading-overlay').style.display = 'none'; }
         }
-        // Retrait forcé de l'overlay au bout de 1,5s quoi qu'il arrive
         setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none'; }, 1500);
 
+        // Configuration par défaut (Baque Virado) au démarrage immédiat
         let circles = [
             { id: 1, radius: 100, steps: 4, activeSteps: ['D', 0, 'd', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
             { id: 2, radius: 135, steps: 8, activeSteps: ['D', 0, 'd', 'g', 0, 'D', 0, 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
@@ -228,8 +230,10 @@
         ];
         let isMetroOn = false;
 
+        // --- 2. GESTIONNAIRE DES RYTHMES (Ajoute tes patterns ici) ---
         function loadPreset(presetName) {
             if (!presetName) return;
+            
             if (presetName === 'baque-virado') {
                 circles = [
                     { id: 1, radius: 100, steps: 4, activeSteps: ['D', 0, 'd', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
@@ -237,7 +241,8 @@
                     { id: 3, radius: 170, steps: 8, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
                     { id: 4, radius: 205, steps: 8, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }
                 ];
-            } else if (presetName === 'baque-arrasto') {
+            } 
+            else if (presetName === 'baque-arrasto') {
                 circles = [
                     { id: 1, radius: 100, steps: 4, activeSteps: ['D', 'd', 0, 'D'], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
                     { id: 2, radius: 135, steps: 4, activeSteps: ['D', 0, 'D', 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
@@ -245,10 +250,19 @@
                     { id: 4, radius: 205, steps: 8, activeSteps: ['P', 0, 'T', 'P', 0, 'T', 'P', 'T'], instrumentIdx: 6, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }
                 ];
             }
+            // EXEMPLE : Pour ajouter un nouveau rythme, duplique le bloc ci-dessous et change les notes !
+            else if (presetName === 'baque-luanda') {
+                circles = [
+                    { id: 1, radius: 100, steps: 4, activeSteps: ['D', 0, 'D', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
+                    { id: 2, radius: 135, steps: 8, activeSteps: ['D', 'g', 'd', 0, 'D', 0, 'G', 0], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
+                    { id: 3, radius: 170, steps: 8, activeSteps: ['GRV', 'AIG', 0, 'GRV', 'AIG', 0, 'GRV', 'AIG'], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }
+                ];
+            }
+            
             renderMixer();
         }
 
-        // --- GRAPHISMES (Bascule sur un cercle si tambour.png est absent) ---
+        // --- GRAPHISMES ---
         const bgImg = new Image(); bgImg.src = 'tambour.png';
         let bgLoaded = false; bgImg.onload = () => { bgLoaded = true; };
 
@@ -259,7 +273,6 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Rendu de secours si l'image tambour.png ne se charge pas
             if (bgLoaded) {
                 ctx.save(); ctx.beginPath(); ctx.arc(centerX, centerY, 310, 0, Math.PI * 2); ctx.clip();
                 ctx.drawImage(bgImg, centerX - 310, centerY - 310, 620, 620); ctx.restore();
@@ -342,7 +355,7 @@
             requestAnimationFrame(draw);
         }
 
-        // --- MOTEUR DE JEU COMPATIBLE METRONOME ---
+        // --- SEQUENCEUR AUDIO ---
         let currentStepIndex = -1;
         const mainLoop = new Tone.Loop((time) => {
             currentStepIndex = (currentStepIndex + 1) % 96;
@@ -393,7 +406,7 @@
         }
         setInterval(drawMeters, 40);
 
-        // --- RENDU MIXER TABLE ---
+        // --- TABLE DE MIXAGE ---
         function renderMixer() {
             const container = document.getElementById('tracks-mixer-container'); 
             if (!container) return;
@@ -442,7 +455,7 @@
             }
         };
 
-        // --- GESTION DES CLICS ---
+        // --- APPUIS SUR LES CERCLES ---
         canvas.addEventListener('click', (e) => {
             const rect = canvas.getBoundingClientRect(); 
             const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top;
@@ -492,7 +505,7 @@
             });
         });
 
-        // --- INTERFACES GENERALES ---
+        // --- ACTIONS GENERALES ---
         const playBtn = document.getElementById('playBtn');
         playBtn.addEventListener('click', async () => {
             if (!isPlaying) {
@@ -559,7 +572,6 @@
 
         window.addEventListener('keydown', (e) => { if (e.code === 'Space' && e.target.tagName !== 'INPUT') { e.preventDefault(); playBtn.click(); } });
 
-        // DÉMARRAGE IMMÉDIAT COMPATIBLE TOUS SYSTÈMES
         renderMixer();
         draw();
         document.getElementById('presetSelect').value = 'baque-virado';
