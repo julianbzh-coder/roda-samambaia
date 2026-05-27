@@ -89,7 +89,7 @@
         .btn-delete:hover { background-color: var(--accent-red); }
 
         .fader-group { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-        .fader { flex-grow: 1; -webkit-appearance: none; height: 6px; border-radius: 3px; background: #444; outline: none; }
+        .fader { flex-grow: 1; -webkit-appearance: none; height: 6px; border-radius: 3px; background: #444; outline: none; width: 70px; }
         .fader::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #fff; cursor: pointer; }
 
         .vol-meter-bg { width: 35px; height: 8px; background-color: #000; border-radius: 2px; position: relative; overflow: hidden; }
@@ -925,11 +925,9 @@
         // --- CHARGEMENT DYNAMIQUE DU CATALOGUE LOCAL ---
         // ==========================================================================
         function onPresetChange(value) {
-            // Si la valeur finit par .json, on tente un chargement dynamique de fichier
             if (value.endsWith('.json')) {
                 loadPresetFile(value);
             } else {
-                // Sinon on utilise les presets d'urgence codés en dur
                 loadFallbackPreset(value);
             }
         }
@@ -952,7 +950,6 @@
                 })
                 .catch(err => {
                     console.warn(`Impossible de lire localement ${fileName}. Passage sur le modèle d'urgence.`, err);
-                    // Rempli à la volée avec le fallback d'urgence correspondant
                     if (fileName.includes("Imale")) {
                         loadFallbackPreset('baque-de-imale');
                     } else {
@@ -985,23 +982,21 @@
             })
             .then(presets => {
                 const select = document.getElementById('presetSelect');
-                select.innerHTML = ''; // Vide la liste de secours statique
+                select.innerHTML = ''; 
                 
                 presets.forEach(p => {
                     const opt = document.createElement('option');
-                    opt.value = p.file; // Contiendra le nom du fichier (ex: "Baque de Imale.json")
+                    opt.value = p.file; 
                     opt.textContent = p.name;
                     select.appendChild(opt);
                 });
                 
-                // Charge le premier fichier du catalogue par défaut
                 if (presets.length > 0) {
                     loadPresetFile(presets[0].file);
                 }
             })
             .catch(err => {
                 console.warn("Utilisation des presets d'urgence intégrés (CORS ou catalogue manquant).", err.message);
-                // Si échec du catalogue (file://), on charge le preset d'urgence initial par défaut
                 loadFallbackPreset('vou-vadiar');
                 document.getElementById('presetSelect').value = 'vou-vadiar';
             });
