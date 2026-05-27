@@ -98,7 +98,6 @@
         .steps-config { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); border-top: 1px dashed #444; padding-top: 6px; }
         .steps-config input { width: 40px; background: #111; border: 1px solid #555; color: #fff; padding: 2px; border-radius: 4px; text-align: center; }
 
-        /* --- STYLE DE LA LÉGENDE PÉDAGOGIQUE --- */
         #legend-section {
             border-top: 1px solid #333;
             padding-top: 12px;
@@ -158,7 +157,6 @@
             box-sizing: border-box;
         }
 
-        /* --- INTERFACE DROITE & CANVAS --- */
         #right-panel { flex-grow: 1; display: flex; flex-direction: column; position: relative; }
         #top-bar {
             height: 60px; background-color: var(--panel-bg); border-bottom: 1px solid #333;
@@ -166,12 +164,7 @@
         }
 
         #header-main { display: flex; align-items: center; gap: 10px; }
-        #header-main img {
-            height: 45px; 
-            width: auto;
-            max-height: 100%;
-            border-radius: 4px;
-        }
+        #header-main img { height: 45px; width: auto; max-height: 100%; border-radius: 4px; }
         #header-title-text { font-size: 16px; font-weight: bold; letter-spacing: 1px; }
         #global-controls { display: flex; align-items: center; gap: 10px; }
 
@@ -186,30 +179,17 @@
         }
         button.control-btn:hover { background-color: #444; }
         
-        button#playBtn { 
-            background-color: var(--accent-green); 
-            border-color: var(--accent-green); 
-            min-width: 50px; 
-            font-size: 16px; 
-            color: #000;
-        }
-        button#playBtn.playing { 
-            background-color: var(--accent-red); 
-            border-color: var(--accent-red); 
-            color: #fff;
-        }
-        
+        button#playBtn { background-color: var(--accent-green); border-color: var(--accent-green); min-width: 50px; font-size: 16px; color: #000; }
+        button#playBtn.playing { background-color: var(--accent-red); border-color: var(--accent-red); color: #fff; }
         button#metroBtn.metro-on { background-color: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
 
         .control-separator { width: 1px; height: 24px; background-color: #444; margin: 0 4px; }
-        
         label.control-label { font-size: 12px; display: flex; align-items: center; gap: 4px; color: var(--text-main); font-weight: bold; }
         #bpm { width: 44px; background-color: var(--control-bg); color: var(--text-main); border: 1px solid #444; padding: 4px; border-radius: 6px; text-align: center; }
 
         .master-vol-fader { -webkit-appearance: none; height: 6px; border-radius: 3px; background: #444; outline: none; width: 70px; }
         .master-vol-fader::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-gold); cursor: pointer; }
 
-        /* --- IMAGE D'ATELIER --- */
         #canvas-container { 
             flex-grow: 1; 
             display: flex; 
@@ -222,79 +202,43 @@
             background-repeat: no-repeat;
         }
 
-        canvas { 
-            max-width: 100%;
-            height: auto;
-            aspect-ratio: 1 / 1;
-        }
+        canvas { max-width: 100%; height: auto; aspect-ratio: 1 / 1; }
         #fileInput { display: none; }
         
         #loading-overlay {
             position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(18,18,18,0.9);
             display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;
-            font-size: 18px; font-weight: bold; color: var(--accent-gold);
+            font-size: 18px; font-weight: bold; color: var(--accent-gold); text-align: center;
+        }
+
+        #debug-log {
+            font-size: 12px; color: #ff7676; margin-top: 15px; font-weight: normal; max-width: 80%;
         }
 
         @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-                overflow-y: auto;
-                height: auto;
-            }
-            #right-panel {
-                order: 1; 
-                width: 100%;
-                height: auto;
-                flex-grow: 0;
-            }
-            #left-panel {
-                order: 2; 
-                width: 100%;
-                height: auto;
-                border-right: none;
-                border-top: 1px solid #333;
-                padding: 15px;
-            }
-            #top-bar {
-                height: auto;
-                flex-direction: column;
-                gap: 12px;
-                padding: 15px;
-                align-items: center;
-            }
-            #global-controls {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 8px;
-                width: 100%;
-            }
-            .control-separator {
-                display: none; 
-            }
-            #canvas-container {
-                padding: 15px 5px;
-                min-height: 320px;
-            }
-            canvas {
-                width: 95vw !important; 
-                height: 95vw !important;
-                max-width: 480px;
-                max-height: 480px;
-            }
+            body { flex-direction: column; overflow-y: auto; height: auto; }
+            #right-panel { order: 1; width: 100%; height: auto; flex-grow: 0; }
+            #left-panel { order: 2; width: 100%; height: auto; border-right: none; border-top: 1px solid #333; padding: 15px; }
+            #top-bar { height: auto; flex-direction: column; gap: 12px; padding: 15px; align-items: center; }
+            #global-controls { flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; }
+            .control-separator { display: none; }
+            #canvas-container { padding: 15px 5px; min-height: 320px; }
+            canvas { width: 95vw !important; height: 95vw !important; max-width: 480px; max-height: 480px; }
         }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay">🌿 Chargement des voix du maracatu Samambaia...</div>
+    <div id="loading-overlay">
+        🌿 Chargement des voix du maracatu Samambaia...
+        <div id="debug-log"></div>
+    </div>
 
     <div id="left-panel">
         <div class="panel-title">🎛️ Table de Mixage</div>
-        
-        <div id="mixer-section">
-            <div id="tracks-mixer-container"></div>
-        </div>
+        <div id="mixer-section"><div id="tracks-mixer-container"></div></div>
 
+        <!-- SECTION LÉGENDE -->
         <div id="legend-section">
             <div class="panel-title" style="margin-bottom: 6px;">📖 Légende</div>
             <div class="legend-container">
@@ -306,66 +250,30 @@
                 
                 <div class="legend-group">
                     <span class="legend-group-title">🥁 Alfaia & Caixa (Tambours)</span>
-                    <div class="legend-item">
-                        <span class="legend-badge" style="background:#8b0000; color:#fff;">D / d</span> 
-                        <span>Main Droite (Mão Direita)</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-badge" style="background:#f39c12; color:#121212;">G / g</span> 
-                        <span>Main Gauche (Mão Esquerda)</span>
-                    </div>
+                    <div class="legend-item"><span class="legend-badge" style="background:#8b0000; color:#fff;">D / d</span> <span>Main Droite</span></div>
+                    <div class="legend-item"><span class="legend-badge" style="background:#f39c12; color:#121212;">G / g</span> <span>Main Gauche</span></div>
                 </div>
 
                 <div class="legend-group">
                     <span class="legend-group-title">🔔 Gonguê (Cloche de fer)</span>
-                    <div class="legend-item">
-                        <span class="legend-badge" style="background:#222; color:#fff;">GRV / grv</span> 
-                        <span>Son Grave (Ouvert)</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-badge" style="background:#bdc3c7; color:#000;">AIG / aig</span> 
-                        <span>Son Aigu (Étouffé)</span>
-                    </div>
+                    <div class="legend-item"><span class="legend-badge" style="background:#222; color:#fff;">GRV / grv</span> <span>Son Grave (Ouvert)</span></div>
+                    <div class="legend-item"><span class="legend-badge" style="background:#bdc3c7; color:#000;">AIG / aig</span> <span>Son Aigu (Étouffé)</span></div>
                 </div>
 
                 <div class="legend-group">
                     <span class="legend-group-title">🌾 Agbê (Secoué Horizontal)</span>
-                    <div class="legend-item">
-                        <span class="legend-badge" style="background:#1b5e20; color:#fff; border: 2px solid #fff;">←</span> 
-                        <span>Poussé Fort / Accent (entouré)</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-badge" style="background:#113b14; color:#fff; opacity:0.8;">←</span> 
-                        <span>Poussé Faible</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-badge" style="background:#4caf50; color:#121212; border: 2px solid #fff;">→</span> 
-                        <span>Tiré Fort / Accent (entouré)</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-badge" style="background:#74d478; color:#121212; opacity:0.8;">→</span> 
-                        <span>Tiré Faible</span>
-                    </div>
+                    <div class="legend-item"><span class="legend-badge" style="background:#1b5e20; color:#fff; border: 2px solid #fff;">←</span> <span>Poussé Fort</span></div>
+                    <div class="legend-item"><span class="legend-badge" style="background:#113b14; color:#fff; opacity:0.8;">←</span> <span>Poussé Faible</span></div>
+                    <div class="legend-item"><span class="legend-badge" style="background:#4caf50; color:#121212; border: 2px solid #fff;">→</span> <span>Tiré Fort</span></div>
+                    <div class="legend-item"><span class="legend-badge" style="background:#74d478; color:#121212; opacity:0.8;">→</span> <span>Tiré Faible</span></div>
                 </div>
 
                 <div class="legend-group">
                     <span class="legend-group-title">🌾 Mineiro (Secoué Vertical)</span>
-                    <div class="legend-item">
-                        <span class="legend-badge" style="background:#1b5e20; color:#fff; border: 2px solid #fff;">↑</span> 
-                        <span>Poussé Fort / Accent (entouré)</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-badge" style="background:#113b14; color:#fff; opacity:0.8;">↑</span> 
-                        <span>Poussé Faible</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-badge" style="background:#4caf50; color:#121212; border: 2px solid #fff;">↓</span> 
-                        <span>Tiré Fort / Accent (entouré)</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-badge" style="background:#74d478; color:#121212; opacity:0.8;">↓</span> 
-                        <span>Tiré Faible</span>
-                    </div>
+                    <div class="legend-item"><span class="legend-badge" style="background:#1b5e20; color:#fff; border: 2px solid #fff;">↑</span> <span>Poussé Fort</span></div>
+                    <div class="legend-item"><span class="legend-badge" style="background:#113b14; color:#fff; opacity:0.8;">↑</span> <span>Poussé Faible</span></div>
+                    <div class="legend-item"><span class="legend-badge" style="background:#4caf50; color:#121212; border: 2px solid #fff;">↓</span> <span>Tiré Fort</span></div>
+                    <div class="legend-item"><span class="legend-badge" style="background:#74d478; color:#121212; opacity:0.8;">↓</span> <span>Tiré Faible</span></div>
                 </div>
             </div>
         </div>
@@ -394,8 +302,7 @@
 
                 <button id="metroBtn" class="control-btn">⏱️ Métronome</button>
                 
-                <select id="addInstrumentSelect" class="preset-select">
-                    </select>
+                <select id="addInstrumentSelect" class="preset-select"></select>
                 <button id="addCircleBtn" class="control-btn" style="background-color: var(--accent-green); border-color: var(--accent-green); color: #000;">+ Ajouter</button>
                 
                 <button id="clearBtn" class="control-btn">Vider</button>
@@ -414,9 +321,17 @@
     </div>
 
     <script>
-        // ==========================================================================
-        // --- PRESETS D'URGENCE (Pour exécution hors-ligne ou protocole file://) ---
-        // ==========================================================================
+        // --- SYSTÈME DE DÉBOGAGE (Affiche les erreurs directement à l'écran si besoin) ---
+        window.onerror = function(msg, url, line) {
+            const d = document.getElementById('debug-log');
+            if(d) d.innerHTML += "⚠️ ERREUR : " + msg + " (Ligne " + line + ")<br>";
+        };
+        window.addEventListener('unhandledrejection', function(e) {
+            const d = document.getElementById('debug-log');
+            if(d) d.innerHTML += "⚠️ ERREUR AUDIO : Impossible de charger certains sons.<br>";
+        });
+
+        // --- PRESETS D'URGENCE ---
         const vouVadiarPreset = {
             bpm: 83,
             circles: [
@@ -447,13 +362,9 @@
         Tone.context.lookAhead = 0.04; 
         Tone.context.latencyHint = "interactive";
         Tone.Transport.swing = 0.0; 
-
         Tone.Destination.volume.value = -6;
 
-        const recorder = new Tone.Recorder();
-        Tone.Destination.connect(recorder);
-
-        const channels = {}; const meters = {}; const samplers = {}; const voiceSynths = {};
+        const channels = {}; const meters = {}; const samplers = {};
 
         const instrumentsConfig = [
             { id: 'marcante', name: 'Alfaia Marcante', type: 'hands', path: 'Alfaia/Marcante', colors: { 'd': '#5a0000', 'D': '#8b0000', 'g': '#ff7676', 'G': '#ff4d4d', text: '#fff' } },
@@ -467,27 +378,23 @@
             { id: 'puxador', name: 'Puxador', type: 'voice', path: 'internal', colors: { active: '#0c19cf', text: '#fff' } }
         ];
 
+        const bChantSynth = new Tone.Synth({ volume: -10, envelope: { attack: 0.05, decay: 0.2 } });
+        
         const bMetroClick = new Tone.Synth({
             oscillator: { type: "sine" },
             envelope: { attack: 0.001, decay: 0.04, sustain: 0, release: 0.04 },
             volume: -8
         }).toDestination();
 
-        // --- SÉCURITÉ AUDIO ROBUSTE : Séparation des synths vocaux et des fichiers WAV ---
         instrumentsConfig.forEach(inst => {
             channels[inst.id] = new Tone.Channel({ volume: 0 }).toDestination();
             meters[inst.id] = new Tone.Meter();
             channels[inst.id].connect(meters[inst.id]);
 
+            // --- CORRECTION CRITIQUE DU BUG AUDIO ---
             if (inst.type === 'voice') {
-                // Synthèse générée (pas de téléchargement WAV nécessaire)
-                voiceSynths[inst.id] = new Tone.Synth({ 
-                    oscillator: { type: inst.id === 'puxador' ? 'triangle' : 'sine' },
-                    envelope: { attack: 0.05, decay: 0.2 },
-                    volume: -10 
-                }).connect(channels[inst.id]);
+                bChantSynth.connect(channels[inst.id]);
             } else {
-                // Fichiers audios téléchargés
                 let urls = inst.type === 'gongue' ? 
                     { "faible-grave": "faible-grave.wav", "fort-grave": "fort-grave.wav", "faible-aigue": "faible-aigue.wav", "fort-aigue": "fort-aigue.wav" } : 
                     { "faible": "faible.wav", "fort": "fort.wav" };
@@ -500,30 +407,19 @@
             }
         });
 
-        // Gestion de l'écran de chargement
         let loadedCount = 0;
-        const totalAudioInstruments = instrumentsConfig.filter(i => i.type !== 'voice').length;
-        
         function checkAllLoaded() {
             loadedCount++;
-            if (loadedCount >= totalAudioInstruments) { 
-                const overlay = document.getElementById('loading-overlay');
-                if (overlay) overlay.style.display = 'none'; 
-            }
+            if (loadedCount >= 7) { document.getElementById('loading-overlay').style.display = 'none'; }
         }
-        
-        // Bouclier d'urgence : on efface l'écran de chargement au bout de 1.5s, même si GitHub renvoie des erreurs 404
-        setTimeout(() => { 
-            const overlay = document.getElementById('loading-overlay');
-            if (overlay) overlay.style.display = 'none'; 
-        }, 1500);
+        setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none'; }, 1500);
 
         const bgImg = new Image(); bgImg.src = 'tambour.png';
         let bgLoaded = false; bgImg.onload = () => { bgLoaded = true; };
 
         const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
         const centerX = canvas.width / 2; const centerY = canvas.height / 2;
-        let isPlaying = false; let isRecording = false;
+        let isPlaying = false;
 
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -573,7 +469,7 @@
                 ctx.beginPath(); ctx.arc(centerX, centerY, circle.radius, 0, Math.PI * 2);
                 ctx.strokeStyle = circle.isSolo ? '#f1c40f' : 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1.5; ctx.stroke();
 
-                const inst = instrumentsConfig[circle.instrumentIdx];
+                const inst = instrumentsConfig[circle.instrumentIdx] || instrumentsConfig[0];
                 
                 const pulsePerStep = 96 / circle.steps;
                 const currentStep = (isPlaying && currentStepIndex >= 0) ? Math.floor(currentStepIndex / pulsePerStep) : -1;
@@ -621,7 +517,7 @@
                     ctx.strokeStyle = '#121212'; ctx.lineWidth = 1.5; ctx.stroke();
                     
                     if (state !== 0) {
-                        let txtColor = inst.colors.text || '#fff';
+                        let txtColor = (inst.colors && inst.colors.text) ? inst.colors.text : '#fff';
                         
                         if (inst.id === 'gongue' && (state === 'aig' || state === 'AIG')) {
                             txtColor = '#000000';
@@ -635,7 +531,7 @@
                         }
                         
                         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                        ctx.fillText(textSymbol.substring(0,5), x, y);
+                        ctx.fillText(String(textSymbol).substring(0,5), x, y);
                     }
                     if (i === 0) {
                         ctx.save(); ctx.globalAlpha = 1.0; ctx.fillStyle = '#bbb'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'left';
@@ -656,7 +552,7 @@
             requestAnimationFrame(draw);
         }
 
-        // --- SEQUENCEUR AUDIO BLINDÉ ---
+        // --- SEQUENCEUR AUDIO ---
         let currentStepIndex = -1;
         const mainLoop = new Tone.Loop((time) => {
             currentStepIndex = (currentStepIndex + 1) % 96;
@@ -672,16 +568,10 @@
                     if (currentStepIndex % pulsePerStep === 0) {
                         const stepIdx = Math.floor(currentStepIndex / pulsePerStep);
                         let state = circle.activeSteps[stepIdx];
-                        
                         if (state !== 0) {
-                            let inst = instrumentsConfig[circle.instrumentIdx];
-                            
+                            let inst = instrumentsConfig[circle.instrumentIdx] || instrumentsConfig[0];
                             if (inst.type === 'voice') {
-                                if (voiceSynths[inst.id]) {
-                                    // Distinction sonore légère entre Puxador et Chant
-                                    let note = inst.id === 'puxador' ? "E3" : "C3";
-                                    voiceSynths[inst.id].triggerAttackRelease(note, "8n", time);
-                                }
+                                bChantSynth.triggerAttackRelease("C3", "8n", time);
                             } else if (samplers[inst.id]) {
                                 let playerGroup = samplers[inst.id];
                                 let targetKey = null;
@@ -697,20 +587,11 @@
                                 }
                                 
                                 if (targetKey && playerGroup.has(targetKey)) {
-                                    // SECURITÉ MAXIMUM : On vérifie que le buffer audio a bien été trouvé sur le serveur
-                                    // avant de le lire, sinon la boucle Tone.js crashe totalement.
-                                    try {
-                                        let player = playerGroup.player(targetKey);
-                                        if (player.loaded) {
-                                            let startTimeOffset = 0;
-                                            if (inst.type === 'shake' && targetKey === 'faible') {
-                                                startTimeOffset = 0.02; 
-                                            }
-                                            player.start(time, startTimeOffset);
-                                        }
-                                    } catch (err) {
-                                        // Ignore l'erreur en silence pour que l'appli continue de tourner
+                                    let startTimeOffset = 0;
+                                    if (inst.type === 'shake' && targetKey === 'faible') {
+                                        startTimeOffset = 0.02; 
                                     }
+                                    playerGroup.player(targetKey).start(time, startTimeOffset);
                                 }
                             }
                         }
@@ -719,11 +600,10 @@
             });
         }, "96n");
 
-        // --- VU-METRES ---
         function drawMeters() {
             const dbToPct = (db) => { if (db < -50) return 0; if (db > 0) return 100; return Math.floor(((db + 50) / 50) * 100); };
             circles.forEach(c => {
-                let inst = instrumentsConfig[c.instrumentIdx];
+                let inst = instrumentsConfig[c.instrumentIdx] || instrumentsConfig[0];
                 let bar = document.getElementById(`meter-bar-${c.id}`);
                 let meter = meters[inst.id];
                 if(bar && meter) { bar.style.width = isPlaying ? dbToPct(meter.getValue()) + '%' : '0%'; }
@@ -731,13 +611,12 @@
         }
         setInterval(drawMeters, 40);
 
-        // --- TABLE DE MIXAGE ---
         function renderMixer() {
             const container = document.getElementById('tracks-mixer-container'); 
             if (!container) return;
             container.innerHTML = "";
             circles.forEach((circle, index) => {
-                const inst = instrumentsConfig[circle.instrumentIdx];
+                const inst = instrumentsConfig[circle.instrumentIdx] || instrumentsConfig[0];
                 
                 let instSelectHtml = `<select onchange="updateInstrument(${circle.id}, this.value)">`;
                 instrumentsConfig.forEach((opt, idx) => {
@@ -772,17 +651,8 @@
 
         window.toggleMute = function(id) { let c = circles.find(x => x.id === id); if(c) c.isMute = !c.isMute; renderMixer(); };
         window.toggleSolo = function(id) { let c = circles.find(x => x.id === id); if(c) c.isSolo = !c.isSolo; renderMixer(); };
-        
-        window.toggleHide = function(id) {
-            let c = circles.find(x => x.id === id);
-            if (c) c.isHidden = !c.isHidden;
-            renderMixer();
-        };
-
-        window.deleteCircle = function(id) {
-            circles = circles.filter(x => x.id !== id);
-            renderMixer();
-        };
+        window.toggleHide = function(id) { let c = circles.find(x => x.id === id); if (c) c.isHidden = !c.isHidden; renderMixer(); };
+        window.deleteCircle = function(id) { circles = circles.filter(x => x.id !== id); renderMixer(); };
 
         window.updateInstrument = function(id, instIdx) {
             let c = circles.find(x => x.id === id);
@@ -790,12 +660,10 @@
                 c.instrumentIdx = parseInt(instIdx);
                 c.activeSteps = Array(c.steps).fill(0);
                 c.lyrics = Array(c.steps).fill("");
-                
-                let instId = instrumentsConfig[c.instrumentIdx].id;
+                let instId = (instrumentsConfig[c.instrumentIdx] || instrumentsConfig[0]).id;
                 let db = Tone.gainToDb(c.volumeVal / 100); 
                 if (c.volumeVal <= 4) db = -Infinity;
                 channels[instId].volume.value = db;
-                
                 renderMixer();
             }
         };
@@ -804,11 +672,12 @@
             let c = circles.find(x => x.id === id);
             if(c) {
                 c.volumeVal = parseInt(v);
-                let instId = instrumentsConfig[c.instrumentIdx].id;
+                let instId = (instrumentsConfig[c.instrumentIdx] || instrumentsConfig[0]).id;
                 let db = Tone.gainToDb(v / 100); if(v <= 4) db = -Infinity;
                 channels[instId].volume.value = db;
             }
         };
+        
         window.updateSteps = function(id, s) {
             let c = circles.find(x => x.id === id);
             if (c) {
@@ -818,18 +687,14 @@
             }
         };
 
-        // --- APPUIS SUR LES CERCLES ---
         canvas.addEventListener('click', (e) => {
             const rect = canvas.getBoundingClientRect(); 
-            
             const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width); 
             const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
-            
             const dx = mouseX - centerX; const dy = mouseY - centerY; const distance = Math.sqrt(dx * dx + dy * dy);
 
             circles.forEach((circle) => {
                 if (circle.isHidden) return;
-
                 if (Math.abs(distance - circle.radius) < 14) {
                     let clickAngle = Math.atan2(dy, dx) + Math.PI / 2; 
                     if (clickAngle < 0) clickAngle += Math.PI * 2;
@@ -841,7 +706,8 @@
                         if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
 
                         if (angleDiff < stepAngleSize / 2) {
-                            const inst = instrumentsConfig[circle.instrumentIdx]; let current = circle.activeSteps[i];
+                            const inst = instrumentsConfig[circle.instrumentIdx] || instrumentsConfig[0]; 
+                            let current = circle.activeSteps[i];
                             if (inst.type === 'shake') {
                                 if (current === 0) circle.activeSteps[i] = 'p'; 
                                 else if (current === 'p') circle.activeSteps[i] = 'P'; 
@@ -873,7 +739,6 @@
             });
         });
 
-        // --- ACTIONS GENERALES ---
         const playBtn = document.getElementById('playBtn');
         playBtn.addEventListener('click', async () => {
             if (!isPlaying) {
@@ -882,16 +747,13 @@
                 playBtn.textContent = "⏹"; playBtn.classList.add('playing'); isPlaying = true;
             } else {
                 mainLoop.stop(); Tone.Transport.stop();
-                instrumentsConfig.forEach(inst => { 
-                    if (samplers[inst.id]) samplers[inst.id].stopAll(); 
-                    if (voiceSynths[inst.id]) voiceSynths[inst.id].triggerRelease();
-                });
+                instrumentsConfig.forEach(inst => { if (samplers[inst.id]) samplers[inst.id].stopAll(); });
+                bChantSynth.triggerRelease();
                 playBtn.textContent = "▶"; playBtn.classList.remove('playing'); isPlaying = false;
             }
         });
 
         document.getElementById('bpm').addEventListener('input', (e) => { Tone.Transport.bpm.value = e.target.value; });
-        
         document.getElementById('masterVol').addEventListener('input', (e) => {
             let val = parseFloat(e.target.value);
             Tone.Destination.volume.value = val === -40 ? -Infinity : val;
@@ -903,26 +765,15 @@
 
         document.getElementById('addCircleBtn').addEventListener('click', () => {
             if (circles.length >= 8) return alert("Nombre maximum de 8 instruments atteint !");
-            
             const steps = 16;
-            
             const selectElem = document.getElementById('addInstrumentSelect');
             const choice = selectElem ? parseInt(selectElem.value) : 0;
             const instIdx = (choice >= 0 && choice < instrumentsConfig.length) ? choice : 0;
-            
             const nextRadius = circles.length > 0 ? circles[circles.length - 1].radius + 30 : 100;
             
             circles.push({ 
-                id: Date.now(), 
-                radius: nextRadius, 
-                steps: steps, 
-                activeSteps: Array(steps).fill(0), 
-                instrumentIdx: instIdx, 
-                lyrics: Array(steps).fill(""), 
-                isMute: false, 
-                isSolo: false, 
-                isHidden: false, 
-                volumeVal: 100 
+                id: Date.now(), radius: nextRadius, steps: steps, activeSteps: Array(steps).fill(0), 
+                instrumentIdx: instIdx, lyrics: Array(steps).fill(""), isMute: false, isSolo: false, isHidden: false, volumeVal: 100 
             });
             renderMixer();
         });
@@ -947,15 +798,8 @@
             reader.readAsText(file);
         });
 
-        // ==========================================================================
-        // --- CHARGEMENT DYNAMIQUE DU CATALOGUE LOCAL ---
-        // ==========================================================================
         function onPresetChange(value) {
-            if (value.endsWith('.json')) {
-                loadPresetFile(value);
-            } else {
-                loadFallbackPreset(value);
-            }
+            if (value.endsWith('.json')) { loadPresetFile(value); } else { loadFallbackPreset(value); }
         }
 
         function loadPresetFile(fileName) {
@@ -965,42 +809,26 @@
                     return res.json();
                 })
                 .then(data => {
-                    if (data.circles) {
-                        circles = JSON.parse(JSON.stringify(data.circles));
-                    }
-                    if (data.bpm) {
-                        document.getElementById('bpm').value = data.bpm;
-                        Tone.Transport.bpm.value = data.bpm;
-                    }
+                    if (data.circles) { circles = JSON.parse(JSON.stringify(data.circles)); }
+                    if (data.bpm) { document.getElementById('bpm').value = data.bpm; Tone.Transport.bpm.value = data.bpm; }
                     renderMixer();
                 })
                 .catch(err => {
                     console.warn(`Impossible de lire localement ${fileName}. Passage sur le modèle d'urgence.`, err);
-                    if (fileName.includes("Imale")) {
-                        loadFallbackPreset('baque-de-imale');
-                    } else {
-                        loadFallbackPreset('vou-vadiar');
-                    }
+                    if (fileName.includes("Imale")) { loadFallbackPreset('baque-de-imale'); } else { loadFallbackPreset('vou-vadiar'); }
                 });
         }
 
         function loadFallbackPreset(name) {
             let p = null;
-            if (name === 'vou-vadiar') {
-                p = vouVadiarPreset;
-            } else if (name === 'baque-de-imale') {
-                p = baqueDeImalePreset;
-            }
-            
+            if (name === 'vou-vadiar') { p = vouVadiarPreset; } else if (name === 'baque-de-imale') { p = baqueDeImalePreset; }
             if (p) {
                 circles = JSON.parse(JSON.stringify(p.circles)); 
-                document.getElementById('bpm').value = p.bpm;
-                Tone.Transport.bpm.value = p.bpm;
+                document.getElementById('bpm').value = p.bpm; Tone.Transport.bpm.value = p.bpm;
             }
             renderMixer();
         }
 
-        // --- Récupération automatique du fichier catalog.json ---
         fetch('catalog.json')
             .then(response => {
                 if (!response.ok) throw new Error("Fichier catalog.json manquant ou inaccessible");
@@ -1009,34 +837,22 @@
             .then(presets => {
                 const select = document.getElementById('presetSelect');
                 select.innerHTML = ''; 
-                
                 presets.forEach(p => {
-                    const opt = document.createElement('option');
-                    opt.value = p.file; 
-                    opt.textContent = p.name;
-                    select.appendChild(opt);
+                    const opt = document.createElement('option'); opt.value = p.file; opt.textContent = p.name; select.appendChild(opt);
                 });
-                
-                if (presets.length > 0) {
-                    loadPresetFile(presets[0].file);
-                }
+                if (presets.length > 0) { loadPresetFile(presets[0].file); }
             })
             .catch(err => {
                 console.warn("Utilisation des presets d'urgence intégrés (CORS ou catalogue manquant).", err.message);
-                loadFallbackPreset('vou-vadiar');
-                document.getElementById('presetSelect').value = 'vou-vadiar';
+                loadFallbackPreset('vou-vadiar'); document.getElementById('presetSelect').value = 'vou-vadiar';
             });
 
         window.addEventListener('keydown', (e) => { if (e.code === 'Space' && e.target.tagName !== 'INPUT') { e.preventDefault(); playBtn.click(); } });
 
-        // --- POPULATION DE LA LISTE DÉROULANTE D'AJOUT ---
         const addSelect = document.getElementById('addInstrumentSelect');
         if (addSelect) {
             instrumentsConfig.forEach((inst, idx) => {
-                const opt = document.createElement('option');
-                opt.value = idx;
-                opt.textContent = inst.name;
-                addSelect.appendChild(opt);
+                const opt = document.createElement('option'); opt.value = idx; opt.textContent = inst.name; addSelect.appendChild(opt);
             });
         }
 
