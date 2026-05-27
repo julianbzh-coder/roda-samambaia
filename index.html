@@ -1009,6 +1009,8 @@
                 const opt = document.createElement('option');
                 opt.value = idx;
                 opt.textContent = inst.name;
+                // --- AJOUT ESSENTIEL : Injecte l'option dans la liste déroulante ---
+                addSelect.appendChild(opt);
             });
         }
 
