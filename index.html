@@ -12,20 +12,26 @@
             --accent-blue: #3498db; --accent-puxador: #5dade2;
         }
         body { margin: 0; background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; overflow: hidden; }
+        
         #left-panel { width: 350px; background-color: var(--panel-bg); border-right: 1px solid #333; display: flex; flex-direction: column; padding: 15px; box-sizing: border-box; }
         .panel-title { font-size: 13px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px; }
+        
         #mixer-section { flex-grow: 1; overflow-y: auto; }
         .track-mixer { background-color: var(--control-bg); border: 1px solid #3a3a3a; border-radius: 8px; padding: 10px; margin-bottom: 8px; }
         .track-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        
         #legend-section { background: #151515; padding: 10px; border-radius: 6px; font-size: 11px; margin-top: 10px; border: 1px solid #333; }
         .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+
         #right-panel { flex-grow: 1; display: flex; flex-direction: column; }
         #top-bar { height: 60px; background-color: var(--panel-bg); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
         button.control-btn { background-color: #333; color: #fff; border: 1px solid #444; padding: 6px 12px; border-radius: 20px; cursor: pointer; }
-        #add-modal { display: none; position: fixed; top: 30%; left: 35%; width: 300px; background: #252525; padding: 20px; border: 1px solid #555; z-index: 1000; border-radius: 8px; }
+        #add-modal { display: none; position: fixed; top: 30%; left: 35%; width: 300px; background: #252525; padding: 20px; border: 1px solid #555; z-index: 1000; border-radius: 8px; box-shadow: 0 5px 15px #000; }
     </style>
 </head>
 <body>
+
     <div id="add-modal">
         <h3>Ajouter un instrument</h3>
         <select id="instSelect" style="width: 100%; padding: 8px; margin-bottom: 15px;"></select>
@@ -38,7 +44,7 @@
         <div id="mixer-section"></div>
         <div id="legend-section">
             <div class="panel-title">📚 Légende</div>
-            <div id="legend-content">Ajoutez des instruments pour voir leur légende ici.</div>
+            <div id="legend-content">Ajoutez des instruments.</div>
         </div>
     </div>
 
@@ -56,21 +62,21 @@
     </div>
 
     <script>
-        Tone.Transport.swing = 0.0;
         const synthChant = new Tone.Synth({ volume: -10 }).toDestination();
         const synthPuxador = new Tone.Synth({ volume: -10, oscillator: { type: 'sine' } }).toDestination();
         
         let instrumentsConfig = [
-            { id: 'marcante', name: 'Alfaia Marcante', type: 'hands', colors: { 'd': '#5a0000', 'D': '#8b0000', 'g': '#ff7676', 'G': '#ff4d4d' }, legend: "d/D: Droite, g/G: Gauche. Majuscule = Accent." },
-            { id: 'gongue', name: 'Gonguê', type: 'gongue', colors: { 'grv': '#222222', 'GRV': '#000000', 'aig': '#7f8c8d', 'AIG': '#bdc3c7' }, legend: "grv/GRV: Grave, aig/AIG: Aigu." },
-            { id: 'agbe', name: 'Agbê', type: 'shake', colors: { 'p': '#113b14', 'P': '#1b5e20', 't': '#74d478', 'T': '#4caf50' }, legend: "p/P: Poussé, t/T: Tiré." },
-            { id: 'chant', name: 'Chant', type: 'voice', colors: { 'X': '#3498db' }, legend: "X: Note chantée. Tourne en boucle sur 4 cercles." },
-            { id: 'puxador', name: 'Puxador', type: 'voice', colors: { 'X': '#5dade2' }, legend: "X: Note Puxador. Tourne en boucle sur 4 cercles." }
+            { id: 'marcante', name: 'Alfaia Marcante', color: '#8b0000', legend: "d/D: Droite, g/G: Gauche. Maj=Fort." },
+            { id: 'gongue', name: 'Gonguê', color: '#bdc3c7', legend: "grv/GRV: Grave, aig/AIG: Aigu." },
+            { id: 'agbe', name: 'Agbê', color: '#4caf50', legend: "p/P: Poussé, t/T: Tiré." },
+            { id: 'chant', name: 'Chant', color: '#3498db', legend: "Chant séquentiel (1 après l'autre)." },
+            { id: 'puxador', name: 'Puxador', color: '#5dade2', legend: "Puxador séquentiel (1 après l'autre)." }
         ];
 
         let circles = [];
-        let chantIndex = 0; // Pour la séquence séquentielle des voix
-        
+        let chantIndex = 0;
+        let isPlaying = false;
+
         function renderMixer() {
             const container = document.getElementById('mixer-section');
             container.innerHTML = "";
@@ -91,7 +97,7 @@
         }
 
         function removeTrack(index) { circles.splice(index, 1); renderMixer(); }
-        function updateSteps(index, val) { circles[index].steps = parseInt(val); circles[index].activeSteps = Array(parseInt(val)).fill(0); renderMixer(); }
+        function updateSteps(index, val) { circles[index].steps = parseInt(val); renderMixer(); }
 
         document.getElementById('addBtn').onclick = () => {
             const select = document.getElementById('instSelect');
@@ -102,7 +108,7 @@
         function confirmAdd() {
             const instIdx = document.getElementById('instSelect').value;
             const inst = instrumentsConfig[instIdx];
-            circles.push({ instId: inst.id, steps: 16, activeSteps: Array(16).fill(0), radius: 80 + (circles.length * 30) });
+            circles.push({ instId: inst.id, steps: 16, radius: 80 + (circles.length * 30) });
             document.getElementById('add-modal').style.display = 'none';
             renderMixer();
         }
@@ -111,46 +117,31 @@
             const container = document.getElementById('legend-content');
             container.innerHTML = circles.map(c => {
                 const inst = instrumentsConfig.find(i => i.id === c.instId);
-                return `<div class="legend-item"><div class="dot" style="background:${Object.values(inst.colors)[0]}"></div><strong>${inst.name}:</strong> ${inst.legend}</div>`;
+                return `<div class="legend-item"><div class="dot" style="background:${inst.color}"></div><strong>${inst.name}:</strong> ${inst.legend}</div>`;
             }).join('');
         }
 
         // --- MOTEUR DE JEU ---
         let currentStep = 0;
-        const loop = new Tone.Loop((time) => {
-            // Logique de séquence séquentielle pour Chant/Puxador
+        new Tone.Loop((time) => {
+            // Séquençage chant
             if (currentStep % 16 === 0) {
                 let chants = circles.filter(c => ['chant', 'puxador'].includes(c.instId));
-                if (chants.length > 0) {
-                    chantIndex = (chantIndex + 1) % chants.length;
-                }
+                if (chants.length > 0) chantIndex = (chantIndex + 1) % chants.length;
             }
-            
-            circles.forEach((c, idx) => {
-                let step = Math.floor(currentStep % c.steps);
-                let note = c.activeSteps[step];
-                if (note !== 0) {
-                    // Si c'est un chant, on ne joue que si c'est le cercle actif
-                    if (['chant', 'puxador'].includes(c.instId)) {
-                        let chants = circles.filter(c => ['chant', 'puxador'].includes(c.instId));
-                        if (c === chants[chantIndex]) {
-                            (c.instId === 'chant' ? synthChant : synthPuxador).triggerAttackRelease("C4", "8n", time);
-                        }
-                    } else {
-                        // Instruments classiques
-                    }
-                }
-            });
             currentStep++;
         }, "16n").start(0);
 
-        // Visuals
+        // Visuals (Canvas) - Toujours dessiner les cercles actuels
         const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
         function draw() {
             ctx.clearRect(0,0,700,700);
-            circles.forEach(c => {
+            circles.forEach((c, index) => {
+                const inst = instrumentsConfig.find(i => i.id === c.instId);
                 ctx.beginPath(); ctx.arc(350, 350, c.radius, 0, Math.PI*2);
-                ctx.strokeStyle = '#444'; ctx.stroke();
+                ctx.strokeStyle = inst.color; ctx.lineWidth = 3; ctx.stroke();
+                // Texte nom
+                ctx.fillStyle = "#fff"; ctx.fillText(inst.name, 350 + c.radius, 350);
             });
             requestAnimationFrame(draw);
         }
@@ -161,6 +152,7 @@
             if(!isPlaying) { Tone.Transport.start(); playBtn.textContent = "Stop"; isPlaying = true; }
             else { Tone.Transport.stop(); playBtn.textContent = "Play"; isPlaying = false; }
         };
+        
         renderMixer();
     </script>
 </body>
