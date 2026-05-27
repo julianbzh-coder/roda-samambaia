@@ -421,7 +421,7 @@
 
     <script>
         // ==========================================================================
-        // --- PRESETS D'URGENCESS (Pour exécution hors-ligne ou protocole file://) ---
+        // --- PRESETS D'URGENCE (Pour exécution hors-ligne ou protocole file://) ---
         // ==========================================================================
         const vouVadiarPreset = {
             bpm: 83,
@@ -447,7 +447,6 @@
             ]
         };
 
-        // Rétention par défaut avant vérification du catalogue
         let circles = JSON.parse(JSON.stringify(vouVadiarPreset.circles));
 
         // --- CORE AUDIO CONFIGURATION ---
@@ -1010,7 +1009,6 @@
                 const opt = document.createElement('option');
                 opt.value = idx;
                 opt.textContent = inst.name;
-                addSelect.appendChild(opt);
             });
         }
 
