@@ -532,6 +532,18 @@
             }
         });
 
+// --- RACCOURCI CLAVIER : BARRE D'ESPACE ---
+        window.addEventListener('keydown', (e) => {
+            // Si l'utilisateur est en train de taper du texte dans une invite (prompt), on ne fait rien
+            if (e.target.tagName === 'INPUT') return;
+            
+            if (e.code === 'Space') {
+                e.preventDefault(); // Évite que la page ne défile vers le bas
+                playBtn.click();    // Simule un clic sur le bouton Démarrer/Pause
+            }
+        });
+
+        
         renderMixer();
         draw();
     </script>
