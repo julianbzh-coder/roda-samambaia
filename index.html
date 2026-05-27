@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Roda de Maracatu - Samambaia Pro</title>
+    <title>Roda de Maracatu - Samambaia Pro Engine</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         :root {
@@ -89,6 +89,11 @@
         #header-title-text { font-size: 16px; font-weight: bold; letter-spacing: 1px; }
         #global-controls { display: flex; align-items: center; gap: 10px; }
 
+        .preset-select {
+            background-color: var(--control-bg); color: var(--text-main);
+            border: 1px solid #444; padding: 5px; border-radius: 6px; font-size: 12px; font-weight: bold;
+        }
+
         button.control-btn {
             background-color: #333; color: #fff; border: 1px solid #444; padding: 6px 14px;
             border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold; transition: background-color 0.2s;
@@ -98,11 +103,14 @@
         button#playBtn.playing { background-color: var(--accent-red); border-color: var(--accent-red); }
         button#recBtn { background-color: #d35400; border-color: #d35400; }
         button#recBtn.recording { background-color: var(--accent-red); animation: pulse 1s infinite; }
+        button#metroBtn.metro-on { background-color: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
 
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
         .control-separator { width: 1px; height: 24px; background-color: #444; margin: 0 4px; }
-        label.bpm-label { font-size: 12px; display: flex; align-items: center; gap: 6px; color: var(--text-main); font-weight: bold; }
-        #bpm { width: 48px; background-color: var(--control-bg); color: var(--text-main); border: 1px solid #444; padding: 4px; border-radius: 6px; text-align: center; }
+        
+        label.control-label { font-size: 12px; display: flex; align-items: center; gap: 4px; color: var(--text-main); font-weight: bold; }
+        #bpm { width: 44px; background-color: var(--control-bg); color: var(--text-main); border: 1px solid #444; padding: 4px; border-radius: 6px; text-align: center; }
+        #swing { width: 80px; accent-color: var(--accent-green); cursor: pointer; }
 
         #canvas-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; background-color: var(--bg-dark); }
         canvas { border-radius: 50%; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
@@ -130,18 +138,30 @@
         <div id="top-bar">
             <div id="header-main">
                 <span style="color:var(--accent-green); font-size:22px;">🌿</span>
-                <span id="header-title-text">RODA DE MARACATU - SAMAMBAIA</span>
+                <span id="header-title-text">MARACATU SAMAMBAIA</span>
             </div>
             <div id="global-controls">
-                <label class="bpm-label">BPM: <input type="number" id="bpm" value="100" min="40" max="240"></label>
+                <select id="presetSelect" class="preset-select" onchange="loadPreset(this.value)">
+                    <option value="">-- Sélectionner un Rythme --</option>
+                    <option value="baque-virado">Baque Virado Traditionnel</option>
+                    <option value="baque-arrasto">Baque Arrasto / Agalo</option>
+                </select>
+                
                 <div class="control-separator"></div>
-                <button id="addCircleBtn" class="control-btn">+ Ajouter Instrument</button>
+
+                <label class="control-label">BPM: <input type="number" id="bpm" value="100" min="40" max="240"></label>
+                <label class="control-label" style="margin-left: 5px;">Sotaque: <input type="range" id="swing" min="0" max="100" value="0"></label>
+                
+                <div class="control-separator"></div>
+                
+                <button id="metroBtn" class="control-btn">⏱️ Métro Clé</button>
+                <button id="addCircleBtn" class="control-btn">+ Ajouter</button>
                 <button id="clearBtn" class="control-btn">Vider</button>
-                <div class="control-separator"></div>
                 <button id="recBtn" class="control-btn">🔴 Rec Audio</button>
                 <button id="saveBtn" class="control-btn" style="background:#2980b9;">💾 Sauver</button>
                 <button id="loadBtn" class="control-btn" style="background:#2980b9;">📂 Charger</button>
                 <input type="file" id="fileInput" accept=".json">
+                
                 <div class="control-separator"></div>
                 <button id="playBtn" class="control-btn">▶ Démarrer</button>
             </div>
@@ -159,7 +179,7 @@
         const recorder = new Tone.Recorder();
         Tone.Destination.connect(recorder);
 
-        // --- CONFIGURATION ET BUS DES INSTRUMENTS ---
+        // --- BUS DE MIXAGE ---
         const channels = {}; const meters = {}; const samplers = {};
 
         const instrumentsConfig = [
@@ -170,11 +190,12 @@
             { id: 'gongue', name: 'Gonguê', type: 'gongue', path: 'Gongue', colors: { 'grv': '#222222', 'GRV': '#000000', 'aig': '#7f8c8d', 'AIG': '#bdc3c7', text: '#fff' } },
             { id: 'agbe', name: 'Agbê', type: 'shake', path: 'Graines/Agbe', colors: { 'p': '#113b14', 'P': '#1b5e20', 't': '#74d478', 'T': '#4caf50', text: '#fff' } },
             { id: 'mineiro', name: 'Mineiro', type: 'shake', path: 'Graines/Mineiro', colors: { 'p': '#113b14', 'P': '#1b5e20', 't': '#74d478', 'T': '#4caf50', text: '#fff' } },
-            { id: 'chant', name: 'Chant', type: 'voice', path: 'internal', colors: { active: '#2980b9', text: '#fff' } } // Ajouté ici !
+            { id: 'chant', name: 'Chant', type: 'voice', path: 'internal', colors: { active: '#2980b9', text: '#fff' } }
         ];
 
-        // On sépare le Chant (synthétiseur) des autres instruments (fichiers .wav)
         const bChantSynth = new Tone.Synth({ volume: -10, envelope: { attack: 0.05, decay: 0.2 } });
+        // Synthé métronome (Cloche fixe)
+        const bMetroClick = new Tone.MetalSynth({ volume: -14, frequency: 1200, envelope: { attack: 0.001, decay: 0.05 } }).toDestination();
 
         instrumentsConfig.forEach(inst => {
             channels[inst.id] = new Tone.Channel({ volume: 0 }).toDestination();
@@ -183,7 +204,6 @@
 
             if (inst.id === 'chant') {
                 bChantSynth.connect(channels[inst.id]);
-                // Pas besoin de charger de fichier extérieur pour le chant
             } else {
                 let urls = inst.type === 'gongue' ? 
                     { "faible-grave": "faible-grave.wav", "fort-grave": "fort-grave.wav", "faible-aigue": "faible-aigue.wav", "fort-aigue": "fort-aigue.wav" } : 
@@ -200,352 +220,20 @@
         let loadedCount = 0;
         function checkAllLoaded() {
             loadedCount++;
-            if (loadedCount >= 6) { document.getElementById('loading-overlay').style.display = 'none'; } // 6 instruments physiques
+            if (loadedCount >= 6) { document.getElementById('loading-overlay').style.display = 'none'; }
         }
         setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none'; }, 2000);
 
-        // Grille par défaut
-        let circles = [
-            { id: 1, radius: 100, steps: 4, activeSteps: ['D', 0, 'd', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
-            { id: 2, radius: 135, steps: 8, activeSteps: ['D', 0, 'd', 'g', 0, 'D', 0, 'G'], instrumentIdx: 1, isMute: false, isSolo: false, volumeVal: 100 }, 
-            { id: 3, radius: 170, steps: 4, activeSteps: ['GRV', 0, 'AIG', 0], instrumentIdx: 4, isMute: false, isSolo: false, volumeVal: 100 }, 
-            { id: 4, radius: 205, steps: 8, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, isMute: false, isSolo: false, volumeVal: 100 },
-            { id: 5, radius: 240, steps: 4, activeSteps: [0, 0, 0, 0], instrumentIdx: 7, lyrics: ["", "", "", ""], isMute: false, isSolo: false, volumeVal: 100 }
-        ];
+        // Grille de cercles par défaut
+        let circles = [];
+        let isMetroOn = false;
 
-        // --- GRAPHISMES ---
-        const bgImg = new Image(); bgImg.src = 'tambour.png';
-        let bgLoaded = false; bgImg.onload = () => { bgLoaded = true; };
-
-        const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
-        const centerX = canvas.width / 2; const centerY = canvas.height / 2;
-        let isPlaying = false; let isRecording = false;
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            if (bgLoaded) {
-                ctx.save(); ctx.beginPath(); ctx.arc(centerX, centerY, 310, 0, Math.PI * 2); ctx.clip();
-                ctx.drawImage(bgImg, centerX - 310, centerY - 310, 620, 620); ctx.restore();
-                ctx.beginPath(); ctx.arc(centerX, centerY, 310, 0, Math.PI * 2); ctx.fillStyle = 'rgba(15, 15, 15, 0.45)'; ctx.fill();
-            } else {
-                ctx.fillStyle = '#161616'; ctx.beginPath(); ctx.arc(centerX, centerY, 310, 0, Math.PI * 2); ctx.fill();
-            }
-
-            ctx.beginPath(); ctx.arc(centerX, centerY, 315, 0, Math.PI * 2); ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 8; ctx.stroke();
-
-            let currentAngle = -Math.PI / 2;
-            if (isPlaying && Tone.Transport.state === "started") {
-                const bpm = Tone.Transport.bpm.value;
-                const progressInMeasure = (Tone.Transport.seconds % ((60 / bpm) * 4)) / ((60 / bpm) * 4);
-                currentAngle = -Math.PI / 2 + (progressInMeasure * Math.PI * 2);
-            }
-
-            circles.forEach((circle) => {
-                let hasActiveSolo = circles.some(c => c.isSolo);
-                let isTargeted = hasActiveSolo ? circle.isSolo : !circle.isMute;
-                
-                ctx.save(); ctx.globalAlpha = isTargeted ? 1.0 : 0.15;
-                ctx.beginPath(); ctx.arc(centerX, centerY, circle.radius, 0, Math.PI * 2);
-                ctx.strokeStyle = circle.isSolo ? '#f1c40f' : 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1.5; ctx.stroke();
-
-                const inst = instrumentsConfig[circle.instrumentIdx];
-                for (let i = 0; i < circle.steps; i++) {
-                    const stepAngle = -Math.PI / 2 + (i * (Math.PI * 2 / circle.steps));
-                    const x = centerX + Math.cos(stepAngle) * circle.radius; const y = centerY + Math.sin(stepAngle) * circle.radius;
-                    
-                    let state = circle.activeSteps[i]; let fillColor = 'rgba(40,40,40,0.6)'; let radiusSize = 5; let isAccent = false;
-                    let textSymbol = state;
-
-                    if (state !== 0) {
-                        radiusSize = 10;
-                        if (inst.type === 'voice') {
-                            fillColor = inst.colors.active;
-                            textSymbol = (circle.lyrics && circle.lyrics[i]) ? circle.lyrics[i] : 'X';
-                        } else {
-                            fillColor = inst.colors[state] || '#fff';
-                            isAccent = (state === state.toUpperCase());
-                            radiusSize = isAccent ? 12 : 9;
-                        }
-                    }
-
-                    if (isAccent) {
-                        ctx.beginPath(); ctx.arc(x, y, radiusSize + 4, 0, Math.PI * 2);
-                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'; ctx.lineWidth = 2; ctx.stroke();
-                    }
-
-                    ctx.beginPath(); ctx.arc(x, y, radiusSize, 0, Math.PI * 2); ctx.fillStyle = fillColor; ctx.fill();
-                    ctx.strokeStyle = '#121212'; ctx.lineWidth = 1.5; ctx.stroke();
-                    
-                    if (state !== 0) {
-                        ctx.fillStyle = inst.colors.text || '#fff'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                        ctx.fillText(textSymbol.substring(0,5), x, y);
-                    }
-                    if (i === 0) {
-                        ctx.save(); ctx.globalAlpha = 1.0; ctx.fillStyle = '#aaa'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'left';
-                        ctx.fillText(inst.name, x + 15, y + 3); ctx.restore();
-                    }
-                }
-                ctx.restore();
-            });
-
-            // Baguette
-            ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(currentAngle);
-            const stickLength = circles.length > 0 ? circles[circles.length - 1].radius + 35 : 120;
-            ctx.beginPath(); ctx.moveTo(0, -2); ctx.lineTo(stickLength - 15, -1); ctx.lineTo(stickLength - 15, 1); ctx.lineTo(0, 2);
-            ctx.closePath(); ctx.fillStyle = '#e0ae6f'; ctx.fill();
-            ctx.beginPath(); ctx.ellipse(stickLength - 10, 0, 7, 3.5, 0, 0, Math.PI * 2); ctx.fillStyle = '#c69552'; ctx.fill();
-            ctx.restore();
-
-            requestAnimationFrame(draw);
-        }
-
-        // --- MOTEUR DE JEU COMPATIBLE VOICE ---
-        let currentStepIndex = -1;
-        
-        const mainLoop = new Tone.Loop((time) => {
-            currentStepIndex = (currentStepIndex + 1) % 96;
-            const hasActiveSolo = circles.some(c => c.isSolo);
-
-            circles.forEach(circle => {
-                let canPlay = hasActiveSolo ? circle.isSolo : !circle.isMute;
-                if (canPlay) {
-                    const pulsePerStep = 96 / circle.steps;
-                    if (currentStepIndex % pulsePerStep === 0) {
-                        const stepIdx = Math.floor(currentStepIndex / pulsePerStep);
-                        let state = circle.activeSteps[stepIdx];
-                        
-                        if (state !== 0) {
-                            let inst = instrumentsConfig[circle.instrumentIdx];
-                            
-                            if (inst.id === 'chant') {
-                                bChantSynth.triggerAttackRelease("C3", "8n", time);
-                            } else {
-                                let player = samplers[inst.id];
-                                if (state === 'D' || state === 'G' || state === 'P' || state === 'T' || state === 'GRV') {
-                                    if (player.player("fort")) player.player("fort").start(time);
-                                } else if (state === 'd' || state === 'g' || state === 'p' || state === 't' || state === 'grv') {
-                                    if (player.player("faible")) player.player("faible").start(time);
-                                } else if (state === 'AIG') {
-                                    if (player.player("fort-aigue")) player.player("fort-aigue").start(time);
-                                } else if (state === 'aig') {
-                                    if (player.player("faible-aigue")) player.player("faible-aigue").start(time);
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }, "96n");
-
-        // --- VU-METRES ---
-        function drawMeters() {
-            const dbToPct = (db) => { if (db < -50) return 0; if (db > 0) return 100; return Math.floor(((db + 50) / 50) * 100); };
-            circles.forEach(c => {
-                let inst = instrumentsConfig[c.instrumentIdx];
-                let bar = document.getElementById(`meter-bar-${c.id}`);
-                let meter = meters[inst.id];
-                if(bar && meter) { bar.style.width = isPlaying ? dbToPct(meter.getValue()) + '%' : '0%'; }
-            });
-        }
-        setInterval(drawMeters, 40);
-
-        // --- RENDU DU MIXER ---
-        function renderMixer() {
-            const container = document.getElementById('tracks-mixer-container'); container.innerHTML = "";
-            circles.forEach((circle, index) => {
-                const inst = instrumentsConfig[circle.instrumentIdx];
-                const div = document.createElement('div'); div.className = "track-mixer";
-                div.innerHTML = `
-                    <div class="track-mixer-header">
-                        <span class="track-name">${index + 1}. ${inst.name}</span>
-                        <div class="track-mute-solo">
-                            <button class="btn-mute-solo ${circle.isMute ? 'mute-on' : ''}" onclick="toggleMute(${circle.id})">M</button>
-                            <button class="btn-mute-solo ${circle.isSolo ? 'solo-on' : ''}" onclick="toggleSolo(${circle.id})">S</button>
-                        </div>
-                    </div>
-                    <div class="fader-group">
-                        <input type="range" class="fader" min="0" max="100" value="${circle.volumeVal}" oninput="updateVolume(${circle.id}, this.value)">
-                        <div class="vol-meter-bg"><div class="vol-meter-bar" id="meter-bar-${circle.id}"></div></div>
-                    </div>
-                    <div class="steps-config">
-                        <span>Nombre de pas :</span>
-                        <input type="number" value="${circle.steps}" min="2" max="32" onchange="updateSteps(${circle.id}, this.value)">
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        window.toggleMute = function(id) { let c = circles.find(x => x.id === id); if(c) c.isMute = !c.isMute; renderMixer(); };
-        window.toggleSolo = function(id) { let c = circles.find(x => x.id === id); if(c) c.isSolo = !c.isSolo; renderMixer(); };
-        window.updateVolume = function(id, v) {
-            let c = circles.find(x => x.id === id);
-            if(c) {
-                c.volumeVal = parseInt(v);
-                let instId = instrumentsConfig[c.instrumentIdx].id;
-                let db = Tone.gainToDb(v / 100); if(v <= 4) db = -Infinity;
-                channels[instId].volume.value = db;
-            }
-        };
-        window.updateSteps = function(id, s) {
-            let c = circles.find(x => x.id === id);
-            if (c) {
-                let sn = parseInt(s) || 4; c.steps = sn;
-                let na = Array(sn).fill(0); for(let i=0; i<Math.min(sn, c.activeSteps.length); i++) na[i] = c.activeSteps[i];
-                c.activeSteps = na;
-                if(c.lyrics) {
-                    let nl = Array(sn).fill(""); for(let i=0; i<Math.min(sn, c.lyrics.length); i++) nl[i] = c.lyrics[i];
-                    c.lyrics = nl;
-                }
-            }
-        };
-
-        // --- CYCLES DES CLICS ADAPTÉS ---
-        canvas.addEventListener('click', (e) => {
-            const rect = canvas.getBoundingClientRect(); const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top;
-            const dx = mouseX - centerX; const dy = mouseY - centerY; const distance = Math.sqrt(dx * dx + dy * dy);
-
-            circles.forEach((circle) => {
-                if (Math.abs(distance - circle.radius) < 14) {
-                    let clickAngle = Math.atan2(dy, dx) + Math.PI / 2; if (clickAngle < 0) clickAngle += Math.PI * 2;
-                    const stepAngleSize = (Math.PI * 2) / circle.steps;
-                    for (let i = 0; i < circle.steps; i++) {
-                        const targetAngle = i * stepAngleSize; let angleDiff = Math.abs(clickAngle - targetAngle);
-                        if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
-
-                        if (angleDiff < stepAngleSize / 2) {
-                            const inst = instrumentsConfig[circle.instrumentIdx]; let current = circle.activeSteps[i];
-                            if (inst.type === 'shake') {
-                                if (current === 0) circle.activeSteps[i] = 'p'; else if (current === 'p') circle.activeSteps[i] = 'P'; else if (current === 'P') circle.activeSteps[i] = 't'; else if (current === 't') circle.activeSteps[i] = 'T'; else circle.activeSteps[i] = 0;
-                            } else if (inst.type === 'gongue') {
-                                if (current === 0) circle.activeSteps[i] = 'grv'; else if (current === 'grv') circle.activeSteps[i] = 'GRV'; else if (current === 'GRV') circle.activeSteps[i] = 'aig'; else if (current === 'aig') circle.activeSteps[i] = 'AIG'; else circle.activeSteps[i] = 0;
-                            } else if (inst.type === 'voice') {
-                                // Logique Chant restaurée !
-                                if (current === 0) {
-                                    let lyric = prompt("Parole/Syllabe du chant (max 5 lettres) :");
-                                    if (lyric !== null && lyric.trim() !== "") {
-                                        circle.activeSteps[i] = 'X';
-                                        if(!circle.lyrics) circle.lyrics = [];
-                                        circle.lyrics[i] = lyric.substring(0,5);
-                                    }
-                                } else {
-                                    circle.activeSteps[i] = 0;
-                                    circle.lyrics[i] = "";
-                                }
-                            } else {
-                                if (current === 0) circle.activeSteps[i] = 'd'; else if (current === 'd') circle.activeSteps[i] = 'D'; else if (current === 'D') circle.activeSteps[i] = 'g'; else if (current === 'g') circle.activeSteps[i] = 'G'; else circle.activeSteps[i] = 0;
-                            }
-                            return;
-                        }
-                    }
-                }
-            });
-        });
-
-        // --- CONTROLES GENERAL ---
-        const playBtn = document.getElementById('playBtn');
-        playBtn.addEventListener('click', async () => {
-            if (!isPlaying) {
-                await Tone.start();
-                currentStepIndex = -1;
-                mainLoop.stop();
-                Tone.Transport.stop();
-                Tone.Transport.cancel(0);
-                
-                mainLoop.start(0);
-                Tone.Transport.start("+0.02");
-                
-                playBtn.textContent = "Pause"; playBtn.classList.add('playing'); isPlaying = true;
-            } else {
-                mainLoop.stop();
-                Tone.Transport.stop();
-                
-                // Coupure nette de tous les samplers et du synthé chant
-                instrumentsConfig.forEach(inst => {
-                    if (samplers[inst.id]) samplers[inst.id].stopAll();
-                });
-                bChantSynth.triggerRelease();
-
-                playBtn.textContent = "Démarrer"; playBtn.classList.remove('playing'); isPlaying = false;
-            }
-        });
-
-        document.getElementById('bpm').addEventListener('input', (e) => { Tone.Transport.bpm.value = e.target.value; });
-        document.getElementById('clearBtn').addEventListener('click', () => { circles = []; renderMixer(); });
-
-        document.getElementById('addCircleBtn').addEventListener('click', () => {
-            const lastRadius = circles.length > 0 ? circles[circles.length - 1].radius : 65;
-            if (lastRadius >= 280) return alert("Roda pleine !");
-            const steps = parseInt(prompt("Nombre de pas :", "8")) || 4;
-            let pText = "Sélectionnez l'instrument :\n";
-            instrumentsConfig.forEach((inst, idx) => pText += `${idx} : ${inst.name}\n`);
-            const choice = parseInt(prompt(pText, "0"));
-            const instIdx = (choice >= 0 && choice < instrumentsConfig.length) ? choice : 0;
-            
-            circles.push({
-                id: Date.now(),
-                radius: lastRadius + 32,
-                steps: steps,
-                activeSteps: Array(steps).fill(0),
-                instrumentIdx: instIdx,
-                lyrics: Array(steps).fill(""),
-                isMute: false,
-                isSolo: false,
-                volumeVal: 100
-            });
-            renderMixer();
-        });
-
-        document.getElementById('saveBtn').addEventListener('click', () => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ bpm: Tone.Transport.bpm.value, circles: circles }));
-            const downloadAnchor = document.createElement('a'); downloadAnchor.setAttribute("href", dataStr); downloadAnchor.setAttribute("download", "rythme_samambaia.json");
-            document.body.appendChild(downloadAnchor); downloadAnchor.click(); downloadAnchor.remove();
-        });
-
-        const fileInput = document.getElementById('fileInput');
-        document.getElementById('loadBtn').addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                try {
-                    const loadedData = JSON.parse(evt.target.result);
-                    if (loadedData.bpm) { document.getElementById('bpm').value = loadedData.bpm; Tone.Transport.bpm.value = loadedData.bpm; }
-                    if (loadedData.circles) { circles = loadedData.circles; renderMixer(); }
-                } catch (err) { alert("Fichier invalide !"); }
-            };
-            reader.readAsText(file);
-        });
-
-        const recBtn = document.getElementById('recBtn');
-        recBtn.addEventListener('click', async () => {
-            if (!isRecording) {
-                await Tone.start(); recorder.start();
-                if (!isPlaying) { currentStepIndex = -1; mainLoop.start(0); Tone.Transport.start("+0.02"); playBtn.textContent = "Pause"; playBtn.classList.add('playing'); isPlaying = true; }
-                recBtn.textContent = "Stop & Télécharger"; recBtn.classList.add('recording'); isRecording = true;
-            } else {
-                const recording = await recorder.stop();
-                const url = URL.createObjectURL(recording);
-                const anchor = document.createElement("a"); anchor.download = "groove_samambaia.webm"; anchor.href = url; anchor.click();
-                recBtn.textContent = "🔴 Rec Audio"; recBtn.classList.remove('recording'); isRecording = false;
-            }
-        });
-
-// --- RACCOURCI CLAVIER : BARRE D'ESPACE ---
-        window.addEventListener('keydown', (e) => {
-            // Si l'utilisateur est en train de taper du texte dans une invite (prompt), on ne fait rien
-            if (e.target.tagName === 'INPUT') return;
-            
-            if (e.code === 'Space') {
-                e.preventDefault(); // Évite que la page ne défile vers le bas
-                playBtn.click();    // Simule un clic sur le bouton Démarrer/Pause
-            }
-        });
-
-        
-        renderMixer();
-        draw();
-    </script>
-</body>
-</html>
+        // --- PRESETS DE REPERTOIRE (Option A) ---
+        function loadPreset(presetName) {
+            if (!presetName) return;
+            if (presetName === 'baque-virado') {
+                circles = [
+                    { id: 1, radius: 95, steps: 4, activeSteps: ['D', 0, 'd', 0], instrumentIdx: 0, isMute: false, isSolo: false, volumeVal: 100 },   
+                    { id: 2, radius: 130, steps: 8, activeSteps: ['D', 0, 'd', 'g', 0, 'D', 0, 'G'], instrumentIdx: 1, isMute: false, isSolo: false, volumeVal: 100 }, 
+                    { id: 3, radius: 165, steps: 8, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, isMute: false, isSolo: false, volumeVal: 100 }, 
+                    { id: 4, radius: 200, steps: 8, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, isMute: false, isSolo: false, volumeVal: 100
