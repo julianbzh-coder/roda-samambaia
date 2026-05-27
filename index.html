@@ -110,7 +110,6 @@
         
         label.control-label { font-size: 12px; display: flex; align-items: center; gap: 4px; color: var(--text-main); font-weight: bold; }
         #bpm { width: 44px; background-color: var(--control-bg); color: var(--text-main); border: 1px solid #444; padding: 4px; border-radius: 6px; text-align: center; }
-        #swing { width: 80px; accent-color: var(--accent-green); cursor: pointer; }
 
         #canvas-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; background-color: var(--bg-dark); }
         canvas { border-radius: 50%; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
@@ -150,11 +149,10 @@
                 <div class="control-separator"></div>
 
                 <label class="control-label">BPM: <input type="number" id="bpm" value="100" min="40" max="240"></label>
-                <label class="control-label" style="margin-left: 5px;">Sotaque: <input type="range" id="swing" min="0" max="100" value="0"></label>
                 
                 <div class="control-separator"></div>
                 
-                <button id="metroBtn" class="control-btn">⏱️ Métro Clé</button>
+                <button id="metroBtn" class="control-btn">⏱️ Métronome</button>
                 <button id="addCircleBtn" class="control-btn">+ Ajouter</button>
                 <button id="clearBtn" class="control-btn">Vider</button>
                 <button id="recBtn" class="control-btn">🔴 Rec Audio</button>
@@ -173,8 +171,10 @@
     </div>
 
     <script>
+        // Configuration stricte de la latence web et calage du Swing d'office
         Tone.context.lookAhead = 0.04; 
         Tone.context.latencyHint = "interactive";
+        Tone.Transport.swing = 0.35; // Ajout systématique d'un léger balancement Maracatu (Sotaque)
 
         const recorder = new Tone.Recorder();
         Tone.Destination.connect(recorder);
@@ -300,192 +300,3 @@
                         radiusSize = 10;
                         if (inst.type === 'voice') {
                             fillColor = inst.colors.active;
-                            textSymbol = (circle.lyrics && circle.lyrics[i]) ? circle.lyrics[i] : 'X';
-                        } else {
-                            fillColor = inst.colors[state] || '#fff';
-                            isAccent = (state === state.toUpperCase());
-                            radiusSize = isAccent ? 12 : 9;
-                        }
-                    }
-
-                    if (isAccent) {
-                        ctx.beginPath(); ctx.arc(x, y, radiusSize + 4, 0, Math.PI * 2);
-                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'; ctx.lineWidth = 2; ctx.stroke();
-                    }
-
-                    ctx.beginPath(); ctx.arc(x, y, radiusSize, 0, Math.PI * 2); ctx.fillStyle = fillColor; ctx.fill();
-                    ctx.strokeStyle = '#121212'; ctx.lineWidth = 1.5; ctx.stroke();
-                    
-                    if (state !== 0) {
-                        ctx.fillStyle = inst.colors.text || '#fff'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                        ctx.fillText(textSymbol.substring(0,5), x, y);
-                    }
-                    if (i === 0) {
-                        ctx.save(); ctx.globalAlpha = 1.0; ctx.fillStyle = '#aaa'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'left';
-                        ctx.fillText(inst.name, x + 15, y + 3); ctx.restore();
-                    }
-                }
-                ctx.restore();
-            });
-
-            // Baguette
-            ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(currentAngle);
-            const stickLength = circles.length > 0 ? circles[circles.length - 1].radius + 35 : 120;
-            ctx.beginPath(); ctx.moveTo(0, -2); ctx.lineTo(stickLength - 15, -1); ctx.lineTo(stickLength - 15, 1); ctx.lineTo(0, 2);
-            ctx.closePath(); ctx.fillStyle = '#e0ae6f'; ctx.fill();
-            ctx.beginPath(); ctx.ellipse(stickLength - 10, 0, 7, 3.5, 0, 0, Math.PI * 2); ctx.fillStyle = '#c69552'; ctx.fill();
-            ctx.restore();
-
-            requestAnimationFrame(draw);
-        }
-
-        // --- UNIQUE MOTEUR DE JEU COMPATIBLE SWING ET METRONOME ---
-        let currentStepIndex = -1;
-        
-        const mainLoop = new Tone.Loop((time) => {
-            currentStepIndex = (currentStepIndex + 1) % 96;
-            
-            if (isMetroOn && currentStepIndex % 24 === 0) {
-                bMetroClick.triggerAttackRelease(time);
-            }
-
-            const hasActiveSolo = circles.some(c => c.isSolo);
-
-            circles.forEach(circle => {
-                let canPlay = hasActiveSolo ? circle.isSolo : !circle.isMute;
-                if (canPlay) {
-                    const pulsePerStep = 96 / circle.steps;
-                    if (currentStepIndex % pulsePerStep === 0) {
-                        const stepIdx = Math.floor(currentStepIndex / pulsePerStep);
-                        let state = circle.activeSteps[stepIdx];
-                        
-                        if (state !== 0) {
-                            let inst = instrumentsConfig[circle.instrumentIdx];
-                            
-                            if (inst.id === 'chant') {
-                                bChantSynth.triggerAttackRelease("C3", "8n", time);
-                            } else {
-                                let player = samplers[inst.id];
-                                if (state === 'D' || state === 'G' || state === 'P' || state === 'T' || state === 'GRV') {
-                                    if (player.player("fort")) player.player("fort").start(time);
-                                } else if (state === 'd' || state === 'g' || state === 'p' || state === 't' || state === 'grv') {
-                                    if (player.player("faible")) player.player("faible").start(time);
-                                } else if (state === 'AIG') {
-                                    if (player.player("fort-aigue")) player.player("fort-aigue").start(time);
-                                } else if (state === 'aig') {
-                                    if (player.player("faible-aigue")) player.player("faible-aigue").start(time);
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }, "96n");
-
-        // --- VU-METRES ---
-        function drawMeters() {
-            const dbToPct = (db) => { if (db < -50) return 0; if (db > 0) return 100; return Math.floor(((db + 50) / 50) * 100); };
-            circles.forEach(c => {
-                let inst = instrumentsConfig[c.instrumentIdx];
-                let bar = document.getElementById(`meter-bar-${c.id}`);
-                let meter = meters[inst.id];
-                if(bar && meter) { bar.style.width = isPlaying ? dbToPct(meter.getValue()) + '%' : '0%'; }
-            });
-        }
-        setInterval(drawMeters, 40);
-
-        // --- RENDU MIXER ---
-        function renderMixer() {
-            const container = document.getElementById('tracks-mixer-container'); container.innerHTML = "";
-            circles.forEach((circle, index) => {
-                const inst = instrumentsConfig[circle.instrumentIdx];
-                const div = document.createElement('div'); div.className = "track-mixer";
-                div.innerHTML = `
-                    <div class="track-mixer-header">
-                        <span class="track-name">${index + 1}. ${inst.name}</span>
-                        <div class="track-mute-solo">
-                            <button class="btn-mute-solo ${circle.isMute ? 'mute-on' : ''}" onclick="toggleMute(${circle.id})">M</button>
-                            <button class="btn-mute-solo ${circle.isSolo ? 'solo-on' : ''}" onclick="toggleSolo(${circle.id})">S</button>
-                        </div>
-                    </div>
-                    <div class="fader-group">
-                        <input type="range" class="fader" min="0" max="100" value="${circle.volumeVal}" oninput="updateVolume(${circle.id}, this.value)">
-                        <div class="vol-meter-bg"><div class="vol-meter-bar" id="meter-bar-${circle.id}"></div></div>
-                    </div>
-                    <div class="steps-config">
-                        <span>Nombre de pas :</span>
-                        <input type="number" value="${circle.steps}" min="2" max="32" onchange="updateSteps(${circle.id}, this.value)">
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        window.toggleMute = function(id) { let c = circles.find(x => x.id === id); if(c) c.isMute = !c.isMute; renderMixer(); };
-        window.toggleSolo = function(id) { let c = circles.find(x => x.id === id); if(c) c.isSolo = !c.isSolo; renderMixer(); };
-        window.updateVolume = function(id, v) {
-            let c = circles.find(x => x.id === id);
-            if(c) {
-                c.volumeVal = parseInt(v);
-                let instId = instrumentsConfig[c.instrumentIdx].id;
-                let db = Tone.gainToDb(v / 100); if(v <= 4) db = -Infinity;
-                channels[instId].volume.value = db;
-            }
-        };
-        window.updateSteps = function(id, s) {
-            let c = circles.find(x => x.id === id);
-            if (c) {
-                let sn = parseInt(s) || 4; c.steps = sn;
-                let na = Array(sn).fill(0); for(let i=0; i<Math.min(sn, c.activeSteps.length); i++) na[i] = c.activeSteps[i];
-                c.activeSteps = na;
-            }
-        };
-
-        // --- CYCLES CLICS ---
-        canvas.addEventListener('click', (e) => {
-            const rect = canvas.getBoundingClientRect(); const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top;
-            const dx = mouseX - centerX; const dy = mouseY - centerY; const distance = Math.sqrt(dx * dx + dy * dy);
-
-            circles.forEach((circle) => {
-                if (Math.abs(distance - circle.radius) < 14) {
-                    let clickAngle = Math.atan2(dy, dx) + Math.PI / 2; if (clickAngle < 0) clickAngle += Math.PI * 2;
-                    const stepAngleSize = (Math.PI * 2) / circle.steps;
-                    for (let i = 0; i < circle.steps; i++) {
-                        const targetAngle = i * stepAngleSize; let angleDiff = Math.abs(clickAngle - targetAngle);
-                        if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
-
-                        if (angleDiff < stepAngleSize / 2) {
-                            const inst = instrumentsConfig[circle.instrumentIdx]; let current = circle.activeSteps[i];
-                            if (inst.type === 'shake') {
-                                if (current === 0) circle.activeSteps[i] = 'p'; else if (current === 'p') circle.activeSteps[i] = 'P'; else if (current === 'P') circle.activeSteps[i] = 't'; else if (current === 't') circle.activeSteps[i] = 'T'; else circle.activeSteps[i] = 0;
-                            } else if (inst.type === 'gongue') {
-                                if (current === 0) circle.activeSteps[i] = 'grv'; else if (current === 'grv') circle.activeSteps[i] = 'GRV'; else if (current === 'GRV') circle.activeSteps[i] = 'aig'; else if (current === 'aig') circle.activeSteps[i] = 'AIG'; else circle.activeSteps[i] = 0;
-                            } else if (inst.type === 'voice') {
-                                if (current === 0) {
-                                    let lyric = prompt("Parole/Syllabe (max 5 let.) :");
-                                    if (lyric !== null && lyric.trim() !== "") { circle.activeSteps[i] = 'X'; if(!circle.lyrics) circle.lyrics = []; circle.lyrics[i] = lyric.substring(0,5); }
-                                } else { circle.activeSteps[i] = 0; circle.lyrics[i] = ""; }
-                            } else {
-                                if (current === 0) circle.activeSteps[i] = 'd'; else if (current === 'd') circle.activeSteps[i] = 'D'; else if (current === 'D') circle.activeSteps[i] = 'g'; else if (current === 'g') circle.activeSteps[i] = 'G'; else circle.activeSteps[i] = 0;
-                            }
-                            return;
-                        }
-                    }
-                }
-            });
-        });
-
-        // --- BOUTONS GENERAL ---
-        const playBtn = document.getElementById('playBtn');
-        playBtn.addEventListener('click', async () => {
-            if (!isPlaying) {
-                await Tone.start();
-                currentStepIndex = -1;
-                mainLoop.stop();
-                Tone.Transport.stop();
-                Tone.Transport.cancel(0);
-                
-                mainLoop.start(0);
-                Tone.Transport.start("+0.02");
-                
-                playBtn.
