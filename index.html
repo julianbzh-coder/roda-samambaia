@@ -171,7 +171,7 @@
     </div>
 
     <script>
-        // Configuration de la latence web et du swing d'office pour le sotaque
+        // Fixation du Sotaque (Swing) constant à 35% dans le moteur audio
         Tone.context.lookAhead = 0.04; 
         Tone.context.latencyHint = "interactive";
         Tone.Transport.swing = 0.35; 
@@ -268,53 +268,4 @@
 
             if (isMetroOn && isPlaying && currentStepIndex % 24 === 0) {
                 ctx.beginPath(); ctx.arc(centerX, centerY, 325, 0, Math.PI * 2);
-                ctx.strokeStyle = 'rgba(241, 196, 15, 0.4)'; ctx.lineWidth = 4; ctx.stroke();
-            }
-
-            ctx.beginPath(); ctx.arc(centerX, centerY, 315, 0, Math.PI * 2); ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 8; ctx.stroke();
-
-            let currentAngle = -Math.PI / 2;
-            if (isPlaying && Tone.Transport.state === "started") {
-                const bpm = Tone.Transport.bpm.value;
-                const progressInMeasure = (Tone.Transport.seconds % ((60 / bpm) * 4)) / ((60 / bpm) * 4);
-                currentAngle = -Math.PI / 2 + (progressInMeasure * Math.PI * 2);
-            }
-
-            circles.forEach((circle) => {
-                let hasActiveSolo = circles.some(c => c.isSolo);
-                let isTargeted = hasActiveSolo ? circle.isSolo : !circle.isMute;
-                
-                ctx.save(); ctx.globalAlpha = isTargeted ? 1.0 : 0.15;
-                ctx.beginPath(); ctx.arc(centerX, centerY, circle.radius, 0, Math.PI * 2);
-                ctx.strokeStyle = circle.isSolo ? '#f1c40f' : 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1.5; ctx.stroke();
-
-                const inst = instrumentsConfig[circle.instrumentIdx];
-                for (let i = 0; i < circle.steps; i++) {
-                    const stepAngle = -Math.PI / 2 + (i * (Math.PI * 2 / circle.steps));
-                    const x = centerX + Math.cos(stepAngle) * circle.radius; const y = centerY + Math.sin(stepAngle) * circle.radius;
-                    
-                    let state = circle.activeSteps[i]; let fillColor = 'rgba(40,40,40,0.6)'; let radiusSize = 5; let isAccent = false;
-                    let textSymbol = state;
-
-                    if (state !== 0) {
-                        radiusSize = 10;
-                        if (inst.type === 'voice') {
-                            fillColor = inst.colors.active;
-                            textSymbol = (circle.lyrics && circle.lyrics[i]) ? circle.lyrics[i] : 'X';
-                        } else {
-                            fillColor = inst.colors[state] || '#fff';
-                            isAccent = (state === state.toUpperCase());
-                            radiusSize = isAccent ? 12 : 9;
-                        }
-                    }
-
-                    if (isAccent) {
-                        ctx.beginPath(); ctx.arc(x, y, radiusSize + 4, 0, Math.PI * 2);
-                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'; ctx.lineWidth = 2; ctx.stroke();
-                    }
-
-                    ctx.beginPath(); ctx.arc(x, y, radiusSize, 0, Math.PI * 2); ctx.fillStyle = fillColor; ctx.fill();
-                    ctx.strokeStyle = '#121212'; ctx.lineWidth = 1.5; ctx.stroke();
-                    
-                    if (state !== 0) {
-                        ctx.fillStyle = inst.colors.text || '#fff'; ctx.font = '
+                ctx.strokeStyle = 'rgba(241, 196, 15, 0.4)'; ctx.lineWidth = 4;
