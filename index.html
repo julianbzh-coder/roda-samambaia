@@ -153,14 +153,13 @@
     </div>
 
     <script>
-        // Configuration stricte de la latence web
         Tone.context.lookAhead = 0.04; 
         Tone.context.latencyHint = "interactive";
 
         const recorder = new Tone.Recorder();
         Tone.Destination.connect(recorder);
 
-        // --- BUS DE MIXAGE ---
+        // --- CONFIGURATION ET BUS DES INSTRUMENTS ---
         const channels = {}; const meters = {}; const samplers = {};
 
         const instrumentsConfig = [
@@ -170,37 +169,48 @@
             { id: 'caixa', name: 'Caixa', type: 'hands', path: 'Caixa', colors: { 'd': '#320b61', 'D': '#4a148c', 'g': '#be5be0', 'G': '#9c27b0', text: '#fff' } },
             { id: 'gongue', name: 'Gonguê', type: 'gongue', path: 'Gongue', colors: { 'grv': '#222222', 'GRV': '#000000', 'aig': '#7f8c8d', 'AIG': '#bdc3c7', text: '#fff' } },
             { id: 'agbe', name: 'Agbê', type: 'shake', path: 'Graines/Agbe', colors: { 'p': '#113b14', 'P': '#1b5e20', 't': '#74d478', 'T': '#4caf50', text: '#fff' } },
-            { id: 'mineiro', name: 'Mineiro', type: 'shake', path: 'Graines/Mineiro', colors: { 'p': '#113b14', 'P': '#1b5e20', 't': '#74d478', 'T': '#4caf50', text: '#fff' } }
+            { id: 'mineiro', name: 'Mineiro', type: 'shake', path: 'Graines/Mineiro', colors: { 'p': '#113b14', 'P': '#1b5e20', 't': '#74d478', 'T': '#4caf50', text: '#fff' } },
+            { id: 'chant', name: 'Chant', type: 'voice', path: 'internal', colors: { active: '#2980b9', text: '#fff' } } // Ajouté ici !
         ];
+
+        // On sépare le Chant (synthétiseur) des autres instruments (fichiers .wav)
+        const bChantSynth = new Tone.Synth({ volume: -10, envelope: { attack: 0.05, decay: 0.2 } });
 
         instrumentsConfig.forEach(inst => {
             channels[inst.id] = new Tone.Channel({ volume: 0 }).toDestination();
             meters[inst.id] = new Tone.Meter();
             channels[inst.id].connect(meters[inst.id]);
 
-            let urls = inst.type === 'gongue' ? 
-                { "faible-grave": "faible-grave.wav", "fort-grave": "fort-grave.wav", "faible-aigue": "faible-aigue.wav", "fort-aigue": "fort-aigue.wav" } : 
-                { "faible": "faible.wav", "fort": "fort.wav" };
+            if (inst.id === 'chant') {
+                bChantSynth.connect(channels[inst.id]);
+                // Pas besoin de charger de fichier extérieur pour le chant
+            } else {
+                let urls = inst.type === 'gongue' ? 
+                    { "faible-grave": "faible-grave.wav", "fort-grave": "fort-grave.wav", "faible-aigue": "faible-aigue.wav", "fort-aigue": "fort-aigue.wav" } : 
+                    { "faible": "faible.wav", "fort": "fort.wav" };
 
-            samplers[inst.id] = new Tone.Players({
-                urls: urls,
-                baseUrl: `sons-maracatu/${inst.path}/`,
-                onload: () => checkAllLoaded()
-            }).connect(channels[inst.id]);
+                samplers[inst.id] = new Tone.Players({
+                    urls: urls,
+                    baseUrl: `sons-maracatu/${inst.path}/`,
+                    onload: () => checkAllLoaded()
+                }).connect(channels[inst.id]);
+            }
         });
 
         let loadedCount = 0;
         function checkAllLoaded() {
             loadedCount++;
-            if (loadedCount >= 7) { document.getElementById('loading-overlay').style.display = 'none'; }
+            if (loadedCount >= 6) { document.getElementById('loading-overlay').style.display = 'none'; } // 6 instruments physiques
         }
         setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none'; }, 2000);
 
+        // Grille par défaut
         let circles = [
-            { id: 1, radius: 110, steps: 4, activeSteps: ['D', 0, 'd', 0], instrumentIdx: 0, isMute: false, isSolo: false, volumeVal: 100 },   
-            { id: 2, radius: 150, steps: 8, activeSteps: ['D', 0, 'd', 'g', 0, 'D', 0, 'G'], instrumentIdx: 1, isMute: false, isSolo: false, volumeVal: 100 }, 
-            { id: 3, radius: 190, steps: 4, activeSteps: ['GRV', 0, 'AIG', 0], instrumentIdx: 4, isMute: false, isSolo: false, volumeVal: 100 }, 
-            { id: 4, radius: 230, steps: 8, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, isMute: false, isSolo: false, volumeVal: 100 }
+            { id: 1, radius: 100, steps: 4, activeSteps: ['D', 0, 'd', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
+            { id: 2, radius: 135, steps: 8, activeSteps: ['D', 0, 'd', 'g', 0, 'D', 0, 'G'], instrumentIdx: 1, isMute: false, isSolo: false, volumeVal: 100 }, 
+            { id: 3, radius: 170, steps: 4, activeSteps: ['GRV', 0, 'AIG', 0], instrumentIdx: 4, isMute: false, isSolo: false, volumeVal: 100 }, 
+            { id: 4, radius: 205, steps: 8, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, isMute: false, isSolo: false, volumeVal: 100 },
+            { id: 5, radius: 240, steps: 4, activeSteps: [0, 0, 0, 0], instrumentIdx: 7, lyrics: ["", "", "", ""], isMute: false, isSolo: false, volumeVal: 100 }
         ];
 
         // --- GRAPHISMES ---
@@ -227,8 +237,7 @@
             let currentAngle = -Math.PI / 2;
             if (isPlaying && Tone.Transport.state === "started") {
                 const bpm = Tone.Transport.bpm.value;
-                const secondsPerMeasure = (60 / bpm) * 4;
-                const progressInMeasure = (Tone.Transport.seconds % secondsPerMeasure) / secondsPerMeasure;
+                const progressInMeasure = (Tone.Transport.seconds % ((60 / bpm) * 4)) / ((60 / bpm) * 4);
                 currentAngle = -Math.PI / 2 + (progressInMeasure * Math.PI * 2);
             }
 
@@ -246,11 +255,18 @@
                     const x = centerX + Math.cos(stepAngle) * circle.radius; const y = centerY + Math.sin(stepAngle) * circle.radius;
                     
                     let state = circle.activeSteps[i]; let fillColor = 'rgba(40,40,40,0.6)'; let radiusSize = 5; let isAccent = false;
+                    let textSymbol = state;
 
                     if (state !== 0) {
-                        fillColor = inst.colors[state] || '#fff';
-                        isAccent = (state === state.toUpperCase());
-                        radiusSize = isAccent ? 12 : 9;
+                        radiusSize = 10;
+                        if (inst.type === 'voice') {
+                            fillColor = inst.colors.active;
+                            textSymbol = (circle.lyrics && circle.lyrics[i]) ? circle.lyrics[i] : 'X';
+                        } else {
+                            fillColor = inst.colors[state] || '#fff';
+                            isAccent = (state === state.toUpperCase());
+                            radiusSize = isAccent ? 12 : 9;
+                        }
                     }
 
                     if (isAccent) {
@@ -263,7 +279,7 @@
                     
                     if (state !== 0) {
                         ctx.fillStyle = inst.colors.text || '#fff'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                        ctx.fillText(state.substring(0,3), x, y);
+                        ctx.fillText(textSymbol.substring(0,5), x, y);
                     }
                     if (i === 0) {
                         ctx.save(); ctx.globalAlpha = 1.0; ctx.fillStyle = '#aaa'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'left';
@@ -284,7 +300,7 @@
             requestAnimationFrame(draw);
         }
 
-        // --- UNIQUE MOTEUR DE JEU (BOUCLE INDÉSTRUCTIBLE) ---
+        // --- MOTEUR DE JEU COMPATIBLE VOICE ---
         let currentStepIndex = -1;
         
         const mainLoop = new Tone.Loop((time) => {
@@ -300,17 +316,21 @@
                         let state = circle.activeSteps[stepIdx];
                         
                         if (state !== 0) {
-                            let instId = instrumentsConfig[circle.instrumentIdx].id;
-                            let player = samplers[instId];
+                            let inst = instrumentsConfig[circle.instrumentIdx];
                             
-                            if (state === 'D' || state === 'G' || state === 'P' || state === 'T' || state === 'GRV') {
-                                if (player.player("fort")) player.player("fort").start(time);
-                            } else if (state === 'd' || state === 'g' || state === 'p' || state === 't' || state === 'grv') {
-                                if (player.player("faible")) player.player("faible").start(time);
-                            } else if (state === 'AIG') {
-                                if (player.player("fort-aigue")) player.player("fort-aigue").start(time);
-                            } else if (state === 'aig') {
-                                if (player.player("faible-aigue")) player.player("faible-aigue").start(time);
+                            if (inst.id === 'chant') {
+                                bChantSynth.triggerAttackRelease("C3", "8n", time);
+                            } else {
+                                let player = samplers[inst.id];
+                                if (state === 'D' || state === 'G' || state === 'P' || state === 'T' || state === 'GRV') {
+                                    if (player.player("fort")) player.player("fort").start(time);
+                                } else if (state === 'd' || state === 'g' || state === 'p' || state === 't' || state === 'grv') {
+                                    if (player.player("faible")) player.player("faible").start(time);
+                                } else if (state === 'AIG') {
+                                    if (player.player("fort-aigue")) player.player("fort-aigue").start(time);
+                                } else if (state === 'aig') {
+                                    if (player.player("faible-aigue")) player.player("faible-aigue").start(time);
+                                }
                             }
                         }
                     }
@@ -330,7 +350,7 @@
         }
         setInterval(drawMeters, 40);
 
-        // --- MIXER INTERFACE ---
+        // --- RENDU DU MIXER ---
         function renderMixer() {
             const container = document.getElementById('tracks-mixer-container'); container.innerHTML = "";
             circles.forEach((circle, index) => {
@@ -374,10 +394,14 @@
                 let sn = parseInt(s) || 4; c.steps = sn;
                 let na = Array(sn).fill(0); for(let i=0; i<Math.min(sn, c.activeSteps.length); i++) na[i] = c.activeSteps[i];
                 c.activeSteps = na;
+                if(c.lyrics) {
+                    let nl = Array(sn).fill(""); for(let i=0; i<Math.min(sn, c.lyrics.length); i++) nl[i] = c.lyrics[i];
+                    c.lyrics = nl;
+                }
             }
         };
 
-        // --- CLICS ---
+        // --- CYCLES DES CLICS ADAPTÉS ---
         canvas.addEventListener('click', (e) => {
             const rect = canvas.getBoundingClientRect(); const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top;
             const dx = mouseX - centerX; const dy = mouseY - centerY; const distance = Math.sqrt(dx * dx + dy * dy);
@@ -396,6 +420,19 @@
                                 if (current === 0) circle.activeSteps[i] = 'p'; else if (current === 'p') circle.activeSteps[i] = 'P'; else if (current === 'P') circle.activeSteps[i] = 't'; else if (current === 't') circle.activeSteps[i] = 'T'; else circle.activeSteps[i] = 0;
                             } else if (inst.type === 'gongue') {
                                 if (current === 0) circle.activeSteps[i] = 'grv'; else if (current === 'grv') circle.activeSteps[i] = 'GRV'; else if (current === 'GRV') circle.activeSteps[i] = 'aig'; else if (current === 'aig') circle.activeSteps[i] = 'AIG'; else circle.activeSteps[i] = 0;
+                            } else if (inst.type === 'voice') {
+                                // Logique Chant restaurée !
+                                if (current === 0) {
+                                    let lyric = prompt("Parole/Syllabe du chant (max 5 lettres) :");
+                                    if (lyric !== null && lyric.trim() !== "") {
+                                        circle.activeSteps[i] = 'X';
+                                        if(!circle.lyrics) circle.lyrics = [];
+                                        circle.lyrics[i] = lyric.substring(0,5);
+                                    }
+                                } else {
+                                    circle.activeSteps[i] = 0;
+                                    circle.lyrics[i] = "";
+                                }
                             } else {
                                 if (current === 0) circle.activeSteps[i] = 'd'; else if (current === 'd') circle.activeSteps[i] = 'D'; else if (current === 'D') circle.activeSteps[i] = 'g'; else if (current === 'g') circle.activeSteps[i] = 'G'; else circle.activeSteps[i] = 0;
                             }
@@ -406,14 +443,12 @@
             });
         });
 
-// --- BOUTONS GENERAL ---
+        // --- CONTROLES GENERAL ---
         const playBtn = document.getElementById('playBtn');
         playBtn.addEventListener('click', async () => {
             if (!isPlaying) {
                 await Tone.start();
                 currentStepIndex = -1;
-                
-                // Nettoyage avant de démarrer
                 mainLoop.stop();
                 Tone.Transport.stop();
                 Tone.Transport.cancel(0);
@@ -423,32 +458,42 @@
                 
                 playBtn.textContent = "Pause"; playBtn.classList.add('playing'); isPlaying = true;
             } else {
-                // On arrête les moteurs rythmiques
                 mainLoop.stop();
                 Tone.Transport.stop();
-
-                // ET ON COUPE NET TOUS LES SONS EN TRAIN DE JOUER
+                
+                // Coupure nette de tous les samplers et du synthé chant
                 instrumentsConfig.forEach(inst => {
-                    if (samplers[inst.id]) {
-                        samplers[inst.id].stopAll();
-                    }
+                    if (samplers[inst.id]) samplers[inst.id].stopAll();
                 });
+                bChantSynth.triggerRelease();
 
                 playBtn.textContent = "Démarrer"; playBtn.classList.remove('playing'); isPlaying = false;
             }
         });
+
         document.getElementById('bpm').addEventListener('input', (e) => { Tone.Transport.bpm.value = e.target.value; });
         document.getElementById('clearBtn').addEventListener('click', () => { circles = []; renderMixer(); });
 
         document.getElementById('addCircleBtn').addEventListener('click', () => {
-            const lastRadius = circles.length > 0 ? circles[circles.length - 1].radius : 70;
+            const lastRadius = circles.length > 0 ? circles[circles.length - 1].radius : 65;
             if (lastRadius >= 280) return alert("Roda pleine !");
             const steps = parseInt(prompt("Nombre de pas :", "8")) || 4;
             let pText = "Sélectionnez l'instrument :\n";
             instrumentsConfig.forEach((inst, idx) => pText += `${idx} : ${inst.name}\n`);
             const choice = parseInt(prompt(pText, "0"));
             const instIdx = (choice >= 0 && choice < instrumentsConfig.length) ? choice : 0;
-            circles.push({ id: Date.now(), radius: lastRadius + 32, steps: steps, activeSteps: Array(steps).fill(0), instrumentIdx: instIdx, isMute: false, isSolo: false, volumeVal: 100 });
+            
+            circles.push({
+                id: Date.now(),
+                radius: lastRadius + 32,
+                steps: steps,
+                activeSteps: Array(steps).fill(0),
+                instrumentIdx: instIdx,
+                lyrics: Array(steps).fill(""),
+                isMute: false,
+                isSolo: false,
+                volumeVal: 100
+            });
             renderMixer();
         });
 
