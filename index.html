@@ -6,23 +6,23 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         body { margin: 0; background: #121212; color: #fff; font-family: sans-serif; display: flex; height: 100vh; }
-        #left-panel { width: 300px; background: #1e1e1e; padding: 20px; border-right: 1px solid #333; }
-        .inst-item { background: #333; padding: 10px; margin-bottom: 10px; border-radius: 5px; display: flex; justify-content: space-between; }
-        #top-bar { height: 60px; display: flex; align-items: center; padding: 0 20px; gap: 15px; border-bottom: 1px solid #333; }
-        #logo { height: 40px; }
-        canvas { cursor: crosshair; }
+        #left-panel { width: 320px; background: #1e1e1e; padding: 15px; border-right: 1px solid #333; overflow-y: auto; }
+        #top-bar { height: 70px; display: flex; align-items: center; padding: 0 20px; gap: 15px; border-bottom: 1px solid #333; }
+        #logo { height: 50px; }
+        .inst-item { background: #333; padding: 10px; margin-bottom: 10px; border-radius: 5px; font-size: 13px; }
+        canvas { cursor: crosshair; display: block; }
     </style>
 </head>
 <body>
 
 <div id="left-panel">
-    <h3>Mixer</h3>
+    <h3>Mixer & Légende</h3>
     <div id="mixer"></div>
 </div>
 
-<div style="flex-grow:1;">
+<div style="flex-grow:1; display:flex; flex-direction:column;">
     <div id="top-bar">
-        <img id="logo" src="logo-samambaia.png" onerror="this.style.display='none'" alt="Logo">
+        <img id="logo" src="logo-samambaia.png" onerror="this.style.display='none'">
         <h2>MARACATU SAMAMBAIA</h2>
         <button onclick="document.getElementById('modal').style.display='block'">+ Ajouter Instrument</button>
         <button onclick="toggleAudio()" id="playBtn">▶ Play</button>
@@ -30,11 +30,10 @@
     <canvas id="canvas" width="800" height="700"></canvas>
 </div>
 
-<div id="modal" style="display:none; position:fixed; top:20%; left:40%; background:#333; padding:20px; border-radius:10px;">
+<div id="modal" style="display:none; position:fixed; top:20%; left:40%; background:#222; padding:20px; border-radius:10px; border:1px solid #555;">
     <h3>Choisir instrument</h3>
     <select id="selInst"></select>
     <button onclick="addInst()">Ajouter</button>
-    <button onclick="document.getElementById('modal').style.display='none'">Fermer</button>
 </div>
 
 <script>
@@ -43,18 +42,18 @@
     let circles = [];
     let isPlaying = false;
 
+    // Définition complète avec les notations musicales
     const instTypes = [
-        { id: 'alfaia', name: 'Alfaia', color: '#8b0000' },
-        { id: 'gongue', name: 'Gonguê', color: '#bdc3c7' },
-        { id: 'agbe', name: 'Agbê', color: '#4caf50' },
-        { id: 'puxador', name: 'Puxador', color: '#5dade2' }
+        { id: 'alfaia', name: 'Alfaia (d/D, g/G)', color: '#8b0000', notes: ['d', 'D', 'g', 'G'] },
+        { id: 'gongue', name: 'Gonguê (grv/aig)', color: '#bdc3c7', notes: ['grv', 'GRV', 'aig', 'AIG'] },
+        { id: 'agbe', name: 'Agbê (p/t)', color: '#4caf50', notes: ['p', 'P', 't', 'T'] }
     ];
 
     document.getElementById('selInst').innerHTML = instTypes.map((i,idx) => `<option value="${idx}">${i.name}</option>`).join('');
 
     function addInst() {
         const idx = document.getElementById('selInst').value;
-        circles.push({ ...instTypes[idx], steps: 16, active: new Array(16).fill(false) });
+        circles.push({ ...instTypes[idx], steps: 16, active: new Array(16).fill(null) });
         document.getElementById('modal').style.display = 'none';
         renderMixer();
     }
@@ -63,34 +62,41 @@
         const mix = document.getElementById('mixer');
         mix.innerHTML = circles.map((c, i) => `
             <div class="inst-item">
-                <span>${c.name}</span>
-                <button onclick="circles.splice(${i},1); renderMixer();">🗑️</button>
+                <strong>${c.name}</strong><br>
+                <button onclick="circles.splice(${i},1); renderMixer();">🗑️ Supprimer</button>
             </div>
         `).join('');
     }
 
-    // --- MOTEUR DE DESSIN ---
+    // --- MOTEUR DE DESSIN ROBUSTE ---
     function draw() {
         ctx.clearRect(0,0,800,700);
         circles.forEach((c, index) => {
-            let radius = 100 + (index * 50);
-            // Cercle guide
+            let radius = 100 + (index * 60);
             ctx.beginPath(); ctx.arc(400, 350, radius, 0, Math.PI*2);
             ctx.strokeStyle = '#444'; ctx.stroke();
-            // Pas
+            
             for(let i=0; i<16; i++) {
                 let angle = (i/16) * Math.PI*2 - Math.PI/2;
                 let x = 400 + Math.cos(angle) * radius;
                 let y = 350 + Math.sin(angle) * radius;
+                
+                // Dessiner le cercle du pas
                 ctx.fillStyle = c.active[i] ? c.color : '#333';
-                ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(x, y, 12, 0, Math.PI*2); ctx.fill();
+                
+                // Écrire la note si active
+                if(c.active[i]) {
+                    ctx.fillStyle = "#fff"; ctx.font = "10px Arial";
+                    ctx.textAlign = "center"; ctx.fillText(c.active[i], x, y+4);
+                }
             }
         });
         requestAnimationFrame(draw);
     }
     draw();
 
-    // Interaction
+    // Interaction : Clic droit pour cycle de notes, Clic gauche pour activer/désactiver
     canvas.addEventListener('click', e => {
         const rect = canvas.getBoundingClientRect();
         const mx = e.clientX - rect.left - 400;
@@ -98,12 +104,18 @@
         const dist = Math.sqrt(mx*mx + my*my);
         
         circles.forEach((c, index) => {
-            let r = 100 + (index * 50);
-            if (Math.abs(dist - r) < 20) {
+            let r = 100 + (index * 60);
+            if (Math.abs(dist - r) < 25) {
                 let angle = Math.atan2(my, mx) + Math.PI/2;
                 if(angle < 0) angle += Math.PI*2;
                 let step = Math.floor((angle / (Math.PI*2)) * 16);
-                c.active[step] = !c.active[step];
+                
+                // Logique de cycle : null -> note1 -> note2 -> note3 -> null
+                if(!c.active[step]) c.active[step] = c.notes[0];
+                else {
+                    let nextIdx = c.notes.indexOf(c.active[step]) + 1;
+                    c.active[step] = (nextIdx < c.notes.length) ? c.notes[nextIdx] : null;
+                }
             }
         });
     });
