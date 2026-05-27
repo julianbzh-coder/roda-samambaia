@@ -194,7 +194,6 @@
         ];
 
         const bChantSynth = new Tone.Synth({ volume: -10, envelope: { attack: 0.05, decay: 0.2 } });
-        // Synthé métronome (Cloche fixe)
         const bMetroClick = new Tone.MetalSynth({ volume: -14, frequency: 1200, envelope: { attack: 0.001, decay: 0.05 } }).toDestination();
 
         instrumentsConfig.forEach(inst => {
@@ -224,26 +223,25 @@
         }
         setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none'; }, 2000);
 
-        // Grille de cercles par défaut
         let circles = [];
         let isMetroOn = false;
 
-        // --- PRESETS DE REPERTOIRE (Option A) ---
+        // --- PRESETS DE REPERTOIRE ---
         function loadPreset(presetName) {
             if (!presetName) return;
             if (presetName === 'baque-virado') {
                 circles = [
-                    { id: 1, radius: 95, steps: 4, activeSteps: ['D', 0, 'd', 0], instrumentIdx: 0, isMute: false, isSolo: false, volumeVal: 100 },   
-                    { id: 2, radius: 130, steps: 8, activeSteps: ['D', 0, 'd', 'g', 0, 'D', 0, 'G'], instrumentIdx: 1, isMute: false, isSolo: false, volumeVal: 100 }, 
-                    { id: 3, radius: 165, steps: 8, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, isMute: false, isSolo: false, volumeVal: 100 }, 
-                    { id: 4, radius: 200, steps: 8, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, isMute: false, isSolo: false, volumeVal: 100 }
+                    { id: 1, radius: 100, steps: 4, activeSteps: ['D', 0, 'd', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
+                    { id: 2, radius: 135, steps: 8, activeSteps: ['D', 0, 'd', 'g', 0, 'D', 0, 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
+                    { id: 3, radius: 170, steps: 8, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
+                    { id: 4, radius: 205, steps: 8, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }
                 ];
             } else if (presetName === 'baque-arrasto') {
                 circles = [
-                    { id: 1, radius: 95, steps: 4, activeSteps: ['D', 'd', 0, 'D'], instrumentIdx: 0, isMute: false, isSolo: false, volumeVal: 100 },   
-                    { id: 2, radius: 130, steps: 4, activeSteps: ['D', 0, 'D', 'G'], instrumentIdx: 1, isMute: false, isSolo: false, volumeVal: 100 }, 
-                    { id: 3, radius: 165, steps: 4, activeSteps: ['GRV', 'AIG', 'GRV', 'AIG'], instrumentIdx: 4, isMute: false, isSolo: false, volumeVal: 100 },
-                    { id: 4, radius: 200, steps: 8, activeSteps: ['P', 0, 'T', 'P', 0, 'T', 'P', 'T'], instrumentIdx: 6, isMute: false, isSolo: false, volumeVal: 100 }
+                    { id: 1, radius: 100, steps: 4, activeSteps: ['D', 'd', 0, 'D'], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
+                    { id: 2, radius: 135, steps: 4, activeSteps: ['D', 0, 'D', 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
+                    { id: 3, radius: 170, steps: 4, activeSteps: ['GRV', 'AIG', 'GRV', 'AIG'], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },
+                    { id: 4, radius: 205, steps: 8, activeSteps: ['P', 0, 'T', 'P', 0, 'T', 'P', 'T'], instrumentIdx: 6, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }
                 ];
             }
             renderMixer();
@@ -268,7 +266,6 @@
                 ctx.fillStyle = '#161616'; ctx.beginPath(); ctx.arc(centerX, centerY, 310, 0, Math.PI * 2); ctx.fill();
             }
 
-            // Repère visuel du Métronome / Clic au centre (Option C)
             if (isMetroOn && isPlaying && currentStepIndex % 24 === 0) {
                 ctx.beginPath(); ctx.arc(centerX, centerY, 325, 0, Math.PI * 2);
                 ctx.strokeStyle = 'rgba(241, 196, 15, 0.4)'; ctx.lineWidth = 4; ctx.stroke();
@@ -348,7 +345,6 @@
         const mainLoop = new Tone.Loop((time) => {
             currentStepIndex = (currentStepIndex + 1) % 96;
             
-            // Repère Métronome Audible (Option C)
             if (isMetroOn && currentStepIndex % 24 === 0) {
                 bMetroClick.triggerAttackRelease(time);
             }
@@ -456,7 +452,7 @@
                     const stepAngleSize = (Math.PI * 2) / circle.steps;
                     for (let i = 0; i < circle.steps; i++) {
                         const targetAngle = i * stepAngleSize; let angleDiff = Math.abs(clickAngle - targetAngle);
-                        if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - delete angleDiff;
+                        if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
 
                         if (angleDiff < stepAngleSize / 2) {
                             const inst = instrumentsConfig[circle.instrumentIdx]; let current = circle.activeSteps[i];
@@ -479,7 +475,7 @@
             });
         });
 
-        // --- CONTROLES GENERAL ---
+        // --- BOUTONS GENERAL ---
         const playBtn = document.getElementById('playBtn');
         playBtn.addEventListener('click', async () => {
             if (!isPlaying) {
@@ -492,94 +488,4 @@
                 mainLoop.start(0);
                 Tone.Transport.start("+0.02");
                 
-                playBtn.textContent = "Pause"; playBtn.classList.add('playing'); isPlaying = true;
-            } else {
-                mainLoop.stop();
-                Tone.Transport.stop();
-                instrumentsConfig.forEach(inst => { if (samplers[inst.id]) samplers[inst.id].stopAll(); });
-                bChantSynth.triggerRelease();
-                playBtn.textContent = "Démarrer"; playBtn.classList.remove('playing'); isPlaying = false;
-            }
-        });
-
-        document.getElementById('bpm').addEventListener('input', (e) => { Tone.Transport.bpm.value = e.target.value; });
-        
-        // SOTAQUE / SWING (Option B)
-        document.getElementById('swing').addEventListener('input', (e) => {
-            // Associe la valeur du curseur (0 à 100) au paramètre de swing de Tone.js (0.0 à 1.0)
-            Tone.Transport.swing = e.target.value / 100;
-        });
-
-        // ACTIVER / DESACTIVER METRONOME (Option C)
-        const metroBtn = document.getElementById('metroBtn');
-        metroBtn.addEventListener('click', () => {
-            isMetroOn = !isMetroOn;
-            if (isMetroOn) metroBtn.classList.add('metro-on');
-            else metroBtn.classList.remove('metro-on');
-        });
-
-        document.getElementById('clearBtn').addEventListener('click', () => { circles = []; renderMixer(); });
-
-        document.getElementById('addCircleBtn').addEventListener('click', () => {
-            const lastRadius = circles.length > 0 ? circles[circles.length - 1].radius : 65;
-            if (lastRadius >= 280) return alert("Roda pleine !");
-            const steps = parseInt(prompt("Nombre de pas :", "8")) || 4;
-            let pText = "Instrument :\n";
-            instrumentsConfig.forEach((inst, idx) => pText += `${idx} : ${inst.name}\n`);
-            const choice = parseInt(prompt(pText, "0"));
-            const instIdx = (choice >= 0 && choice < instrumentsConfig.length) ? choice : 0;
-            
-            circles.push({ id: Date.now(), radius: lastRadius + 32, steps: steps, activeSteps: Array(steps).fill(0), instrumentIdx: instIdx, lyrics: Array(steps).fill(""), isMute: false, isSolo: false, volumeVal: 100 });
-            renderMixer();
-        });
-
-        document.getElementById('saveBtn').addEventListener('click', () => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ bpm: Tone.Transport.bpm.value, circles: circles }));
-            const downloadAnchor = document.createElement('a'); downloadAnchor.setAttribute("href", dataStr); downloadAnchor.setAttribute("download", "rythme_samambaia.json");
-            document.body.appendChild(downloadAnchor); downloadAnchor.click(); downloadAnchor.remove();
-        });
-
-        const fileInput = document.getElementById('fileInput');
-        document.getElementById('loadBtn').addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                try {
-                    const loadedData = JSON.parse(evt.target.result);
-                    if (loadedData.bpm) { document.getElementById('bpm').value = loadedData.bpm; Tone.Transport.bpm.value = loadedData.bpm; }
-                    if (loadedData.circles) { circles = loadedData.circles; renderMixer(); }
-                } catch (err) { alert("Fichier invalide !"); }
-            };
-            reader.readAsText(file);
-        });
-
-        const recBtn = document.getElementById('recBtn');
-        recBtn.addEventListener('click', async () => {
-            if (!isRecording) {
-                await Tone.start(); recorder.start();
-                if (!isPlaying) { currentStepIndex = -1; mainLoop.start(0); Tone.Transport.start("+0.02"); playBtn.textContent = "Pause"; playBtn.classList.add('playing'); isPlaying = true; }
-                recBtn.textContent = "Stop & Télécharger"; recBtn.classList.add('recording'); isRecording = true;
-            } else {
-                const recording = await recorder.stop();
-                const url = URL.createObjectURL(recording);
-                const anchor = document.createElement("a"); anchor.download = "groove_samambaia.webm"; anchor.href = url; anchor.click();
-                recBtn.textContent = "🔴 Rec Audio"; recBtn.classList.remove('recording'); isRecording = false;
-            }
-        });
-
-        // --- RACCOURCI CLAVIER : BARRE D'ESPACE ---
-        window.addEventListener('keydown', (e) => {
-            if (e.target.tagName === 'INPUT') return;
-            if (e.code === 'Space') {
-                e.preventDefault(); 
-                playBtn.click();
-            }
-        });
-
-        // Chargement initial d'un rythme par défaut pour ne pas démarrer à vide
-        loadPreset('baque-virado');
-        document.getElementById('presetSelect').value = 'baque-virado';
-    </script>
-</body>
-</html>
+                playBtn.
