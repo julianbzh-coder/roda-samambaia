@@ -73,7 +73,7 @@
             font-size: 11px;
             padding: 2px 4px;
             border-radius: 4px;
-            max-width: 130px;
+            max-width: 110px;
         }
 
         .track-mute-solo { display: flex; gap: 4px; }
@@ -84,6 +84,7 @@
         }
         .btn-mute-solo.mute-on { background-color: var(--accent-red); }
         .btn-mute-solo.solo-on { background-color: var(--accent-gold); color: #000; }
+        .btn-mute-solo.hidden-on { background-color: #34495e; color: #95a5a6; }
         .btn-delete { background-color: #444; }
         .btn-delete:hover { background-color: var(--accent-red); }
 
@@ -100,8 +101,8 @@
         /* --- STYLE DE LA LÉGENDE PÉDAGOGIQUE --- */
         #legend-section {
             border-top: 1px solid #333;
-            padding-top: 15px;
-            margin-top: 15px;
+            padding-top: 12px;
+            margin-top: 12px;
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
@@ -110,8 +111,8 @@
         .legend-container {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            max-height: 250px;
+            gap: 6px;
+            max-height: 220px;
             overflow-y: auto;
             padding-right: 5px;
         }
@@ -179,7 +180,6 @@
         }
         button.control-btn:hover { background-color: #444; }
         
-        /* Bouton Play/Stop épuré */
         button#playBtn { 
             background-color: var(--accent-green); 
             border-color: var(--accent-green); 
@@ -284,7 +284,7 @@
 
         <!-- --- SECTION LÉGENDE PÉDAGOGIQUE --- -->
         <div id="legend-section">
-            <div class="panel-title" style="margin-bottom: 8px;">📖 Guide des Sons (Élèves)</div>
+            <div class="panel-title" style="margin-bottom: 6px;">📖 Guide des Sons (Élèves)</div>
             <div class="legend-container">
                 <div style="font-size: 11px; margin-bottom: 4px; color: var(--accent-gold); line-height: 1.35;">
                     💡 <strong>Règle d'or :</strong><br>
@@ -311,14 +311,13 @@
                         <span>Son Grave (Ouvert)</span>
                     </div>
                     <div class="legend-item">
-                        <!-- Surlignage noir sur gris pour améliorer la lisibilité du Gonguê -->
                         <span class="legend-badge" style="background:#bdc3c7; color:#000;">AIG / aig</span> 
                         <span>Son Aigu (Étouffé)</span>
                     </div>
                 </div>
 
                 <div class="legend-group">
-                    <span class="legend-group-title">🌾 Agbê & Mineiro (Secoué)</span>
+                    <span class="legend-group-title">🌾 Agbê (Secoué Horizontal)</span>
                     <div class="legend-item">
                         <span class="legend-badge" style="background:#1b5e20; color:#fff; border: 2px solid #fff;">←</span> 
                         <span>Poussé Fort / Accent (entouré)</span>
@@ -333,6 +332,27 @@
                     </div>
                     <div class="legend-item">
                         <span class="legend-badge" style="background:#74d478; color:#121212; opacity:0.8;">→</span> 
+                        <span>Tiré Faible</span>
+                    </div>
+                </div>
+
+                <!-- --- AJOUT : SECTION DISTINCTE POUR LE MINEIRO (FLECHES VERTICALES) --- -->
+                <div class="legend-group">
+                    <span class="legend-group-title">🌾 Mineiro (Secoué Vertical)</span>
+                    <div class="legend-item">
+                        <span class="legend-badge" style="background:#1b5e20; color:#fff; border: 2px solid #fff;">↑</span> 
+                        <span>Poussé Fort / Accent (entouré)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-badge" style="background:#113b14; color:#fff; opacity:0.8;">↑</span> 
+                        <span>Poussé Faible</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-badge" style="background:#4caf50; color:#121212; border: 2px solid #fff;">↓</span> 
+                        <span>Tiré Fort / Accent (entouré)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-badge" style="background:#74d478; color:#121212; opacity:0.8;">↓</span> 
                         <span>Tiré Faible</span>
                     </div>
                 </div>
@@ -365,7 +385,7 @@
 
                 <button id="metroBtn" class="control-btn">⏱️ Métronome</button>
                 
-                <!-- Menu déroulant d'ajout direct d'instrument -->
+                <!-- Menu d'ajout d'instrument -->
                 <select id="addInstrumentSelect" class="preset-select">
                     <!-- Rempli dynamiquement en JavaScript -->
                 </select>
@@ -378,7 +398,6 @@
                 <input type="file" id="fileInput" accept=".json">
                 
                 <div class="control-separator"></div>
-                <!-- Bouton Play/Stop épuré -->
                 <button id="playBtn" class="control-btn">▶</button>
             </div>
         </div>
@@ -415,7 +434,13 @@
         ];
 
         const bChantSynth = new Tone.Synth({ volume: -10, envelope: { attack: 0.05, decay: 0.2 } });
-        const bMetroClick = new Tone.MetalSynth({ volume: -14, frequency: 1200, envelope: { attack: 0.001, decay: 0.05 } }).toDestination();
+        
+        // --- MISE À JOUR : Synthétiseur de clave/bois précis et très léger pour le métronome ---
+        const bMetroClick = new Tone.Synth({
+            oscillator: { type: "sine" },
+            envelope: { attack: 0.001, decay: 0.04, sustain: 0, release: 0.04 },
+            volume: -8
+        }).toDestination();
 
         instrumentsConfig.forEach(inst => {
             channels[inst.id] = new Tone.Channel({ volume: 0 }).toDestination();
@@ -444,16 +469,16 @@
         }
         setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none'; }, 1500);
 
-        // --- FICHIER PAR DÉFAUT : "Vou vadiar carnaval" (8 instruments complets) ---
+        // Rythme par défaut : "Vou vadiar carnaval" (8 instruments)
         let circles = [
-            { id: 1, radius: 85, steps: 16, activeSteps: ['D', 0, 0, 0, 'd', 0, 'D', 0, 'D', 0, 0, 0, 'd', 0, 'D', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
-            { id: 2, radius: 110, steps: 16, activeSteps: [0, 0, 'D', 0, 0, 0, 'D', 'G', 0, 0, 'D', 0, 0, 0, 'D', 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
-            { id: 3, radius: 135, steps: 16, activeSteps: ['d', 'g', 0, 'D', 0, 'g', 'D', 0, 'd', 'g', 0, 'D', 0, 'g', 'D', 0], instrumentIdx: 2, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
-            { id: 4, radius: 160, steps: 16, activeSteps: ['D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G'], instrumentIdx: 3, lyrics: [], isMute: false, isSolo: false, volumeVal: 90 }, 
-            { id: 5, radius: 185, steps: 16, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0, 'GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
-            { id: 6, radius: 210, steps: 16, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
-            { id: 7, radius: 235, steps: 16, activeSteps: ['p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't'], instrumentIdx: 6, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
-            { id: 8, radius: 260, steps: 16, activeSteps: ['X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0], instrumentIdx: 7, lyrics: ['Vou', '', 'va', '', 'di', '', 'ar', '', 'Car', '', 'na', '', 'val', '', '!', ''], isMute: false, isSolo: false, volumeVal: 100 }
+            { id: 1, radius: 85, steps: 16, activeSteps: ['D', 0, 0, 0, 'd', 0, 'D', 0, 'D', 0, 0, 0, 'd', 0, 'D', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },   
+            { id: 2, radius: 110, steps: 16, activeSteps: [0, 0, 'D', 0, 0, 0, 'D', 'G', 0, 0, 'D', 0, 0, 0, 'D', 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+            { id: 3, radius: 135, steps: 16, activeSteps: ['d', 'g', 0, 'D', 0, 'g', 'D', 0, 'd', 'g', 0, 'D', 0, 'g', 'D', 0], instrumentIdx: 2, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+            { id: 4, radius: 160, steps: 16, activeSteps: ['D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G'], instrumentIdx: 3, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 90 }, 
+            { id: 5, radius: 185, steps: 16, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0, 'GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+            { id: 6, radius: 210, steps: 16, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+            { id: 7, radius: 235, steps: 16, activeSteps: ['p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't'], instrumentIdx: 6, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+            { id: 8, radius: 260, steps: 16, activeSteps: ['X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0], instrumentIdx: 7, lyrics: ['Vou', '', 'va', '', 'di', '', 'ar', '', 'Car', '', 'na', '', 'val', '', '!', ''], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }
         ];
         let isMetroOn = false;
 
@@ -463,37 +488,37 @@
             
             if (presetName === 'vou-vadiar') {
                 circles = [
-                    { id: 1, radius: 85, steps: 16, activeSteps: ['D', 0, 0, 0, 'd', 0, 'D', 0, 'D', 0, 0, 0, 'd', 0, 'D', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
-                    { id: 2, radius: 110, steps: 16, activeSteps: [0, 0, 'D', 0, 0, 0, 'D', 'G', 0, 0, 'D', 0, 0, 0, 'D', 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
-                    { id: 3, radius: 135, steps: 16, activeSteps: ['d', 'g', 0, 'D', 0, 'g', 'D', 0, 'd', 'g', 0, 'D', 0, 'g', 'D', 0], instrumentIdx: 2, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
-                    { id: 4, radius: 160, steps: 16, activeSteps: ['D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G'], instrumentIdx: 3, lyrics: [], isMute: false, isSolo: false, volumeVal: 90 }, 
-                    { id: 5, radius: 185, steps: 16, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0, 'GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
-                    { id: 6, radius: 210, steps: 16, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
-                    { id: 7, radius: 235, steps: 16, activeSteps: ['p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't'], instrumentIdx: 6, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
-                    { id: 8, radius: 260, steps: 16, activeSteps: ['X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0], instrumentIdx: 7, lyrics: ['Vou', '', 'va', '', 'di', '', 'ar', '', 'Car', '', 'na', '', 'val', '', '!', ''], isMute: false, isSolo: false, volumeVal: 100 }
+                    { id: 1, radius: 85, steps: 16, activeSteps: ['D', 0, 0, 0, 'd', 0, 'D', 0, 'D', 0, 0, 0, 'd', 0, 'D', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },   
+                    { id: 2, radius: 110, steps: 16, activeSteps: [0, 0, 'D', 0, 0, 0, 'D', 'G', 0, 0, 'D', 0, 0, 0, 'D', 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+                    { id: 3, radius: 135, steps: 16, activeSteps: ['d', 'g', 0, 'D', 0, 'g', 'D', 0, 'd', 'g', 0, 'D', 0, 'g', 'D', 0], instrumentIdx: 2, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+                    { id: 4, radius: 160, steps: 16, activeSteps: ['D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G'], instrumentIdx: 3, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 90 }, 
+                    { id: 5, radius: 185, steps: 16, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0, 'GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+                    { id: 6, radius: 210, steps: 16, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+                    { id: 7, radius: 235, steps: 16, activeSteps: ['p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't'], instrumentIdx: 6, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+                    { id: 8, radius: 260, steps: 16, activeSteps: ['X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0], instrumentIdx: 7, lyrics: ['Vou', '', 'va', '', 'di', '', 'ar', '', 'Car', '', 'na', '', 'val', '', '!', ''], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }
                 ];
             }
             else if (presetName === 'baque-virado') {
                 circles = [
-                    { id: 1, radius: 100, steps: 4, activeSteps: ['D', 0, 'd', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
-                    { id: 2, radius: 135, steps: 8, activeSteps: ['D', 0, 'd', 'g', 0, 'D', 0, 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
-                    { id: 3, radius: 170, steps: 8, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
-                    { id: 4, radius: 205, steps: 8, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }
+                    { id: 1, radius: 100, steps: 4, activeSteps: ['D', 0, 'd', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },   
+                    { id: 2, radius: 135, steps: 8, activeSteps: ['D', 0, 'd', 'g', 0, 'D', 0, 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+                    { id: 3, radius: 170, steps: 8, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+                    { id: 4, radius: 205, steps: 8, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }
                 ];
             } 
             else if (presetName === 'baque-arrasto') {
                 circles = [
-                    { id: 1, radius: 100, steps: 4, activeSteps: ['D', 'd', 0, 'D'], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
-                    { id: 2, radius: 135, steps: 4, activeSteps: ['D', 0, 'D', 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
-                    { id: 3, radius: 170, steps: 4, activeSteps: ['GRV', 'AIG', 'GRV', 'AIG'], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },
-                    { id: 4, radius: 205, steps: 8, activeSteps: ['P', 0, 'T', 'P', 0, 'T', 'P', 'T'], instrumentIdx: 6, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }
+                    { id: 1, radius: 100, steps: 4, activeSteps: ['D', 'd', 0, 'D'], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },   
+                    { id: 2, radius: 135, steps: 4, activeSteps: ['D', 0, 'D', 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+                    { id: 3, radius: 170, steps: 4, activeSteps: ['GRV', 'AIG', 'GRV', 'AIG'], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },
+                    { id: 4, radius: 205, steps: 8, activeSteps: ['P', 0, 'T', 'P', 0, 'T', 'P', 'T'], instrumentIdx: 6, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }
                 ];
             }
             else if (presetName === 'baque-luanda') {
                 circles = [
-                    { id: 1, radius: 100, steps: 4, activeSteps: ['D', 0, 'D', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
-                    { id: 2, radius: 135, steps: 8, activeSteps: ['D', 'g', 'd', 0, 'D', 0, 'G', 0], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
-                    { id: 3, radius: 170, steps: 8, activeSteps: ['GRV', 'AIG', 0, 'GRV', 'AIG', 0, 'GRV', 'AIG'], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }
+                    { id: 1, radius: 100, steps: 4, activeSteps: ['D', 0, 'D', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },   
+                    { id: 2, radius: 135, steps: 8, activeSteps: ['D', 'g', 'd', 0, 'D', 0, 'G', 0], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
+                    { id: 3, radius: 170, steps: 8, activeSteps: ['GRV', 'AIG', 0, 'GRV', 'AIG', 0, 'GRV', 'AIG'], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }
                 ];
             }
             
@@ -535,6 +560,9 @@
             }
 
             circles.forEach((circle) => {
+                // --- MODIFICATION : On masque complètement le cercle s'il est coché comme masqué ---
+                if (circle.isHidden) return;
+
                 let hasActiveSolo = circles.some(c => c.isSolo);
                 let isTargeted = hasActiveSolo ? circle.isSolo : !circle.isMute;
                 
@@ -564,10 +592,17 @@
                             isAccent = (state === state.toUpperCase());
                             radiusSize = isAccent ? 12 : 9;
                             
-                            // --- REMPLACEMENT PAR DES FLÈCHES POUR LES SECOUÉS (AGBÊ/MINEIRO) ---
+                            // --- REMPLACEMENT PAR DES FLÈCHES SELON L'INSTRUMENT DE SECOUÉ ---
                             if (inst.type === 'shake') {
-                                if (state.toLowerCase() === 'p') textSymbol = '←';
-                                else if (state.toLowerCase() === 't') textSymbol = '→';
+                                if (inst.id === 'mineiro') {
+                                    // Mineiro : Flèches verticales
+                                    if (state.toLowerCase() === 'p') textSymbol = '↑';
+                                    else if (state.toLowerCase() === 't') textSymbol = '↓';
+                                } else {
+                                    // Agbê : Flèches horizontales
+                                    if (state.toLowerCase() === 'p') textSymbol = '←';
+                                    else if (state.toLowerCase() === 't') textSymbol = '→';
+                                }
                             }
                         }
                     }
@@ -588,13 +623,11 @@
                     if (state !== 0) {
                         let txtColor = inst.colors.text || '#fff';
                         
-                        // --- COULEUR CORRIGÉE : Texte noir pour les coups aigus du gonguê ---
                         if (inst.id === 'gongue' && (state === 'aig' || state === 'AIG')) {
                             txtColor = '#000000';
                         }
                         ctx.fillStyle = txtColor;
                         
-                        // Style de police adapté : un peu plus grand pour les flèches d'agbé/mineiro
                         if (inst.type === 'shake') {
                             ctx.font = 'bold 12px sans-serif';
                         } else {
@@ -627,7 +660,10 @@
         let currentStepIndex = -1;
         const mainLoop = new Tone.Loop((time) => {
             currentStepIndex = (currentStepIndex + 1) % 96;
-            if (isMetroOn && currentStepIndex % 24 === 0) bMetroClick.triggerAttackRelease(time);
+            if (isMetroOn && currentStepIndex % 24 === 0) {
+                // Pitch haut pour un son de Clave boisée précis (A5 = 880Hz)
+                bMetroClick.triggerAttackRelease("A5", "32n", time);
+            }
 
             const hasActiveSolo = circles.some(c => c.isSolo);
             circles.forEach(circle => {
@@ -654,7 +690,15 @@
                                     if (['D', 'G', 'P', 'T'].includes(state)) targetKey = 'fort';
                                     else if (['d', 'g', 'p', 't'].includes(state)) targetKey = 'faible';
                                 }
-                                if (targetKey && playerGroup.has(targetKey)) playerGroup.player(targetKey).start(time);
+                                
+                                if (targetKey && playerGroup.has(targetKey)) {
+                                    // --- COMPENSATION ANTI-DECALAGE D'ATTAQUE (shakers faibles) ---
+                                    let startTimeOffset = 0;
+                                    if (inst.type === 'shake' && targetKey === 'faible') {
+                                        startTimeOffset = 0.02; // Saute les 20 premières ms de blanc d'attaque pour aligner le son
+                                    }
+                                    playerGroup.player(targetKey).start(time, startTimeOffset);
+                                }
                             }
                         }
                     }
@@ -696,6 +740,8 @@
                         <div class="track-mute-solo">
                             <button class="btn-mute-solo ${circle.isMute ? 'mute-on' : ''}" onclick="toggleMute(${circle.id})">M</button>
                             <button class="btn-mute-solo ${circle.isSolo ? 'solo-on' : ''}" onclick="toggleSolo(${circle.id})">S</button>
+                            <!-- --- BOUTON DE MASQUAGE VISUEL (👁️) --- -->
+                            <button class="btn-mute-solo ${circle.isHidden ? 'hidden-on' : ''}" onclick="toggleHide(${circle.id})">${circle.isHidden ? '🙈' : '👁️'}</button>
                             <button class="btn-mute-solo btn-delete" onclick="deleteCircle(${circle.id})">🗑️</button>
                         </div>
                     </div>
@@ -715,6 +761,13 @@
         window.toggleMute = function(id) { let c = circles.find(x => x.id === id); if(c) c.isMute = !c.isMute; renderMixer(); };
         window.toggleSolo = function(id) { let c = circles.find(x => x.id === id); if(c) c.isSolo = !c.isSolo; renderMixer(); };
         
+        // --- CHANGER DE VISIBILITÉ ---
+        window.toggleHide = function(id) {
+            let c = circles.find(x => x.id === id);
+            if (c) c.isHidden = !c.isHidden;
+            renderMixer();
+        };
+
         window.deleteCircle = function(id) {
             circles = circles.filter(x => x.id !== id);
             renderMixer();
@@ -764,6 +817,9 @@
             const dx = mouseX - centerX; const dy = mouseY - centerY; const distance = Math.sqrt(dx * dx + dy * dy);
 
             circles.forEach((circle) => {
+                // --- ON IGNORE LES CLICS SUR LES CERCLES MASQUÉS ---
+                if (circle.isHidden) return;
+
                 if (Math.abs(distance - circle.radius) < 14) {
                     let clickAngle = Math.atan2(dy, dx) + Math.PI / 2; 
                     if (clickAngle < 0) clickAngle += Math.PI * 2;
@@ -853,6 +909,7 @@
                 lyrics: Array(steps).fill(""), 
                 isMute: false, 
                 isSolo: false, 
+                isHidden: false, // Initialisé visible
                 volumeVal: 100 
             });
             renderMixer();
