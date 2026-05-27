@@ -214,7 +214,7 @@
             <div id="tracks-mixer-container"></div>
         </div>
 
-        <!-- --- SECTION LÉGENDE PÉDAGOGIQUE POUR LES ÉLÈVES --- -->
+        <!-- --- SECTION LÉGENDE PÉDAGOGIQUE --- -->
         <div id="legend-section">
             <div class="panel-title" style="margin-bottom: 8px;">📖 Guide des Sons (Élèves)</div>
             <div class="legend-container">
@@ -286,7 +286,13 @@
                 <div class="control-separator"></div>
 
                 <button id="metroBtn" class="control-btn">⏱️ Métronome</button>
-                <button id="addCircleBtn" class="control-btn">+ Ajouter</button>
+                
+                <!-- --- ERGONOMIE D'AJOUT : Liste déroulante directe + bouton d'ajout rapide --- -->
+                <select id="addInstrumentSelect" class="preset-select">
+                    <!-- Rempli dynamiquement en JavaScript -->
+                </select>
+                <button id="addCircleBtn" class="control-btn" style="background-color: var(--accent-green); border-color: var(--accent-green); color: #000;">+ Ajouter</button>
+                
                 <button id="clearBtn" class="control-btn">Vider</button>
                 <button id="recBtn" class="control-btn">🔴 Rec Audio</button>
                 <button id="saveBtn" class="control-btn" style="background:#2980b9;">💾 Sauver</button>
@@ -410,7 +416,6 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // CORRECTION DU BUG D'AFFICHAGE DU FOND CENTRAL DU TAMBOUR
             if (bgLoaded) {
                 ctx.save(); ctx.beginPath(); ctx.arc(centerX, centerY, 310, 0, Math.PI * 2); ctx.clip();
                 ctx.drawImage(bgImg, centerX - 310, centerY - 310, 620, 620); ctx.restore();
@@ -444,7 +449,6 @@
 
                 const inst = instrumentsConfig[circle.instrumentIdx];
                 
-                // Calcul du pas actif actuel pour ce cercle
                 const pulsePerStep = 96 / circle.steps;
                 const currentStep = (isPlaying && currentStepIndex >= 0) ? Math.floor(currentStepIndex / pulsePerStep) : -1;
 
@@ -467,7 +471,6 @@
                         }
                     }
 
-                    // Surlignage dynamique du pas actif lors de la lecture
                     if (i === currentStep) {
                         ctx.beginPath(); ctx.arc(x, y, radiusSize + 5, 0, Math.PI * 2);
                         ctx.strokeStyle = 'rgba(46, 204, 113, 0.7)'; ctx.lineWidth = 2.5; ctx.stroke();
@@ -672,4 +675,122 @@
                                     if (lyric) { circle.activeSteps[i] = 'X'; if(!circle.lyrics) circle.lyrics = []; circle.lyrics[i] = lyric.substring(0,5); }
                                 } else { circle.activeSteps[i] = 0; }
                             } else {
-                                if (current === 0) circle.activeSteps[i] = 'd';
+                                if (current === 0) circle.activeSteps[i] = 'd'; 
+                                else if (current === 'd') circle.activeSteps[i] = 'D'; 
+                                else if (current === 'D') circle.activeSteps[i] = 'g'; 
+                                else if (current === 'g') circle.activeSteps[i] = 'G'; 
+                                else circle.activeSteps[i] = 0;
+                            }
+                            return;
+                        }
+                    }
+                }
+            });
+        });
+
+        // --- ACTIONS GENERALES ---
+        const playBtn = document.getElementById('playBtn');
+        playBtn.addEventListener('click', async () => {
+            if (!isPlaying) {
+                await Tone.start(); currentStepIndex = -1; mainLoop.stop(); Tone.Transport.stop(); Tone.Transport.cancel(0);
+                mainLoop.start(0); Tone.Transport.start("+0.02");
+                playBtn.textContent = "Pause"; playBtn.classList.add('playing'); isPlaying = true;
+            } else {
+                mainLoop.stop(); Tone.Transport.stop();
+                instrumentsConfig.forEach(inst => { if (samplers[inst.id]) samplers[inst.id].stopAll(); });
+                bChantSynth.triggerRelease();
+                playBtn.textContent = "Démarrer"; playBtn.classList.remove('playing'); isPlaying = false;
+            }
+        });
+
+        document.getElementById('bpm').addEventListener('input', (e) => { Tone.Transport.bpm.value = e.target.value; });
+        
+        document.getElementById('masterVol').addEventListener('input', (e) => {
+            let val = parseFloat(e.target.value);
+            Tone.Destination.volume.value = val === -40 ? -Infinity : val;
+        });
+
+        const metroBtn = document.getElementById('metroBtn');
+        metroBtn.addEventListener('click', () => { isMetroOn = !isMetroOn; metroBtn.classList.toggle('metro-on', isMetroOn); });
+        document.getElementById('clearBtn').addEventListener('click', () => { circles = []; renderMixer(); });
+
+        // --- MODIFICATION ERGONOMIQUE : Ajout direct sans fenêtre d'invite (16 pas) ---
+        document.getElementById('addCircleBtn').addEventListener('click', () => {
+            const lastRadius = circles.length > 0 ? circles[circles.length - 1].radius : 65;
+            if (lastRadius >= 280) return alert("Roda pleine !");
+            
+            // On configure directement 16 pas
+            const steps = 16;
+            
+            // On récupère l'instrument choisi dans le menu déroulant
+            const selectElem = document.getElementById('addInstrumentSelect');
+            const choice = selectElem ? parseInt(selectElem.value) : 0;
+            const instIdx = (choice >= 0 && choice < instrumentsConfig.length) ? choice : 0;
+            
+            circles.push({ 
+                id: Date.now(), 
+                radius: lastRadius + 32, 
+                steps: steps, 
+                activeSteps: Array(steps).fill(0), 
+                instrumentIdx: instIdx, 
+                lyrics: Array(steps).fill(""), 
+                isMute: false, 
+                isSolo: false, 
+                volumeVal: 100 
+            });
+            renderMixer();
+        });
+
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ bpm: Tone.Transport.bpm.value, circles: circles }));
+            const dl = document.createElement('a'); dl.href = dataStr; dl.download = "rythme_samambaia.json"; dl.click();
+        });
+
+        const fileInput = document.getElementById('fileInput');
+        document.getElementById('loadBtn').addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const d = JSON.parse(evt.target.result);
+                    if (d.bpm) { document.getElementById('bpm').value = d.bpm; Tone.Transport.bpm.value = d.bpm; }
+                    if (d.circles) { circles = d.circles; renderMixer(); }
+                } catch (err) { alert("Fichier invalide !"); }
+            };
+            reader.readAsText(file);
+        });
+
+        const recBtn = document.getElementById('recBtn');
+        recBtn.addEventListener('click', async () => {
+            if (!isRecording) {
+                await Tone.start(); recorder.start();
+                if (!isPlaying) { currentStepIndex = -1; mainLoop.start(0); Tone.Transport.start("+0.02"); playBtn.textContent = "Pause"; playBtn.classList.add('playing'); isPlaying = true; }
+                recBtn.textContent = "Stop & Télécharger"; recBtn.classList.add('recording'); isRecording = true;
+            } else {
+                const recording = await recorder.stop();
+                const url = URL.createObjectURL(recording);
+                const anchor = document.createElement("a"); anchor.download = "groove_samambaia.webm"; anchor.href = url; anchor.click();
+                recBtn.textContent = "🔴 Rec Audio"; recBtn.classList.remove('recording'); isRecording = false;
+            }
+        });
+
+        window.addEventListener('keydown', (e) => { if (e.code === 'Space' && e.target.tagName !== 'INPUT') { e.preventDefault(); playBtn.click(); } });
+
+        // --- POPULATION DE LA LISTE DÉROULANTE D'AJOUT ---
+        const addSelect = document.getElementById('addInstrumentSelect');
+        if (addSelect) {
+            instrumentsConfig.forEach((inst, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = inst.name;
+                addSelect.appendChild(opt);
+            });
+        }
+
+        renderMixer();
+        draw();
+        document.getElementById('presetSelect').value = 'baque-virado';
+    </script>
+</body>
+</html>
