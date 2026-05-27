@@ -193,13 +193,70 @@
         .master-vol-fader::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-gold); cursor: pointer; }
 
         #canvas-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; background-color: var(--bg-dark); }
-        canvas { border-radius: 50%; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+        canvas { 
+            border-radius: 50%; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8); 
+            max-width: 100%;
+            height: auto;
+            aspect-ratio: 1 / 1;
+        }
         #fileInput { display: none; }
         
         #loading-overlay {
             position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(18,18,18,0.9);
             display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;
             font-size: 18px; font-weight: bold; color: var(--accent-gold);
+        }
+
+        /* ==========================================================================
+           --- AJOUT : ADAPTATION SMARTPHONE (ÉCRANS DE MOINS DE 768px) ---
+           ========================================================================== */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+                overflow-y: auto;
+                height: auto;
+            }
+            #right-panel {
+                order: 1; /* Le canevas passe au-dessus pour être joué directement tactilement */
+                width: 100%;
+                height: auto;
+                flex-grow: 0;
+            }
+            #left-panel {
+                order: 2; /* Les volumes et la légende passent en dessous */
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-top: 1px solid #333;
+                padding: 15px;
+            }
+            #top-bar {
+                height: auto;
+                flex-direction: column;
+                gap: 12px;
+                padding: 15px;
+                align-items: center;
+            }
+            #global-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
+                width: 100%;
+            }
+            .control-separator {
+                display: none; /* Cache les séparateurs pour gagner de la place */
+            }
+            #canvas-container {
+                padding: 15px 5px;
+                min-height: 320px;
+            }
+            canvas {
+                width: 95vw !important; /* Adapté à la largeur du téléphone */
+                height: 95vw !important;
+                max-width: 480px;
+                max-height: 480px;
+            }
         }
     </style>
 </head>
@@ -272,6 +329,7 @@
             <div id="global-controls">
                 
                 <select id="presetSelect" class="preset-select" onchange="loadPreset(this.value)">
+                    <option value="vou-vadiar" selected>Vou vadiar carnaval (Défaut)</option>
                     <option value="baque-virado">Baque Virado Traditionnel</option>
                     <option value="baque-arrasto">Baque Arrasto / Agalo</option>
                     <option value="baque-luanda">Baque de Luanda (Exemple)</option>
@@ -287,7 +345,7 @@
 
                 <button id="metroBtn" class="control-btn">⏱️ Métronome</button>
                 
-                <!-- --- ERGONOMIE D'AJOUT : Liste déroulante directe + bouton d'ajout rapide --- -->
+                <!-- Menu déroulant d'ajout direct d'instrument -->
                 <select id="addInstrumentSelect" class="preset-select">
                     <!-- Rempli dynamiquement en JavaScript -->
                 </select>
@@ -365,12 +423,16 @@
         }
         setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none'; }, 1500);
 
-        // Configuration par défaut (Baque Virado)
+        // --- FICHIER PAR DÉFAUT : "Vou vadiar carnaval" (8 instruments complets) ---
         let circles = [
-            { id: 1, radius: 100, steps: 4, activeSteps: ['D', 0, 'd', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
-            { id: 2, radius: 135, steps: 8, activeSteps: ['D', 0, 'd', 'g', 0, 'D', 0, 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
-            { id: 3, radius: 170, steps: 8, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
-            { id: 4, radius: 205, steps: 8, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }
+            { id: 1, radius: 85, steps: 16, activeSteps: ['D', 0, 0, 0, 'd', 0, 'D', 0, 'D', 0, 0, 0, 'd', 0, 'D', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
+            { id: 2, radius: 110, steps: 16, activeSteps: [0, 0, 'D', 0, 0, 0, 'D', 'G', 0, 0, 'D', 0, 0, 0, 'D', 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
+            { id: 3, radius: 135, steps: 16, activeSteps: ['d', 'g', 0, 'D', 0, 'g', 'D', 0, 'd', 'g', 0, 'D', 0, 'g', 'D', 0], instrumentIdx: 2, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
+            { id: 4, radius: 160, steps: 16, activeSteps: ['D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G'], instrumentIdx: 3, lyrics: [], isMute: false, isSolo: false, volumeVal: 90 }, 
+            { id: 5, radius: 185, steps: 16, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0, 'GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
+            { id: 6, radius: 210, steps: 16, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
+            { id: 7, radius: 235, steps: 16, activeSteps: ['p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't'], instrumentIdx: 6, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
+            { id: 8, radius: 260, steps: 16, activeSteps: ['X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0], instrumentIdx: 7, lyrics: ['Vou', '', 'va', '', 'di', '', 'ar', '', 'Car', '', 'na', '', 'val', '', '!', ''], isMute: false, isSolo: false, volumeVal: 100 }
         ];
         let isMetroOn = false;
 
@@ -378,7 +440,19 @@
         function loadPreset(presetName) {
             if (!presetName) return;
             
-            if (presetName === 'baque-virado') {
+            if (presetName === 'vou-vadiar') {
+                circles = [
+                    { id: 1, radius: 85, steps: 16, activeSteps: ['D', 0, 0, 0, 'd', 0, 'D', 0, 'D', 0, 0, 0, 'd', 0, 'D', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
+                    { id: 2, radius: 110, steps: 16, activeSteps: [0, 0, 'D', 0, 0, 0, 'D', 'G', 0, 0, 'D', 0, 0, 0, 'D', 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
+                    { id: 3, radius: 135, steps: 16, activeSteps: ['d', 'g', 0, 'D', 0, 'g', 'D', 0, 'd', 'g', 0, 'D', 0, 'g', 'D', 0], instrumentIdx: 2, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
+                    { id: 4, radius: 160, steps: 16, activeSteps: ['D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G'], instrumentIdx: 3, lyrics: [], isMute: false, isSolo: false, volumeVal: 90 }, 
+                    { id: 5, radius: 185, steps: 16, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0, 'GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
+                    { id: 6, radius: 210, steps: 16, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
+                    { id: 7, radius: 235, steps: 16, activeSteps: ['p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't'], instrumentIdx: 6, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
+                    { id: 8, radius: 260, steps: 16, activeSteps: ['X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0], instrumentIdx: 7, lyrics: ['Vou', '', 'va', '', 'di', '', 'ar', '', 'Car', '', 'na', '', 'val', '', '!', ''], isMute: false, isSolo: false, volumeVal: 100 }
+                ];
+            }
+            else if (presetName === 'baque-virado') {
                 circles = [
                     { id: 1, radius: 100, steps: 4, activeSteps: ['D', 0, 'd', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
                     { id: 2, radius: 135, steps: 8, activeSteps: ['D', 0, 'd', 'g', 0, 'D', 0, 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
@@ -641,7 +715,11 @@
         // --- APPUIS SUR LES CERCLES ---
         canvas.addEventListener('click', (e) => {
             const rect = canvas.getBoundingClientRect(); 
-            const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top;
+            
+            // --- AJOUT : Redimensionnement tactile intelligent pour smartphone ---
+            const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width); 
+            const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+            
             const dx = mouseX - centerX; const dy = mouseY - centerY; const distance = Math.sqrt(dx * dx + dy * dy);
 
             circles.forEach((circle) => {
@@ -714,22 +792,22 @@
         metroBtn.addEventListener('click', () => { isMetroOn = !isMetroOn; metroBtn.classList.toggle('metro-on', isMetroOn); });
         document.getElementById('clearBtn').addEventListener('click', () => { circles = []; renderMixer(); });
 
-        // --- MODIFICATION ERGONOMIQUE : Ajout direct sans fenêtre d'invite (16 pas) ---
+        // --- ADAPTATION : Ajout direct sans fenêtre (16 pas) avec gestion d'échelle resserrée (8 max) ---
         document.getElementById('addCircleBtn').addEventListener('click', () => {
-            const lastRadius = circles.length > 0 ? circles[circles.length - 1].radius : 65;
-            if (lastRadius >= 280) return alert("Roda pleine !");
+            if (circles.length >= 8) return alert("Nombre maximum de 8 instruments atteint !");
             
-            // On configure directement 16 pas
             const steps = 16;
             
-            // On récupère l'instrument choisi dans le menu déroulant
             const selectElem = document.getElementById('addInstrumentSelect');
             const choice = selectElem ? parseInt(selectElem.value) : 0;
             const instIdx = (choice >= 0 && choice < instrumentsConfig.length) ? choice : 0;
             
+            // Échelle resserrée (85, 110, 135, 160, 185, 210, 235, 260) pour loger les 8 cercles
+            const nextRadius = circles.length > 0 ? circles[circles.length - 1].radius + 25 : 85;
+            
             circles.push({ 
                 id: Date.now(), 
-                radius: lastRadius + 32, 
+                radius: nextRadius, 
                 steps: steps, 
                 activeSteps: Array(steps).fill(0), 
                 instrumentIdx: instIdx, 
@@ -743,7 +821,7 @@
 
         document.getElementById('saveBtn').addEventListener('click', () => {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ bpm: Tone.Transport.bpm.value, circles: circles }));
-            const dl = document.createElement('a'); dl.href = dataStr; dl.download = "rythme_samambaia.json"; dl.click();
+            const dl = document.createElement('a'); dl.href = dataStr; dl.download = "Vou_vadiar_carnaval.json"; dl.click();
         });
 
         const fileInput = document.getElementById('fileInput');
@@ -790,7 +868,9 @@
 
         renderMixer();
         draw();
-        document.getElementById('presetSelect').value = 'baque-virado';
+        
+        // Initialise la toada au chargement
+        document.getElementById('presetSelect').value = 'vou-vadiar';
     </script>
 </body>
 </html>
