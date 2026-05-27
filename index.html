@@ -166,6 +166,12 @@
         }
 
         #header-main { display: flex; align-items: center; gap: 10px; }
+        #header-main img {
+            height: 45px; 
+            width: auto;
+            max-height: 100%;
+            border-radius: 4px;
+        }
         #header-title-text { font-size: 16px; font-weight: bold; letter-spacing: 1px; }
         #global-controls { display: flex; align-items: center; gap: 10px; }
 
@@ -193,11 +199,8 @@
             color: #fff;
         }
         
-        button#recBtn { background-color: #d35400; border-color: #d35400; }
-        button#recBtn.recording { background-color: var(--accent-red); animation: pulse 1s infinite; }
         button#metroBtn.metro-on { background-color: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
 
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
         .control-separator { width: 1px; height: 24px; background-color: #444; margin: 0 4px; }
         
         label.control-label { font-size: 12px; display: flex; align-items: center; gap: 4px; color: var(--text-main); font-weight: bold; }
@@ -206,7 +209,7 @@
         .master-vol-fader { -webkit-appearance: none; height: 6px; border-radius: 3px; background: #444; outline: none; width: 70px; }
         .master-vol-fader::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-gold); cursor: pointer; }
 
-        /* --- CONFIGURATION DU CONTENEUR : Image d'atelier sur tout le fond rectangulaire --- */
+        /* --- IMAGE D'ATELIER --- */
         #canvas-container { 
             flex-grow: 1; 
             display: flex; 
@@ -219,7 +222,6 @@
             background-repeat: no-repeat;
         }
 
-        /* --- CONFIGURATION DU CANEVAS : Transparent, sans rognage de bordure --- */
         canvas { 
             max-width: 100%;
             height: auto;
@@ -293,7 +295,7 @@
             <div id="tracks-mixer-container"></div>
         </div>
 
-        <!-- --- SECTION LÉGENDE --- -->
+        <!-- SECTION LÉGENDE -->
         <div id="legend-section">
             <div class="panel-title" style="margin-bottom: 6px;">📖 Légende</div>
             <div class="legend-container">
@@ -374,21 +376,20 @@
         <div id="top-bar">
             <!-- SECTION TITRE & LOGO INTEGRÉ (AVEC EMOTE DE SECOURS) -->
             <div id="header-main" style="display: flex; align-items: center; gap: 12px;">
-                <img src="logo-samambaia.png" alt="Samambaia" style="height: 36px; width: auto; max-height: 100%; border-radius: 4px;" onerror="this.style.display='none'; document.getElementById('fallback-emoji').style.display='inline';">
+                <img src="logo-samambaia.png" alt="Samambaia" onerror="this.style.display='none'; document.getElementById('fallback-emoji').style.display='inline';">
                 <span id="fallback-emoji" style="display:none; color:var(--accent-green); font-size:22px;">🌿</span>
                 <span id="header-title-text">Les cycles du maracatu</span>
             </div>
             <div id="global-controls">
                 
-                <select id="presetSelect" class="preset-select" onchange="loadPreset(this.value)">
-                    <option value="vou-vadiar" selected>Vou vadiar carnaval (Défaut)</option>
-                    <option value="baque-virado">Baque Virado Traditionnel</option>
-                    <option value="baque-arrasto">Baque Arrasto / Agalo</option>
-                    <option value="baque-luanda">Baque de Luanda (Exemple)</option>
+                <!-- MENU DÉROULANT DES PRESETS (GÉRÉ DYNAMIQUEMENT) -->
+                <select id="presetSelect" class="preset-select" onchange="onPresetChange(this.value)">
+                    <option value="vou-vadiar" selected>Vou vadiar carnaval</option>
+                    <option value="baque-de-imale">Baque de Imale</option>
                 </select>
                 
                 <div class="control-separator"></div>
-                <label class="control-label">BPM: <input type="number" id="bpm" value="80" min="40" max="240"></label>
+                <label class="control-label">BPM: <input type="number" id="bpm" value="83" min="40" max="240"></label>
                 <div class="control-separator"></div>
                 
                 <!-- Contrôle de Volume Général -->
@@ -404,7 +405,6 @@
                 <button id="addCircleBtn" class="control-btn" style="background-color: var(--accent-green); border-color: var(--accent-green); color: #000;">+ Ajouter</button>
                 
                 <button id="clearBtn" class="control-btn">Vider</button>
-                <button id="recBtn" class="control-btn">🔴 Rec Audio</button>
                 <button id="saveBtn" class="control-btn" style="background:#2980b9;">💾 Sauver</button>
                 <button id="loadBtn" class="control-btn" style="background:#2980b9;">📂 Charger</button>
                 <input type="file" id="fileInput" accept=".json">
@@ -420,12 +420,41 @@
     </div>
 
     <script>
-        // --- CONFIGURATION AUDIO DROITE ET CARRÉE ---
+        // ==========================================================================
+        // --- PRESETS D'URGENCESS (Pour exécution hors-ligne ou protocole file://) ---
+        // ==========================================================================
+        const vouVadiarPreset = {
+            bpm: 83,
+            circles: [
+                {"id":1,"radius":85,"steps":16,"activeSteps":["g","D",0,"d","G",0,"D",0,"g","D",0,"d","G",0,0,0],"instrumentIdx":0,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":4,"radius":160,"steps":16,"activeSteps":["D","D","g","D","D","g","D","g","D","D","g","D","D","g","D","g"],"instrumentIdx":3,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":90},
+                {"id":5,"radius":185,"steps":16,"activeSteps":[0,"GRV",0,0,"GRV",0,"GRV",0,0,"GRV",0,0,"GRV",0,"GRV",0],"instrumentIdx":4,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":62},
+                {"id":6,"radius":210,"steps":16,"activeSteps":["P",0,"t","p","T",0,"p","t","P",0,"t","p","T",0,"p","t"],"instrumentIdx":5,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":8,"radius":260,"steps":16,"activeSteps":["X",0,"X",0,"X",0,"X",0,0,"X",0,"X","X",0,0,0],"instrumentIdx":7,"lyrics":["Vou","","va","","di","","ar","","Car","Car","na","na","val","","!",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":1779903228779,"radius":285,"steps":16,"activeSteps":["X",0,"X",0,"X",0,"X",0,0,"X",0,"X","X",0,"X",0],"instrumentIdx":8,"lyrics":["Vou","","Pra","","Ba","","hi","","","a","","Brin","car","","Eu",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100}
+            ]
+        };
+
+        const baqueDeImalePreset = {
+            bpm: 77,
+            circles: [
+                {"id":1779908305252,"radius":100,"steps":16,"activeSteps":["D",0,0,0,"g",0,"D",0,"g","D",0,0,"g","D",0,0],"instrumentIdx":0,"lyrics":["","","","","","","","","","","","","","","",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":1779908307194,"radius":130,"steps":16,"activeSteps":["G",0,0,"d","g",0,"D",0,"g","D",0,"d","g","D",0,"d"],"instrumentIdx":1,"lyrics":["","","","","","","","","","","","","","","",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":1779908312248,"radius":160,"steps":16,"activeSteps":["G",0,0,"D","g","D",0,"d","g","D",0,"d","g","D",0,"d"],"instrumentIdx":2,"lyrics":["","","","","","","","","","","","","","","",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":1779908314541,"radius":190,"steps":16,"activeSteps":["D","D","g","D","D","g","D","g","D","D","g","D","D","g","D","g"],"instrumentIdx":3,"lyrics":["","","","","","","","","","","","","","","",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":1779908319456,"radius":220,"steps":16,"activeSteps":["GRV",0,"AIG",0,"GRV",0,"AIG",0,"GRV","AIG",0,"aig","GRV",0,"AIG",0],"instrumentIdx":4,"lyrics":["","","","","","","","","","","","","","","",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":1779908323224,"radius":250,"steps":16,"activeSteps":["P",0,"t","p","T",0,"p","t","P",0,"t","p","T",0,"p","t"],"instrumentIdx":5,"lyrics":["","","","","","","","","","","","","","","",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100}
+            ]
+        };
+
+        // Rétention par défaut avant vérification du catalogue
+        let circles = JSON.parse(JSON.stringify(vouVadiarPreset.circles));
+
+        // --- CORE AUDIO CONFIGURATION ---
         Tone.context.lookAhead = 0.04; 
         Tone.context.latencyHint = "interactive";
         Tone.Transport.swing = 0.0; 
 
-        // Initialisation du volume global (Master)
         Tone.Destination.volume.value = -6;
 
         const recorder = new Tone.Recorder();
@@ -480,75 +509,17 @@
         }
         setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none'; }, 1500);
 
-        // --- FICHIERS IMAGES ---
         const bgImg = new Image(); bgImg.src = 'tambour.png';
         let bgLoaded = false; bgImg.onload = () => { bgLoaded = true; };
-
-        // --- ÉCHELLE ENRICHIE (Épaisseur 30px d'intervalle, départ à 100px) ---
-        let circles = [
-            { id: 1, radius: 100, steps: 16, activeSteps: ['D', 0, 0, 0, 'd', 0, 'D', 0, 'D', 0, 0, 0, 'd', 0, 'D', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },   
-            { id: 2, radius: 130, steps: 16, activeSteps: [0, 0, 'D', 0, 0, 0, 'D', 'G', 0, 0, 'D', 0, 0, 0, 'D', 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-            { id: 3, radius: 160, steps: 16, activeSteps: ['d', 'g', 0, 'D', 0, 'g', 'D', 0, 'd', 'g', 0, 'D', 0, 'g', 'D', 0], instrumentIdx: 2, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-            { id: 4, radius: 190, steps: 16, activeSteps: ['D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G'], instrumentIdx: 3, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 90 }, 
-            { id: 5, radius: 220, steps: 16, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0, 'GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-            { id: 6, radius: 250, steps: 16, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-            { id: 7, radius: 280, steps: 16, activeSteps: ['p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't'], instrumentIdx: 6, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-            { id: 8, radius: 310, steps: 16, activeSteps: ['X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0], instrumentIdx: 7, lyrics: ['Vou', '', 'va', '', 'di', '', 'ar', '', 'Car', '', 'na', '', 'val', '', '!', ''], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }
-        ];
-        let isMetroOn = false;
-
-        // --- GESTIONNAIRE DES RYTHMES (ÉCHELLE DE SPACING ÉLARGIE) ---
-        function loadPreset(presetName) {
-            if (!presetName) return;
-            
-            if (presetName === 'vou-vadiar') {
-                circles = [
-                    { id: 1, radius: 100, steps: 16, activeSteps: ['D', 0, 0, 0, 'd', 0, 'D', 0, 'D', 0, 0, 0, 'd', 0, 'D', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },   
-                    { id: 2, radius: 130, steps: 16, activeSteps: [0, 0, 'D', 0, 0, 0, 'D', 'G', 0, 0, 'D', 0, 0, 0, 'D', 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-                    { id: 3, radius: 160, steps: 16, activeSteps: ['d', 'g', 0, 'D', 0, 'g', 'D', 0, 'd', 'g', 0, 'D', 0, 'g', 'D', 0], instrumentIdx: 2, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-                    { id: 4, radius: 190, steps: 16, activeSteps: ['D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G', 'D', 'g', 'd', 'G'], instrumentIdx: 3, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 90 }, 
-                    { id: 5, radius: 220, steps: 16, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0, 'GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-                    { id: 6, radius: 250, steps: 16, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-                    { id: 7, radius: 280, steps: 16, activeSteps: ['p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't', 'p', 't'], instrumentIdx: 6, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-                    { id: 8, radius: 310, steps: 16, activeSteps: ['X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0, 'X', 0], instrumentIdx: 7, lyrics: ['Vou', '', 'va', '', 'di', '', 'ar', '', 'Car', '', 'na', '', 'val', '', '!', ''], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }
-                ];
-            }
-            else if (presetName === 'baque-virado') {
-                circles = [
-                    { id: 1, radius: 100, steps: 4, activeSteps: ['D', 0, 'd', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },   
-                    { id: 2, radius: 130, steps: 8, activeSteps: ['D', 0, 'd', 'g', 0, 'D', 0, 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-                    { id: 3, radius: 160, steps: 8, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-                    { id: 4, radius: 190, steps: 8, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }
-                ];
-            } 
-            else if (presetName === 'baque-arrasto') {
-                circles = [
-                    { id: 1, radius: 100, steps: 4, activeSteps: ['D', 'd', 0, 'D'], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },   
-                    { id: 2, radius: 130, steps: 4, activeSteps: ['D', 0, 'D', 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-                    { id: 3, radius: 160, steps: 4, activeSteps: ['GRV', 'AIG', 'GRV', 'AIG'], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },
-                    { id: 4, radius: 190, steps: 8, activeSteps: ['P', 0, 'T', 'P', 0, 'T', 'P', 'T'], instrumentIdx: 6, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }
-                ];
-            }
-            else if (presetName === 'baque-luanda') {
-                circles = [
-                    { id: 1, radius: 100, steps: 4, activeSteps: ['D', 0, 'D', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 },   
-                    { id: 2, radius: 130, steps: 8, activeSteps: ['D', 'g', 'd', 0, 'D', 0, 'G', 0], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }, 
-                    { id: 3, radius: 160, steps: 8, activeSteps: ['GRV', 'AIG', 0, 'GRV', 'AIG', 0, 'GRV', 'AIG'], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, isHidden: false, volumeVal: 100 }
-                ];
-            }
-            
-            renderMixer();
-        }
 
         const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
         const centerX = canvas.width / 2; const centerY = canvas.height / 2;
         let isPlaying = false; let isRecording = false;
 
         function draw() {
-            // Le canevas est entièrement transparent pour laisser apparaître "atelier.png" en arrière-plan rectangulaire (CSS)
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // --- CORRECTION : Ombre portée 2D réaliste sous le tambour central ---
+            // Ombre portée 2D
             ctx.save();
             ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
             ctx.shadowBlur = 32;
@@ -556,11 +527,10 @@
             ctx.shadowOffsetY = 12;
             ctx.beginPath();
             ctx.arc(centerX, centerY, 350, 0, Math.PI * 2);
-            ctx.fillStyle = '#000000'; // Remplissage noir opaque pour projeter l'ombre
+            ctx.fillStyle = '#000000'; 
             ctx.fill();
             ctx.restore();
 
-            // Dessin du tambour circulaire par-dessus son ombre
             if (bgLoaded) {
                 ctx.save(); ctx.beginPath(); ctx.arc(centerX, centerY, 350, 0, Math.PI * 2); ctx.clip();
                 ctx.drawImage(bgImg, centerX - 350, centerY - 350, 700, 700); ctx.restore();
@@ -933,7 +903,7 @@
 
         document.getElementById('saveBtn').addEventListener('click', () => {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ bpm: Tone.Transport.bpm.value, circles: circles }));
-            const dl = document.createElement('a'); dl.href = dataStr; dl.download = "Vou_vadiar_carnaval.json"; dl.click();
+            const dl = document.createElement('a'); dl.href = dataStr; dl.download = "rythme_samambaia.json"; dl.click();
         });
 
         const fileInput = document.getElementById('fileInput');
@@ -951,19 +921,90 @@
             reader.readAsText(file);
         });
 
-        const recBtn = document.getElementById('recBtn');
-        recBtn.addEventListener('click', async () => {
-            if (!isRecording) {
-                await Tone.start(); recorder.start();
-                if (!isPlaying) { currentStepIndex = -1; mainLoop.start(0); Tone.Transport.start("+0.02"); playBtn.textContent = "⏹"; playBtn.classList.add('playing'); isPlaying = true; }
-                recBtn.textContent = "Stop & Télécharger"; recBtn.classList.add('recording'); isRecording = true;
+        // ==========================================================================
+        // --- CHARGEMENT DYNAMIQUE DU CATALOGUE LOCAL ---
+        // ==========================================================================
+        function onPresetChange(value) {
+            // Si la valeur finit par .json, on tente un chargement dynamique de fichier
+            if (value.endsWith('.json')) {
+                loadPresetFile(value);
             } else {
-                const recording = await recorder.stop();
-                const url = URL.createObjectURL(recording);
-                const anchor = document.createElement("a"); anchor.download = "groove_samambaia.webm"; anchor.href = url; anchor.click();
-                recBtn.textContent = "🔴 Rec Audio"; recBtn.classList.remove('recording'); isRecording = false;
+                // Sinon on utilise les presets d'urgence codés en dur
+                loadFallbackPreset(value);
             }
-        });
+        }
+
+        function loadPresetFile(fileName) {
+            fetch(fileName)
+                .then(res => {
+                    if (!res.ok) throw new Error("Fichier introuvable");
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.circles) {
+                        circles = JSON.parse(JSON.stringify(data.circles));
+                    }
+                    if (data.bpm) {
+                        document.getElementById('bpm').value = data.bpm;
+                        Tone.Transport.bpm.value = data.bpm;
+                    }
+                    renderMixer();
+                })
+                .catch(err => {
+                    console.warn(`Impossible de lire localement ${fileName}. Passage sur le modèle d'urgence.`, err);
+                    // Rempli à la volée avec le fallback d'urgence correspondant
+                    if (fileName.includes("Imale")) {
+                        loadFallbackPreset('baque-de-imale');
+                    } else {
+                        loadFallbackPreset('vou-vadiar');
+                    }
+                });
+        }
+
+        function loadFallbackPreset(name) {
+            let p = null;
+            if (name === 'vou-vadiar') {
+                p = vouVadiarPreset;
+            } else if (name === 'baque-de-imale') {
+                p = baqueDeImalePreset;
+            }
+            
+            if (p) {
+                circles = JSON.parse(JSON.stringify(p.circles)); 
+                document.getElementById('bpm').value = p.bpm;
+                Tone.Transport.bpm.value = p.bpm;
+            }
+            renderMixer();
+        }
+
+        // --- Récupération automatique du fichier catalog.json ---
+        fetch('catalog.json')
+            .then(response => {
+                if (!response.ok) throw new Error("Fichier catalog.json manquant ou inaccessible");
+                return response.json();
+            })
+            .then(presets => {
+                const select = document.getElementById('presetSelect');
+                select.innerHTML = ''; // Vide la liste de secours statique
+                
+                presets.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.file; // Contiendra le nom du fichier (ex: "Baque de Imale.json")
+                    opt.textContent = p.name;
+                    select.appendChild(opt);
+                });
+                
+                // Charge le premier fichier du catalogue par défaut
+                if (presets.length > 0) {
+                    loadPresetFile(presets[0].file);
+                }
+            })
+            .catch(err => {
+                console.warn("Utilisation des presets d'urgence intégrés (CORS ou catalogue manquant).", err.message);
+                // Si échec du catalogue (file://), on charge le preset d'urgence initial par défaut
+                loadFallbackPreset('vou-vadiar');
+                document.getElementById('presetSelect').value = 'vou-vadiar';
+            });
 
         window.addEventListener('keydown', (e) => { if (e.code === 'Space' && e.target.tagName !== 'INPUT') { e.preventDefault(); playBtn.click(); } });
 
@@ -980,8 +1021,6 @@
 
         renderMixer();
         draw();
-        
-        document.getElementById('presetSelect').value = 'vou-vadiar';
     </script>
 </body>
 </html>
