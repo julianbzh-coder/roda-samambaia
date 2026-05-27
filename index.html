@@ -153,14 +153,14 @@
     </div>
 
     <script>
-        // Optimisation stricte pour éviter la latence sur internet
-        Tone.context.lookAhead = 0.03; 
+        // Configuration stricte de la latence web
+        Tone.context.lookAhead = 0.04; 
         Tone.context.latencyHint = "interactive";
 
         const recorder = new Tone.Recorder();
         Tone.Destination.connect(recorder);
 
-        // --- BUS DE MIXAGE (VOLUME) ---
+        // --- BUS DE MIXAGE ---
         const channels = {}; const meters = {}; const samplers = {};
 
         const instrumentsConfig = [
@@ -194,8 +194,7 @@
             loadedCount++;
             if (loadedCount >= 7) { document.getElementById('loading-overlay').style.display = 'none'; }
         }
-        // Protection si un fichier est manquant sur GitHub
-        setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none'; }, 2500);
+        setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none'; }, 2000);
 
         let circles = [
             { id: 1, radius: 110, steps: 4, activeSteps: ['D', 0, 'd', 0], instrumentIdx: 0, isMute: false, isSolo: false, volumeVal: 100 },   
@@ -225,7 +224,6 @@
 
             ctx.beginPath(); ctx.arc(centerX, centerY, 315, 0, Math.PI * 2); ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 8; ctx.stroke();
 
-            // Synchro visuelle blindée basée sur le temps réel absolu de l'horloge audio
             let currentAngle = -Math.PI / 2;
             if (isPlaying && Tone.Transport.state === "started") {
                 const bpm = Tone.Transport.bpm.value;
@@ -286,12 +284,11 @@
             requestAnimationFrame(draw);
         }
 
-        // --- LE MOTEUR DE JEU (SÉQUENCÉ SANS EMBALLEMENT) ---
-        // Utilisation d'un événement discret indexé sur la grille temporelle stricte de Tone.js
+        // --- UNIQUE MOTEUR DE JEU (BOUCLE INDÉSTRUCTIBLE) ---
         let currentStepIndex = -1;
         
-        const loop = new Tone.Loop((time) => {
-            currentStepIndex = (currentStepIndex + 1) % 96; // Résolution fine
+        const mainLoop = new Tone.Loop((time) => {
+            currentStepIndex = (currentStepIndex + 1) % 96;
             const hasActiveSolo = circles.some(c => c.isSolo);
 
             circles.forEach(circle => {
@@ -306,7 +303,6 @@
                             let instId = instrumentsConfig[circle.instrumentIdx].id;
                             let player = samplers[instId];
                             
-                            // Déclenchement propre basé sur la mémoire tampon planifiée (time)
                             if (state === 'D' || state === 'G' || state === 'P' || state === 'T' || state === 'GRV') {
                                 if (player.player("fort")) player.player("fort").start(time);
                             } else if (state === 'd' || state === 'g' || state === 'p' || state === 't' || state === 'grv') {
@@ -381,7 +377,7 @@
             }
         };
 
-        // --- INTEGRATION CLICS ---
+        // --- CLICS ---
         canvas.addEventListener('click', (e) => {
             const rect = canvas.getBoundingClientRect(); const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top;
             const dx = mouseX - centerX; const dy = mouseY - centerY; const distance = Math.sqrt(dx * dx + dy * dy);
@@ -410,22 +406,24 @@
             });
         });
 
-        // --- CONTROLES GENERAL ---
+        // --- BOUTONS GENERAL ---
         const playBtn = document.getElementById('playBtn');
         playBtn.addEventListener('click', async () => {
             if (!isPlaying) {
                 await Tone.start();
                 currentStepIndex = -1;
-                // Protection anti-doublon et calage strict
-                loop.stop();
-                Tone.Transport.stop();
                 
-                loop.start(0);
-                Tone.Transport.start("+0.05");
+                // Nettoyage radical avant de démarrer
+                mainLoop.stop();
+                Tone.Transport.stop();
+                Tone.Transport.cancel(0);
+                
+                mainLoop.start(0);
+                Tone.Transport.start("+0.02");
                 
                 playBtn.textContent = "Pause"; playBtn.classList.add('playing'); isPlaying = true;
             } else {
-                loop.stop();
+                mainLoop.stop();
                 Tone.Transport.stop();
                 playBtn.textContent = "Démarrer"; playBtn.classList.remove('playing'); isPlaying = false;
             }
@@ -438,7 +436,7 @@
             const lastRadius = circles.length > 0 ? circles[circles.length - 1].radius : 70;
             if (lastRadius >= 280) return alert("Roda pleine !");
             const steps = parseInt(prompt("Nombre de pas :", "8")) || 4;
-            let pText = "Instrument :\n";
+            let pText = "Sélectionnez l'instrument :\n";
             instrumentsConfig.forEach((inst, idx) => pText += `${idx} : ${inst.name}\n`);
             const choice = parseInt(prompt(pText, "0"));
             const instIdx = (choice >= 0 && choice < instrumentsConfig.length) ? choice : 0;
@@ -471,7 +469,7 @@
         recBtn.addEventListener('click', async () => {
             if (!isRecording) {
                 await Tone.start(); recorder.start();
-                if (!isPlaying) { currentStepIndex = -1; loop.start(0); Tone.Transport.start("+0.05"); playBtn.textContent = "Pause"; playBtn.classList.add('playing'); isPlaying = true; }
+                if (!isPlaying) { currentStepIndex = -1; mainLoop.start(0); Tone.Transport.start("+0.02"); playBtn.textContent = "Pause"; playBtn.classList.add('playing'); isPlaying = true; }
                 recBtn.textContent = "Stop & Télécharger"; recBtn.classList.add('recording'); isRecording = true;
             } else {
                 const recording = await recorder.stop();
