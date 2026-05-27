@@ -142,7 +142,7 @@
             <div id="global-controls">
                 
                 <select id="presetSelect" class="preset-select" onchange="loadPreset(this.value)">
-                    <option value="baque-virado">Baque Virado Traditionnel</option>
+                    <option value="vou-vadiar">Vou vadiar carnaval</option>
                     <option value="baque-arrasto">Baque Arrasto / Agalo</option>
                     <option value="baque-luanda">Baque de Luanda (Exemple)</option>
                 </select>
@@ -234,14 +234,16 @@
         function loadPreset(presetName) {
             if (!presetName) return;
             
-            if (presetName === 'baque-virado') {
-                circles = [
-                    { id: 1, radius: 100, steps: 4, activeSteps: ['D', 0, 'd', 0], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
-                    { id: 2, radius: 135, steps: 8, activeSteps: ['D', 0, 'd', 'g', 0, 'D', 0, 'G'], instrumentIdx: 1, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
-                    { id: 3, radius: 170, steps: 8, activeSteps: ['GRV', 0, 'AIG', 'GRV', 0, 'AIG', 'GRV', 0], instrumentIdx: 4, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }, 
-                    { id: 4, radius: 205, steps: 8, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 }
+            if (presetName === 'vou-vadiar') {
+                "bpm":77,"circles":[
+                    {"id":1779890167406,"radius":97,"steps":16,"activeSteps":["g","D",0,"d","G",0,"D",0,"g","D",0,"d","g",0,0,0],"instrumentIdx":0,"lyrics":["","","","","","","","","","","","","","","",""],"isMute":false,"isSolo":false,"volumeVal":100},
+                    {"id":1779890173572,"radius":129,"steps":16,"activeSteps":["D","D","g","D","D","g","D","g","D","D","g","D","D","g","D","g"],"instrumentIdx":3,"lyrics":["","","","","","","","","","","","","","","",""],"isMute":false,"isSolo":false,"volumeVal":100},
+                    {"id":1779890178346,"radius":161,"steps":16,"activeSteps":[0,"GRV",0,0,"GRV",0,"GRV",0,0,"GRV",0,0,"GRV",0,"GRV",0],"instrumentIdx":4,"lyrics":["","","","","","","","","","","","","","","",""],"isMute":false,"isSolo":false,"volumeVal":100},
+                    {"id":1779890185287,"radius":193,"steps":16,"activeSteps":["P",0,"t","p","T",0,"p","t","P",0,"t","p","T",0,"p","t"],"instrumentIdx":5,"lyrics":["","","","","","","","","","","","","","","",""],"isMute":false,"isSolo":false,"volumeVal":100},
+                    {"id":1779890191986,"radius":225,"steps":16,"activeSteps":["X",0,"X",0,"X",0,"X",0,0,"X",0,"X","X",0,0,0],"instrumentIdx":7,"lyrics":["Vou","","Va","","di","","ar","","","Car","","na","val","","",""],"isMute":false,"isSolo":false,"volumeVal":100}
                 ];
             } 
+                
             else if (presetName === 'baque-arrasto') {
                 circles = [
                     { id: 1, radius: 100, steps: 4, activeSteps: ['D', 'd', 0, 'D'], instrumentIdx: 0, lyrics: [], isMute: false, isSolo: false, volumeVal: 100 },   
