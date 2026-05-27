@@ -141,7 +141,6 @@
             </div>
             <div id="global-controls">
                 <select id="presetSelect" class="preset-select" onchange="loadPreset(this.value)">
-                    <option value="">-- Sélectionner un Rythme --</option>
                     <option value="baque-virado">Baque Virado Traditionnel</option>
                     <option value="baque-arrasto">Baque Arrasto / Agalo</option>
                 </select>
@@ -171,7 +170,7 @@
     </div>
 
     <script>
-        // Sotaque de 35% configuré d'entrée de jeu
+        // Configuration audio et sotaque (swing) automatique fixé à 35%
         Tone.context.lookAhead = 0.04; 
         Tone.context.latencyHint = "interactive";
         Tone.Transport.swing = 0.35; 
@@ -186,4 +185,12 @@
             { id: 'marcante', name: 'Alfaia Marcante', type: 'hands', path: 'Alfaia/Marcante', colors: { 'd': '#5a0000', 'D': '#8b0000', 'g': '#ff7676', 'G': '#ff4d4d', text: '#fff' } },
             { id: 'meiao', name: 'Alfaia Meião', type: 'hands', path: 'Alfaia/Meiao', colors: { 'd': '#a04000', 'D': '#d35400', 'g': '#fbc531', 'G': '#f39c12', text: '#fff' } },
             { id: 'repique', name: 'Alfaia Repique', type: 'hands', path: 'Alfaia/Repique', colors: { 'd': '#b59510', 'D': '#f1c40f', 'g': '#fff5cc', 'G': '#ffeaa7', text: '#121212' } },
-            { id
+            { id: 'caixa', name: 'Caixa', type: 'hands', path: 'Caixa', colors: { 'd': '#320b61', 'D': '#4a148c', 'g': '#be5be0', 'G': '#9c27b0', text: '#fff' } },
+            { id: 'gongue', name: 'Gonguê', type: 'gongue', path: 'Gongue', colors: { 'grv': '#222222', 'GRV': '#000000', 'aig': '#7f8c8d', 'AIG': '#bdc3c7', text: '#fff' } },
+            { id: 'agbe', name: 'Agbê', type: 'shake', path: 'Graines/Agbe', colors: { 'p': '#113b14', 'P': '#1b5e20', 't': '#74d478', 'T': '#4caf50', text: '#fff' } },
+            { id: 'mineiro', name: 'Mineiro', type: 'shake', path: 'Graines/Mineiro', colors: { 'p': '#113b14', 'P': '#1b5e20', 't': '#74d478', 'T': '#4caf50', text: '#fff' } },
+            { id: 'chant', name: 'Chant', type: 'voice', path: 'internal', colors: { active: '#2980b9', text: '#fff' } }
+        ];
+
+        const bChantSynth = new Tone.Synth({ volume: -10, envelope: { attack: 0.05, decay: 0.2 } });
+        const bMetroClick = new Tone.MetalSynth({ volume: -14, frequency: 1200, envelope:
