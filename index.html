@@ -295,7 +295,6 @@
             <div id="tracks-mixer-container"></div>
         </div>
 
-        <!-- SECTION LÉGENDE -->
         <div id="legend-section">
             <div class="panel-title" style="margin-bottom: 6px;">📖 Légende</div>
             <div class="legend-container">
@@ -374,7 +373,6 @@
 
     <div id="right-panel">
         <div id="top-bar">
-            <!-- SECTION TITRE & LOGO INTEGRÉ (AVEC EMOTE DE SECOURS) -->
             <div id="header-main" style="display: flex; align-items: center; gap: 12px;">
                 <img src="logo-samambaia.png" alt="Samambaia" onerror="this.style.display='none'; document.getElementById('fallback-emoji').style.display='inline';">
                 <span id="fallback-emoji" style="display:none; color:var(--accent-green); font-size:22px;">🌿</span>
@@ -382,7 +380,6 @@
             </div>
             <div id="global-controls">
                 
-                <!-- MENU DÉROULANT DES PRESETS (GÉRÉ DYNAMIQUEMENT) -->
                 <select id="presetSelect" class="preset-select" onchange="onPresetChange(this.value)">
                     <option value="vou-vadiar" selected>Vou vadiar carnaval</option>
                     <option value="baque-de-imale">Baque de Imale</option>
@@ -392,16 +389,13 @@
                 <label class="control-label">BPM: <input type="number" id="bpm" value="83" min="40" max="240"></label>
                 <div class="control-separator"></div>
                 
-                <!-- Contrôle de Volume Général -->
                 <label class="control-label">Vol: <input type="range" id="masterVol" class="master-vol-fader" min="-40" max="6" value="-6"></label>
                 <div class="control-separator"></div>
 
                 <button id="metroBtn" class="control-btn">⏱️ Métronome</button>
                 
-                <!-- Menu d'ajout d'instrument -->
                 <select id="addInstrumentSelect" class="preset-select">
-                    <!-- Rempli dynamiquement en JavaScript -->
-                </select>
+                    </select>
                 <button id="addCircleBtn" class="control-btn" style="background-color: var(--accent-green); border-color: var(--accent-green); color: #000;">+ Ajouter</button>
                 
                 <button id="clearBtn" class="control-btn">Vider</button>
@@ -459,7 +453,7 @@
         const recorder = new Tone.Recorder();
         Tone.Destination.connect(recorder);
 
-        const channels = {}; const meters = {}; const samplers = {};
+        const channels = {}; const meters = {}; const samplers = {}; const voiceSynths = {};
 
         const instrumentsConfig = [
             { id: 'marcante', name: 'Alfaia Marcante', type: 'hands', path: 'Alfaia/Marcante', colors: { 'd': '#5a0000', 'D': '#8b0000', 'g': '#ff7676', 'G': '#ff4d4d', text: '#fff' } },
@@ -473,22 +467,27 @@
             { id: 'puxador', name: 'Puxador', type: 'voice', path: 'internal', colors: { active: '#0c19cf', text: '#fff' } }
         ];
 
-        const bChantSynth = new Tone.Synth({ volume: -10, envelope: { attack: 0.05, decay: 0.2 } });
-        
         const bMetroClick = new Tone.Synth({
             oscillator: { type: "sine" },
             envelope: { attack: 0.001, decay: 0.04, sustain: 0, release: 0.04 },
             volume: -8
         }).toDestination();
 
+        // --- SÉCURITÉ AUDIO ROBUSTE : Séparation des synths vocaux et des fichiers WAV ---
         instrumentsConfig.forEach(inst => {
             channels[inst.id] = new Tone.Channel({ volume: 0 }).toDestination();
             meters[inst.id] = new Tone.Meter();
             channels[inst.id].connect(meters[inst.id]);
 
-            if (inst.id === 'chant') {
-                bChantSynth.connect(channels[inst.id]);
+            if (inst.type === 'voice') {
+                // Synthèse générée (pas de téléchargement WAV nécessaire)
+                voiceSynths[inst.id] = new Tone.Synth({ 
+                    oscillator: { type: inst.id === 'puxador' ? 'triangle' : 'sine' },
+                    envelope: { attack: 0.05, decay: 0.2 },
+                    volume: -10 
+                }).connect(channels[inst.id]);
             } else {
+                // Fichiers audios téléchargés
                 let urls = inst.type === 'gongue' ? 
                     { "faible-grave": "faible-grave.wav", "fort-grave": "fort-grave.wav", "faible-aigue": "faible-aigue.wav", "fort-aigue": "fort-aigue.wav" } : 
                     { "faible": "faible.wav", "fort": "fort.wav" };
@@ -501,12 +500,23 @@
             }
         });
 
+        // Gestion de l'écran de chargement
         let loadedCount = 0;
+        const totalAudioInstruments = instrumentsConfig.filter(i => i.type !== 'voice').length;
+        
         function checkAllLoaded() {
             loadedCount++;
-            if (loadedCount >= 6) { document.getElementById('loading-overlay').style.display = 'none'; }
+            if (loadedCount >= totalAudioInstruments) { 
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) overlay.style.display = 'none'; 
+            }
         }
-        setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none'; }, 1500);
+        
+        // Bouclier d'urgence : on efface l'écran de chargement au bout de 1.5s, même si GitHub renvoie des erreurs 404
+        setTimeout(() => { 
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) overlay.style.display = 'none'; 
+        }, 1500);
 
         const bgImg = new Image(); bgImg.src = 'tambour.png';
         let bgLoaded = false; bgImg.onload = () => { bgLoaded = true; };
@@ -646,7 +656,7 @@
             requestAnimationFrame(draw);
         }
 
-        // --- SEQUENCEUR AUDIO ---
+        // --- SEQUENCEUR AUDIO BLINDÉ ---
         let currentStepIndex = -1;
         const mainLoop = new Tone.Loop((time) => {
             currentStepIndex = (currentStepIndex + 1) % 96;
@@ -662,10 +672,16 @@
                     if (currentStepIndex % pulsePerStep === 0) {
                         const stepIdx = Math.floor(currentStepIndex / pulsePerStep);
                         let state = circle.activeSteps[stepIdx];
+                        
                         if (state !== 0) {
                             let inst = instrumentsConfig[circle.instrumentIdx];
-                            if (inst.id === 'chant') {
-                                bChantSynth.triggerAttackRelease("C3", "8n", time);
+                            
+                            if (inst.type === 'voice') {
+                                if (voiceSynths[inst.id]) {
+                                    // Distinction sonore légère entre Puxador et Chant
+                                    let note = inst.id === 'puxador' ? "E3" : "C3";
+                                    voiceSynths[inst.id].triggerAttackRelease(note, "8n", time);
+                                }
                             } else if (samplers[inst.id]) {
                                 let playerGroup = samplers[inst.id];
                                 let targetKey = null;
@@ -681,11 +697,20 @@
                                 }
                                 
                                 if (targetKey && playerGroup.has(targetKey)) {
-                                    let startTimeOffset = 0;
-                                    if (inst.type === 'shake' && targetKey === 'faible') {
-                                        startTimeOffset = 0.02; 
+                                    // SECURITÉ MAXIMUM : On vérifie que le buffer audio a bien été trouvé sur le serveur
+                                    // avant de le lire, sinon la boucle Tone.js crashe totalement.
+                                    try {
+                                        let player = playerGroup.player(targetKey);
+                                        if (player.loaded) {
+                                            let startTimeOffset = 0;
+                                            if (inst.type === 'shake' && targetKey === 'faible') {
+                                                startTimeOffset = 0.02; 
+                                            }
+                                            player.start(time, startTimeOffset);
+                                        }
+                                    } catch (err) {
+                                        // Ignore l'erreur en silence pour que l'appli continue de tourner
                                     }
-                                    playerGroup.player(targetKey).start(time, startTimeOffset);
                                 }
                             }
                         }
@@ -857,8 +882,10 @@
                 playBtn.textContent = "⏹"; playBtn.classList.add('playing'); isPlaying = true;
             } else {
                 mainLoop.stop(); Tone.Transport.stop();
-                instrumentsConfig.forEach(inst => { if (samplers[inst.id]) samplers[inst.id].stopAll(); });
-                bChantSynth.triggerRelease();
+                instrumentsConfig.forEach(inst => { 
+                    if (samplers[inst.id]) samplers[inst.id].stopAll(); 
+                    if (voiceSynths[inst.id]) voiceSynths[inst.id].triggerRelease();
+                });
                 playBtn.textContent = "▶"; playBtn.classList.remove('playing'); isPlaying = false;
             }
         });
@@ -1009,7 +1036,6 @@
                 const opt = document.createElement('option');
                 opt.value = idx;
                 opt.textContent = inst.name;
-                // --- AJOUT ESSENTIEL : Injecte l'option dans la liste déroulante ---
                 addSelect.appendChild(opt);
             });
         }
