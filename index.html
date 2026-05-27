@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Roda de Maracatu - Samambaia Engine Pro</title>
+    <title>Roda de Maracatu - Samambaia Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         :root {
@@ -74,7 +74,7 @@
         .fader::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #fff; cursor: pointer; }
 
         .vol-meter-bg { width: 35px; height: 8px; background-color: #000; border-radius: 2px; position: relative; overflow: hidden; }
-        .vol-meter-bar { height: 100%; background-color: var(--accent-green); width: 0%; transition: width 0.05s linear; }
+        .vol-meter-bar { height: 100%; background-color: var(--accent-green); width: 0%; }
 
         .steps-config { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); border-top: 1px dashed #444; padding-top: 6px; }
         .steps-config input { width: 40px; background: #111; border: 1px solid #555; color: #fff; padding: 2px; border-radius: 4px; text-align: center; }
@@ -153,16 +153,15 @@
     </div>
 
     <script>
-        Tone.context.lookAhead = 0.015;
-        Tone.context.latencyHint = "fastest";
+        // Optimisation stricte pour éviter la latence sur internet
+        Tone.context.lookAhead = 0.03; 
+        Tone.context.latencyHint = "interactive";
 
         const recorder = new Tone.Recorder();
         Tone.Destination.connect(recorder);
 
-        // --- ATTRIBUTION ET CHARGEMENT DES SAMPLES AUDIO DU DOSSIER ---
-        const channels = {};
-        const meters = {};
-        const samplers = {};
+        // --- BUS DE MIXAGE (VOLUME) ---
+        const channels = {}; const meters = {}; const samplers = {};
 
         const instrumentsConfig = [
             { id: 'marcante', name: 'Alfaia Marcante', type: 'hands', path: 'Alfaia/Marcante', colors: { 'd': '#5a0000', 'D': '#8b0000', 'g': '#ff7676', 'G': '#ff4d4d', text: '#fff' } },
@@ -174,27 +173,14 @@
             { id: 'mineiro', name: 'Mineiro', type: 'shake', path: 'Graines/Mineiro', colors: { 'p': '#113b14', 'P': '#1b5e20', 't': '#74d478', 'T': '#4caf50', text: '#fff' } }
         ];
 
-        // Boucle de construction du moteur audio
         instrumentsConfig.forEach(inst => {
             channels[inst.id] = new Tone.Channel({ volume: 0 }).toDestination();
             meters[inst.id] = new Tone.Meter();
             channels[inst.id].connect(meters[inst.id]);
 
-            // Cartographie des fichiers .wav locaux
-            let urls = {};
-            if (inst.type === 'gongue') {
-                urls = {
-                    "faible-grave": "faible-grave.wav",
-                    "fort-grave": "fort-grave.wav",
-                    "faible-aigue": "faible-aigue.wav",
-                    "fort-aigue": "fort-aigue.wav"
-                };
-            } else {
-                urls = {
-                    "faible": "faible.wav",
-                    "fort": "fort.wav"
-                };
-            }
+            let urls = inst.type === 'gongue' ? 
+                { "faible-grave": "faible-grave.wav", "fort-grave": "fort-grave.wav", "faible-aigue": "faible-aigue.wav", "fort-aigue": "fort-aigue.wav" } : 
+                { "faible": "faible.wav", "fort": "fort.wav" };
 
             samplers[inst.id] = new Tone.Players({
                 urls: urls,
@@ -206,13 +192,11 @@
         let loadedCount = 0;
         function checkAllLoaded() {
             loadedCount++;
-            // 7 instruments configurés
-            if (loadedCount >= 7) {
-                document.getElementById('loading-overlay').style.display = 'none';
-            }
+            if (loadedCount >= 7) { document.getElementById('loading-overlay').style.display = 'none'; }
         }
+        // Protection si un fichier est manquant sur GitHub
+        setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none'; }, 2500);
 
-        // Configuration de la Roda initiale
         let circles = [
             { id: 1, radius: 110, steps: 4, activeSteps: ['D', 0, 'd', 0], instrumentIdx: 0, isMute: false, isSolo: false, volumeVal: 100 },   
             { id: 2, radius: 150, steps: 8, activeSteps: ['D', 0, 'd', 'g', 0, 'D', 0, 'G'], instrumentIdx: 1, isMute: false, isSolo: false, volumeVal: 100 }, 
@@ -220,7 +204,7 @@
             { id: 4, radius: 230, steps: 8, activeSteps: ['P', 'T', 'p', 't', 'P', 'T', 'p', 't'], instrumentIdx: 5, isMute: false, isSolo: false, volumeVal: 100 }
         ];
 
-        // --- IMAGE FOND ---
+        // --- GRAPHISMES ---
         const bgImg = new Image(); bgImg.src = 'tambour.png';
         let bgLoaded = false; bgImg.onload = () => { bgLoaded = true; };
 
@@ -228,7 +212,6 @@
         const centerX = canvas.width / 2; const centerY = canvas.height / 2;
         let isPlaying = false; let isRecording = false;
 
-        // --- FONCTION DE DESSIN ---
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -242,10 +225,12 @@
 
             ctx.beginPath(); ctx.arc(centerX, centerY, 315, 0, Math.PI * 2); ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 8; ctx.stroke();
 
+            // Synchro visuelle blindée basée sur le temps réel absolu de l'horloge audio
             let currentAngle = -Math.PI / 2;
-            if (isPlaying) {
+            if (isPlaying && Tone.Transport.state === "started") {
                 const bpm = Tone.Transport.bpm.value;
-                const progressInMeasure = (Tone.Transport.seconds % ((60 / bpm) * 4)) / ((60 / bpm) * 4);
+                const secondsPerMeasure = (60 / bpm) * 4;
+                const progressInMeasure = (Tone.Transport.seconds % secondsPerMeasure) / secondsPerMeasure;
                 currentAngle = -Math.PI / 2 + (progressInMeasure * Math.PI * 2);
             }
 
@@ -262,19 +247,14 @@
                     const stepAngle = -Math.PI / 2 + (i * (Math.PI * 2 / circle.steps));
                     const x = centerX + Math.cos(stepAngle) * circle.radius; const y = centerY + Math.sin(stepAngle) * circle.radius;
                     
-                    let state = circle.activeSteps[i];
-                    let fillColor = 'rgba(40,40,40,0.6)';
-                    let radiusSize = 5;
-                    let isAccent = false;
+                    let state = circle.activeSteps[i]; let fillColor = 'rgba(40,40,40,0.6)'; let radiusSize = 5; let isAccent = false;
 
                     if (state !== 0) {
                         fillColor = inst.colors[state] || '#fff';
-                        // Si la lettre est en majuscule, c'est un Accent (coup fort)
                         isAccent = (state === state.toUpperCase());
                         radiusSize = isAccent ? 12 : 9;
                     }
 
-                    // Dessin de l'accent (Gros contour blanc extérieur)
                     if (isAccent) {
                         ctx.beginPath(); ctx.arc(x, y, radiusSize + 4, 0, Math.PI * 2);
                         ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'; ctx.lineWidth = 2; ctx.stroke();
@@ -284,13 +264,9 @@
                     ctx.strokeStyle = '#121212'; ctx.lineWidth = 1.5; ctx.stroke();
                     
                     if (state !== 0) {
-                        ctx.fillStyle = inst.colors.text || '#fff';
-                        ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                        // On n'affiche qu'une seule lettre ou abréviation lisible
-                        let shortText = state.substring(0,3);
-                        ctx.fillText(shortText, x, y);
+                        ctx.fillStyle = inst.colors.text || '#fff'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        ctx.fillText(state.substring(0,3), x, y);
                     }
-
                     if (i === 0) {
                         ctx.save(); ctx.globalAlpha = 1.0; ctx.fillStyle = '#aaa'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'left';
                         ctx.fillText(inst.name, x + 15, y + 3); ctx.restore();
@@ -299,7 +275,7 @@
                 ctx.restore();
             });
 
-            // Aiguille
+            // Baguette
             ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(currentAngle);
             const stickLength = circles.length > 0 ? circles[circles.length - 1].radius + 35 : 120;
             ctx.beginPath(); ctx.moveTo(0, -2); ctx.lineTo(stickLength - 15, -1); ctx.lineTo(stickLength - 15, 1); ctx.lineTo(0, 2);
@@ -310,53 +286,55 @@
             requestAnimationFrame(draw);
         }
 
-        // --- LOGIQUE DECLENCHEMENT AUDIO DES SAMPLES ---
-        const pulseResolution = 96; let currentPulse = 0;
-        Tone.Transport.scheduleRepeat((time) => {
+        // --- LE MOTEUR DE JEU (SÉQUENCÉ SANS EMBALLEMENT) ---
+        // Utilisation d'un événement discret indexé sur la grille temporelle stricte de Tone.js
+        let currentStepIndex = -1;
+        
+        const loop = new Tone.Loop((time) => {
+            currentStepIndex = (currentStepIndex + 1) % 96; // Résolution fine
             const hasActiveSolo = circles.some(c => c.isSolo);
+
             circles.forEach(circle => {
                 let canPlay = hasActiveSolo ? circle.isSolo : !circle.isMute;
                 if (canPlay) {
-                    const pulsePerStep = pulseResolution / circle.steps;
-                    if (currentPulse % pulsePerStep === 0) {
-                        const stepIndex = Math.floor(currentPulse / pulsePerStep);
-                        let state = circle.activeSteps[stepIndex];
+                    const pulsePerStep = 96 / circle.steps;
+                    if (currentStepIndex % pulsePerStep === 0) {
+                        const stepIdx = Math.floor(currentStepIndex / pulsePerStep);
+                        let state = circle.activeSteps[stepIdx];
                         
                         if (state !== 0) {
                             let instId = instrumentsConfig[circle.instrumentIdx].id;
                             let player = samplers[instId];
                             
-                            // Sélection du bon fichier en fonction de la technique et de l'accent
+                            // Déclenchement propre basé sur la mémoire tampon planifiée (time)
                             if (state === 'D' || state === 'G' || state === 'P' || state === 'T' || state === 'GRV') {
-                                player.player("fort").start(time);
+                                if (player.player("fort")) player.player("fort").start(time);
                             } else if (state === 'd' || state === 'g' || state === 'p' || state === 't' || state === 'grv') {
-                                player.player("faible").start(time);
+                                if (player.player("faible")) player.player("faible").start(time);
                             } else if (state === 'AIG') {
-                                player.player("fort-aigue").start(time);
+                                if (player.player("fort-aigue")) player.player("fort-aigue").start(time);
                             } else if (state === 'aig') {
-                                player.player("faible-aigue").start(time);
+                                if (player.player("faible-aigue")) player.player("faible-aigue").start(time);
                             }
                         }
                     }
                 }
             });
-            currentPulse = (currentPulse + 1) % pulseResolution;
         }, "96n");
 
         // --- VU-METRES ---
         function drawMeters() {
-            if (!isPlaying) return;
-            const dbToPct = (db) => { if (db < -60) return 0; if (db > 0) return 100; return Math.floor(((db + 60) / 60) * 100); };
+            const dbToPct = (db) => { if (db < -50) return 0; if (db > 0) return 100; return Math.floor(((db + 50) / 50) * 100); };
             circles.forEach(c => {
                 let inst = instrumentsConfig[c.instrumentIdx];
                 let bar = document.getElementById(`meter-bar-${c.id}`);
                 let meter = meters[inst.id];
-                if(bar && meter) { bar.style.width = dbToPct(meter.getValue()) + '%'; }
+                if(bar && meter) { bar.style.width = isPlaying ? dbToPct(meter.getValue()) + '%' : '0%'; }
             });
         }
         setInterval(drawMeters, 40);
 
-        // --- RENDU PANNEAU GAUCHE ---
+        // --- MIXER INTERFACE ---
         function renderMixer() {
             const container = document.getElementById('tracks-mixer-container'); container.innerHTML = "";
             circles.forEach((circle, index) => {
@@ -403,7 +381,7 @@
             }
         };
 
-        // --- CYCLES DE CLIC ET LOGIQUE DES ACCENTS ---
+        // --- INTEGRATION CLICS ---
         canvas.addEventListener('click', (e) => {
             const rect = canvas.getBoundingClientRect(); const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top;
             const dx = mouseX - centerX; const dy = mouseY - centerY; const distance = Math.sqrt(dx * dx + dy * dy);
@@ -412,36 +390,18 @@
                 if (Math.abs(distance - circle.radius) < 14) {
                     let clickAngle = Math.atan2(dy, dx) + Math.PI / 2; if (clickAngle < 0) clickAngle += Math.PI * 2;
                     const stepAngleSize = (Math.PI * 2) / circle.steps;
-                    
                     for (let i = 0; i < circle.steps; i++) {
                         const targetAngle = i * stepAngleSize; let angleDiff = Math.abs(clickAngle - targetAngle);
                         if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
 
                         if (angleDiff < stepAngleSize / 2) {
-                            const inst = instrumentsConfig[circle.instrumentIdx];
-                            let current = circle.activeSteps[i];
-
+                            const inst = instrumentsConfig[circle.instrumentIdx]; let current = circle.activeSteps[i];
                             if (inst.type === 'shake') {
-                                // Cycle Agbê / Mineiro : Inactif -> p (faible) -> P (FORT) -> t (faible) -> T (FORT)
-                                if (current === 0) circle.activeSteps[i] = 'p';
-                                else if (current === 'p') circle.activeSteps[i] = 'P';
-                                else if (current === 'P') circle.activeSteps[i] = 't';
-                                else if (current === 't') circle.activeSteps[i] = 'T';
-                                else circle.activeSteps[i] = 0;
+                                if (current === 0) circle.activeSteps[i] = 'p'; else if (current === 'p') circle.activeSteps[i] = 'P'; else if (current === 'P') circle.activeSteps[i] = 't'; else if (current === 't') circle.activeSteps[i] = 'T'; else circle.activeSteps[i] = 0;
                             } else if (inst.type === 'gongue') {
-                                // Cycle Gonguê : Inactif -> grv (faible) -> GRV (FORT) -> aig (Gris faible) -> AIG (Gris FORT)
-                                if (current === 0) circle.activeSteps[i] = 'grv';
-                                else if (current === 'grv') circle.activeSteps[i] = 'GRV';
-                                else if (current === 'GRV') circle.activeSteps[i] = 'aig';
-                                else if (current === 'aig') circle.activeSteps[i] = 'AIG';
-                                else circle.activeSteps[i] = 0;
+                                if (current === 0) circle.activeSteps[i] = 'grv'; else if (current === 'grv') circle.activeSteps[i] = 'GRV'; else if (current === 'GRV') circle.activeSteps[i] = 'aig'; else if (current === 'aig') circle.activeSteps[i] = 'AIG'; else circle.activeSteps[i] = 0;
                             } else {
-                                // Cycle Mains (Alfaia, Caixa) : Inactif -> d -> D (Accent) -> g -> G (Accent)
-                                if (current === 0) circle.activeSteps[i] = 'd';
-                                else if (current === 'd') circle.activeSteps[i] = 'D';
-                                else if (current === 'D') circle.activeSteps[i] = 'g';
-                                else if (current === 'g') circle.activeSteps[i] = 'G';
-                                else circle.activeSteps[i] = 0;
+                                if (current === 0) circle.activeSteps[i] = 'd'; else if (current === 'd') circle.activeSteps[i] = 'D'; else if (current === 'D') circle.activeSteps[i] = 'g'; else if (current === 'g') circle.activeSteps[i] = 'G'; else circle.activeSteps[i] = 0;
                             }
                             return;
                         }
@@ -450,14 +410,24 @@
             });
         });
 
-        // --- ACTIONS DU HAUT ---
+        // --- CONTROLES GENERAL ---
         const playBtn = document.getElementById('playBtn');
         playBtn.addEventListener('click', async () => {
             if (!isPlaying) {
-                await Tone.start(); currentPulse = 0; Tone.Transport.start();
+                await Tone.start();
+                currentStepIndex = -1;
+                // Protection anti-doublon et calage strict
+                loop.stop();
+                Tone.Transport.stop();
+                
+                loop.start(0);
+                Tone.Transport.start("+0.05");
+                
                 playBtn.textContent = "Pause"; playBtn.classList.add('playing'); isPlaying = true;
             } else {
-                Tone.Transport.stop(); playBtn.textContent = "Démarrer"; playBtn.classList.remove('playing'); isPlaying = false;
+                loop.stop();
+                Tone.Transport.stop();
+                playBtn.textContent = "Démarrer"; playBtn.classList.remove('playing'); isPlaying = false;
             }
         });
 
@@ -468,7 +438,7 @@
             const lastRadius = circles.length > 0 ? circles[circles.length - 1].radius : 70;
             if (lastRadius >= 280) return alert("Roda pleine !");
             const steps = parseInt(prompt("Nombre de pas :", "8")) || 4;
-            let pText = "Sélectionnez l'instrument :\n";
+            let pText = "Instrument :\n";
             instrumentsConfig.forEach((inst, idx) => pText += `${idx} : ${inst.name}\n`);
             const choice = parseInt(prompt(pText, "0"));
             const instIdx = (choice >= 0 && choice < instrumentsConfig.length) ? choice : 0;
@@ -478,7 +448,7 @@
 
         document.getElementById('saveBtn').addEventListener('click', () => {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ bpm: Tone.Transport.bpm.value, circles: circles }));
-            const downloadAnchor = document.createElement('a'); downloadAnchor.setAttribute("href", dataStr); downloadAnchor.setAttribute("download", "rythme_samambaia_audio.json");
+            const downloadAnchor = document.createElement('a'); downloadAnchor.setAttribute("href", dataStr); downloadAnchor.setAttribute("download", "rythme_samambaia.json");
             document.body.appendChild(downloadAnchor); downloadAnchor.click(); downloadAnchor.remove();
         });
 
@@ -501,7 +471,7 @@
         recBtn.addEventListener('click', async () => {
             if (!isRecording) {
                 await Tone.start(); recorder.start();
-                if (!isPlaying) { currentPulse = 0; Tone.Transport.start(); playBtn.textContent = "Pause"; playBtn.classList.add('playing'); isPlaying = true; }
+                if (!isPlaying) { currentStepIndex = -1; loop.start(0); Tone.Transport.start("+0.05"); playBtn.textContent = "Pause"; playBtn.classList.add('playing'); isPlaying = true; }
                 recBtn.textContent = "Stop & Télécharger"; recBtn.classList.add('recording'); isRecording = true;
             } else {
                 const recording = await recorder.stop();
