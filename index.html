@@ -154,6 +154,7 @@
             border-radius: 4px;
             text-align: center;
             border: 1px solid rgba(255,255,255,0.1);
+            box-sizing: border-box;
         }
 
         /* --- INTERFACE DROITE & CANVAS --- */
@@ -177,8 +178,21 @@
             border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold; transition: background-color 0.2s;
         }
         button.control-btn:hover { background-color: #444; }
-        button#playBtn { background-color: var(--accent-green); border-color: var(--accent-green); min-width: 90px; }
-        button#playBtn.playing { background-color: var(--accent-red); border-color: var(--accent-red); }
+        
+        /* Bouton Play/Stop épuré */
+        button#playBtn { 
+            background-color: var(--accent-green); 
+            border-color: var(--accent-green); 
+            min-width: 50px; 
+            font-size: 16px; 
+            color: #000;
+        }
+        button#playBtn.playing { 
+            background-color: var(--accent-red); 
+            border-color: var(--accent-red); 
+            color: #fff;
+        }
+        
         button#recBtn { background-color: #d35400; border-color: #d35400; }
         button#recBtn.recording { background-color: var(--accent-red); animation: pulse 1s infinite; }
         button#metroBtn.metro-on { background-color: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
@@ -208,9 +222,6 @@
             font-size: 18px; font-weight: bold; color: var(--accent-gold);
         }
 
-        /* ==========================================================================
-           --- AJOUT : ADAPTATION SMARTPHONE (ÉCRANS DE MOINS DE 768px) ---
-           ========================================================================== */
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
@@ -218,13 +229,13 @@
                 height: auto;
             }
             #right-panel {
-                order: 1; /* Le canevas passe au-dessus pour être joué directement tactilement */
+                order: 1; 
                 width: 100%;
                 height: auto;
                 flex-grow: 0;
             }
             #left-panel {
-                order: 2; /* Les volumes et la légende passent en dessous */
+                order: 2; 
                 width: 100%;
                 height: auto;
                 border-right: none;
@@ -245,14 +256,14 @@
                 width: 100%;
             }
             .control-separator {
-                display: none; /* Cache les séparateurs pour gagner de la place */
+                display: none; 
             }
             #canvas-container {
                 padding: 15px 5px;
                 min-height: 320px;
             }
             canvas {
-                width: 95vw !important; /* Adapté à la largeur du téléphone */
+                width: 95vw !important; 
                 height: 95vw !important;
                 max-width: 480px;
                 max-height: 480px;
@@ -300,7 +311,8 @@
                         <span>Son Grave (Ouvert)</span>
                     </div>
                     <div class="legend-item">
-                        <span class="legend-badge" style="background:#bdc3c7; color:#121212;">AIG / aig</span> 
+                        <!-- Surlignage noir sur gris pour améliorer la lisibilité du Gonguê -->
+                        <span class="legend-badge" style="background:#bdc3c7; color:#000;">AIG / aig</span> 
                         <span>Son Aigu (Étouffé)</span>
                     </div>
                 </div>
@@ -308,12 +320,20 @@
                 <div class="legend-group">
                     <span class="legend-group-title">🌾 Agbê & Mineiro (Secoué)</span>
                     <div class="legend-item">
-                        <span class="legend-badge" style="background:#1b5e20; color:#fff;">P / p</span> 
-                        <span>Poussé (Frappé - "Pá")</span>
+                        <span class="legend-badge" style="background:#1b5e20; color:#fff; border: 2px solid #fff;">←</span> 
+                        <span>Poussé Fort / Accent (entouré)</span>
                     </div>
                     <div class="legend-item">
-                        <span class="legend-badge" style="background:#4caf50; color:#121212;">T / t</span> 
-                        <span>Tiré (Glissé - "Ta")</span>
+                        <span class="legend-badge" style="background:#113b14; color:#fff; opacity:0.8;">←</span> 
+                        <span>Poussé Faible</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-badge" style="background:#4caf50; color:#121212; border: 2px solid #fff;">→</span> 
+                        <span>Tiré Fort / Accent (entouré)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-badge" style="background:#74d478; color:#121212; opacity:0.8;">→</span> 
+                        <span>Tiré Faible</span>
                     </div>
                 </div>
             </div>
@@ -358,7 +378,8 @@
                 <input type="file" id="fileInput" accept=".json">
                 
                 <div class="control-separator"></div>
-                <button id="playBtn" class="control-btn">▶ Démarrer</button>
+                <!-- Bouton Play/Stop épuré -->
+                <button id="playBtn" class="control-btn">▶</button>
             </div>
         </div>
 
@@ -542,6 +563,12 @@
                             fillColor = inst.colors[state] || '#fff';
                             isAccent = (state === state.toUpperCase());
                             radiusSize = isAccent ? 12 : 9;
+                            
+                            // --- REMPLACEMENT PAR DES FLÈCHES POUR LES SECOUÉS (AGBÊ/MINEIRO) ---
+                            if (inst.type === 'shake') {
+                                if (state.toLowerCase() === 'p') textSymbol = '←';
+                                else if (state.toLowerCase() === 't') textSymbol = '→';
+                            }
                         }
                     }
 
@@ -559,7 +586,22 @@
                     ctx.strokeStyle = '#121212'; ctx.lineWidth = 1.5; ctx.stroke();
                     
                     if (state !== 0) {
-                        ctx.fillStyle = inst.colors.text || '#fff'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        let txtColor = inst.colors.text || '#fff';
+                        
+                        // --- COULEUR CORRIGÉE : Texte noir pour les coups aigus du gonguê ---
+                        if (inst.id === 'gongue' && (state === 'aig' || state === 'AIG')) {
+                            txtColor = '#000000';
+                        }
+                        ctx.fillStyle = txtColor;
+                        
+                        // Style de police adapté : un peu plus grand pour les flèches d'agbé/mineiro
+                        if (inst.type === 'shake') {
+                            ctx.font = 'bold 12px sans-serif';
+                        } else {
+                            ctx.font = 'bold 9px sans-serif';
+                        }
+                        
+                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                         ctx.fillText(textSymbol.substring(0,5), x, y);
                     }
                     if (i === 0) {
@@ -716,7 +758,6 @@
         canvas.addEventListener('click', (e) => {
             const rect = canvas.getBoundingClientRect(); 
             
-            // --- AJOUT : Redimensionnement tactile intelligent pour smartphone ---
             const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width); 
             const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
             
@@ -772,12 +813,12 @@
             if (!isPlaying) {
                 await Tone.start(); currentStepIndex = -1; mainLoop.stop(); Tone.Transport.stop(); Tone.Transport.cancel(0);
                 mainLoop.start(0); Tone.Transport.start("+0.02");
-                playBtn.textContent = "Pause"; playBtn.classList.add('playing'); isPlaying = true;
+                playBtn.textContent = "⏹"; playBtn.classList.add('playing'); isPlaying = true;
             } else {
                 mainLoop.stop(); Tone.Transport.stop();
                 instrumentsConfig.forEach(inst => { if (samplers[inst.id]) samplers[inst.id].stopAll(); });
                 bChantSynth.triggerRelease();
-                playBtn.textContent = "Démarrer"; playBtn.classList.remove('playing'); isPlaying = false;
+                playBtn.textContent = "▶"; playBtn.classList.remove('playing'); isPlaying = false;
             }
         });
 
@@ -792,7 +833,6 @@
         metroBtn.addEventListener('click', () => { isMetroOn = !isMetroOn; metroBtn.classList.toggle('metro-on', isMetroOn); });
         document.getElementById('clearBtn').addEventListener('click', () => { circles = []; renderMixer(); });
 
-        // --- ADAPTATION : Ajout direct sans fenêtre (16 pas) avec gestion d'échelle resserrée (8 max) ---
         document.getElementById('addCircleBtn').addEventListener('click', () => {
             if (circles.length >= 8) return alert("Nombre maximum de 8 instruments atteint !");
             
@@ -802,7 +842,6 @@
             const choice = selectElem ? parseInt(selectElem.value) : 0;
             const instIdx = (choice >= 0 && choice < instrumentsConfig.length) ? choice : 0;
             
-            // Échelle resserrée (85, 110, 135, 160, 185, 210, 235, 260) pour loger les 8 cercles
             const nextRadius = circles.length > 0 ? circles[circles.length - 1].radius + 25 : 85;
             
             circles.push({ 
@@ -843,7 +882,7 @@
         recBtn.addEventListener('click', async () => {
             if (!isRecording) {
                 await Tone.start(); recorder.start();
-                if (!isPlaying) { currentStepIndex = -1; mainLoop.start(0); Tone.Transport.start("+0.02"); playBtn.textContent = "Pause"; playBtn.classList.add('playing'); isPlaying = true; }
+                if (!isPlaying) { currentStepIndex = -1; mainLoop.start(0); Tone.Transport.start("+0.02"); playBtn.textContent = "⏹"; playBtn.classList.add('playing'); isPlaying = true; }
                 recBtn.textContent = "Stop & Télécharger"; recBtn.classList.add('recording'); isRecording = true;
             } else {
                 const recording = await recorder.stop();
@@ -869,7 +908,6 @@
         renderMixer();
         draw();
         
-        // Initialise la toada au chargement
         document.getElementById('presetSelect').value = 'vou-vadiar';
     </script>
 </body>
