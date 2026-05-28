@@ -21,13 +21,24 @@
             font-family: 'Segoe UI', Roboto, sans-serif; display: flex; height: 100vh; overflow: hidden;
         }
 
+        /* --- PANNEAU GAUCHE (MIXEUR) --- */
         #left-panel {
-            width: 350px; min-width: 350px; background-color: var(--panel-bg); border-right: 1px solid #333;
+            width: 400px; min-width: 400px; background-color: var(--panel-bg); border-right: 1px solid #333;
             display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; z-index: 10; height: 100%;
             transition: margin-left 0.35s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
         #left-panel.collapsed {
-            margin-left: -350px;
+            margin-left: -400px;
+        }
+
+        /* --- PANNEAU DROIT (LÉGENDE) --- */
+        #legend-panel {
+            width: 300px; min-width: 300px; background-color: var(--panel-bg); border-left: 1px solid #333;
+            display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; z-index: 10; height: 100%;
+            transition: margin-right 0.35s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        #legend-panel.collapsed {
+            margin-right: -300px;
         }
 
         .panel-title {
@@ -62,11 +73,11 @@
         .pattern-row { display: flex; align-items: flex-start; gap: 8px; margin-top: 8px; border-top: 1px dashed #444; padding-top: 8px; }
         .pattern-label { font-size: 11px; color: var(--text-muted); white-space: nowrap; cursor: help; margin-top: 5px; }
         
-        /* NOIX CARRES POUR LES PAS */
-        .step-boxes { display: flex; gap: 4px; flex-wrap: wrap; flex-grow: 1; }
+        /* NOIX CARRES POUR LES PAS (Séquenceur) */
+        .step-boxes { display: flex; gap: 4px; flex-wrap: wrap; flex-grow: 1; align-items: center; }
         .step-box { 
             width: 22px; height: 22px; background: #111; border: 1px solid #555; 
-            color: var(--accent-gold); font-family: monospace; font-size: 13px; font-weight: bold;
+            color: var(--accent-gold); font-family: monospace; font-size: 14px; font-weight: bold;
             text-align: center; border-radius: 4px; outline: none; padding: 0; box-sizing: border-box;
         }
         .step-box:focus { border-color: var(--accent-gold); background: #222; box-shadow: 0 0 4px var(--accent-gold); }
@@ -79,14 +90,14 @@
         .pattern-input::placeholder { color: #555; letter-spacing: normal; font-family: sans-serif; font-size: 11px; }
         .pattern-input:focus { border-color: var(--accent-gold); outline: none; }
 
-        #legend-section { border-top: 1px solid #333; padding-top: 12px; margin-top: 12px; display: flex; flex-direction: column; flex-shrink: 0; }
-        .legend-container { display: flex; flex-direction: column; gap: 6px; max-height: 250px; overflow-y: auto; padding-right: 5px; }
+        .legend-container { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; padding-right: 5px; flex-grow: 1; }
         .legend-group { display: flex; flex-direction: column; gap: 4px; background: #181818; padding: 8px; border-radius: 6px; border: 1px solid #2a2a2a; }
         .legend-group-title { font-weight: bold; color: var(--accent-gold); margin-bottom: 2px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
         .legend-item { display: flex; align-items: center; gap: 8px; color: var(--text-main); font-size: 11px; }
         .legend-badge { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 18px; font-size: 9px; font-weight: bold; border-radius: 4px; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; }
 
-        #right-panel { flex-grow: 1; display: flex; flex-direction: column; position: relative; min-width: 0; }
+        /* --- INTERFACE CENTRALE --- */
+        #center-panel { flex-grow: 1; display: flex; flex-direction: column; position: relative; min-width: 0; }
         #top-bar { height: 60px; background-color: var(--panel-bg); border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-sizing: border-box; z-index: 10; }
 
         #header-main { display: flex; align-items: center; gap: 12px; }
@@ -121,12 +132,15 @@
 
         @media (max-width: 768px) {
             body { flex-direction: column; overflow-y: auto; height: auto; }
-            #right-panel { order: 1; width: 100%; height: auto; flex-grow: 0; }
+            #center-panel { order: 1; width: 100%; height: auto; flex-grow: 0; }
             #left-panel { order: 2; min-width: 100%; width: 100%; height: auto; border-right: none; border-top: 1px solid #333; margin-left: 0 !important; }
             #left-panel.collapsed { display: none; } 
+            #legend-panel { order: 3; min-width: 100%; width: 100%; height: auto; border-left: none; border-top: 1px solid #333; margin-right: 0 !important; }
+            #legend-panel.collapsed { display: none; }
+            
             #top-bar { height: auto; flex-direction: column; gap: 12px; padding: 15px; align-items: center; }
             #header-main { width: 100%; justify-content: center; position: relative; }
-            #togglePanelBtn { position: absolute; left: 0; }
+            #toggleLeftBtn { position: absolute; left: 0; }
             #global-controls { flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; }
             .control-separator { display: none; }
             #canvas-container { padding: 5px; min-height: 350px; }
@@ -137,52 +151,19 @@
 
     <div id="loading-overlay">🌿 <span id="loading-text">Carregando vozes...</span></div>
 
+    <!-- PANNEAU DE GAUCHE : MIXEUR -->
     <div id="left-panel">
         <div class="panel-title" id="title-mixer">🎛️ Misturador</div>
         <div id="mixer-section"><div id="tracks-mixer-container"></div></div>
-
-        <div id="legend-section">
-            <div class="panel-title" style="margin-bottom: 6px;" id="title-legend">📖 Legenda</div>
-            <div class="legend-container">
-                <div style="font-size: 11px; margin-bottom: 4px; color: var(--accent-gold); line-height: 1.35;" id="legend-gold">
-                    💡 <strong>Regra de ouro:</strong><br>• <strong>Maiúscula</strong> = Golpe Forte (Acentuado)<br>• <strong>Minúscula</strong> = Golpe Fraco (Fantasma)
-                </div>
-                
-                <div class="legend-group">
-                    <span class="legend-group-title" id="legend-ac-title">🥁 Alfaia & Caixa</span>
-                    <div class="legend-item" id="legend-ac-1"><span class="legend-badge" style="background:#8b0000; color:#fff;">D / d</span> <span>Mão Direita</span></div>
-                    <div class="legend-item" id="legend-ac-2"><span class="legend-badge" style="background:#f39c12; color:#121212;">G / g</span> <span>Mão Esquerda</span></div>
-                </div>
-
-                <div class="legend-group">
-                    <span class="legend-group-title" id="legend-go-title">🔔 Gonguê</span>
-                    <div class="legend-item" id="legend-go-1"><span class="legend-badge" style="background:#222; color:#fff;">G / g</span> <span>Grave Forte / Fraco</span></div>
-                    <div class="legend-item" id="legend-go-2"><span class="legend-badge" style="background:#bdc3c7; color:#000;">A / a</span> <span>Agudo Forte / Fraco</span></div>
-                </div>
-
-                <div class="legend-group">
-                    <span class="legend-group-title" id="legend-ag-title">🌾 Agbê</span>
-                    <div class="legend-item" id="legend-ag-1"><span class="legend-badge" style="background:#1b5e20; color:#fff;">G / g</span> <span>Esquerda (Forte / Fraco)</span></div>
-                    <div class="legend-item" id="legend-ag-2"><span class="legend-badge" style="background:#4caf50; color:#121212;">D / d</span> <span>Direita (Forte / Fraco)</span></div>
-                </div>
-
-                <div class="legend-group">
-                    <span class="legend-group-title" id="legend-mi-title">🌾 Mineiro</span>
-                    <div class="legend-item" id="legend-mi-1"><span class="legend-badge" style="background:#1b5e20; color:#fff;">P / p</span> <span>Cima (Forte / Fraco)</span></div>
-                    <div class="legend-item" id="legend-mi-2"><span class="legend-badge" style="background:#4caf50; color:#121212;">T / t</span> <span>Baixo (Forte / Fraco)</span></div>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <div id="right-panel">
+    <!-- PANNEAU CENTRAL : RODA ET OUTILS -->
+    <div id="center-panel">
         <div id="top-bar">
             <div id="header-main">
-                <button id="togglePanelBtn" class="control-btn" title="Ocultar / Mostrar painel" onclick="togglePanel()" style="background: transparent; border: 1px solid #444; padding: 8px;">
+                <button id="toggleLeftBtn" class="control-btn" title="Ocultar / Mostrar painel" onclick="togglePanel('left')" style="background: transparent; border: 1px solid #444; padding: 8px;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="3" y1="12" x2="21" y2="12"></line>
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                        <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>
                     </svg>
                 </button>
                 <img src="logo-samambaia.png" alt="Samambaia" onerror="this.style.display='none'; document.getElementById('fallback-emoji').style.display='inline';">
@@ -217,16 +198,13 @@
                 <div class="control-separator"></div>
                 <button id="metroBtn" class="control-btn" title="Metrônomo" style="padding: 6px 12px;">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="12 2 5 22 19 22"></polygon>
-                        <circle cx="12" cy="16" r="2" fill="currentColor"></circle>
-                        <line x1="12" y1="16" x2="7" y2="7"></line>
+                        <polygon points="12 2 5 22 19 22"></polygon><circle cx="12" cy="16" r="2" fill="currentColor"></circle><line x1="12" y1="16" x2="7" y2="7"></line>
                     </svg>
                 </button>
                 
                 <button id="langBtn" class="control-btn" onclick="toggleLang()" style="background:#8e44ad; width: 44px; text-align: center;" title="Changer de langue / Mudar idioma">🇫🇷</button>
-                
                 <button id="tutorialBtn" class="control-btn icon-btn" title="Tutorial / Ajuda" onclick="window.open('https://www.youtube.com/results?search_query=maracatu+tutorial', '_blank')" style="background:#e67e22;">📺</button>
-
+                
                 <div class="control-separator"></div>
                 
                 <div style="position:relative; display:flex; align-items:center;">
@@ -240,6 +218,10 @@
                 <button id="saveBtn" class="control-btn icon-btn" title="Salvar" style="background:#2980b9;">💾</button>
                 <button id="loadBtn" class="control-btn icon-btn" title="Carregar" style="background:#2980b9;">📂</button>
                 <input type="file" id="fileInput" accept=".json">
+
+                <div class="control-separator"></div>
+                <!-- BOUTON POUR LA LEGENDE -->
+                <button id="toggleLegendBtn" class="control-btn" title="Ocultar / Mostrar legenda" onclick="togglePanel('right')" style="background: transparent; border: 1px solid #444; padding: 8px;">📖</button>
             </div>
         </div>
 
@@ -248,8 +230,45 @@
         </div>
     </div>
 
+    <!-- PANNEAU DE DROITE : LEGENDE -->
+    <div id="legend-panel" class="collapsed">
+        <div class="panel-title" id="title-legend">📖 Legenda</div>
+        <div class="legend-container">
+            <div style="font-size: 11px; margin-bottom: 4px; color: var(--accent-gold); line-height: 1.35;" id="legend-gold">
+                💡 <strong>Regra de ouro:</strong><br>• <strong>Maiúscula</strong> = Golpe Forte (Acentuado)<br>• <strong>Minúscula</strong> = Golpe Fraco (Fantasma)
+            </div>
+            
+            <div class="legend-group">
+                <span class="legend-group-title" id="legend-ac-title">🥁 Alfaia & Caixa</span>
+                <div class="legend-item" id="legend-ac-1"><span class="legend-badge" style="background:#8b0000; color:#fff;">D / d</span> <span>Mão Direita</span></div>
+                <div class="legend-item" id="legend-ac-2"><span class="legend-badge" style="background:#f39c12; color:#121212;">G / g</span> <span>Mão Esquerda</span></div>
+            </div>
+
+            <div class="legend-group">
+                <span class="legend-group-title" id="legend-go-title">🔔 Gonguê</span>
+                <div class="legend-item" id="legend-go-1"><span class="legend-badge" style="background:#222; color:#fff;">G / g</span> <span>Grave Forte / Fraco</span></div>
+                <div class="legend-item" id="legend-go-2"><span class="legend-badge" style="background:#bdc3c7; color:#000;">A / a</span> <span>Agudo Forte / Fraco</span></div>
+            </div>
+
+            <div class="legend-group">
+                <span class="legend-group-title" id="legend-ag-title">🌾 Agbê</span>
+                <div class="legend-item" id="legend-ag-1"><span class="legend-badge" style="background:#1b5e20; color:#fff;">G / g</span> <span>Esquerda (Forte / Fraco)</span></div>
+                <div class="legend-item" id="legend-ag-2"><span class="legend-badge" style="background:#4caf50; color:#121212;">D / d</span> <span>Direita (Forte / Fraco)</span></div>
+            </div>
+
+            <div class="legend-group">
+                <span class="legend-group-title" id="legend-mi-title">🌾 Mineiro</span>
+                <div class="legend-item" id="legend-mi-1"><span class="legend-badge" style="background:#1b5e20; color:#fff;">P / p</span> <span>Cima (Forte / Fraco)</span></div>
+                <div class="legend-item" id="legend-mi-2"><span class="legend-badge" style="background:#4caf50; color:#121212;">T / t</span> <span>Baixo (Forte / Fraco)</span></div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        function togglePanel() { document.getElementById('left-panel').classList.toggle('collapsed'); }
+        function togglePanel(side) { 
+            if (side === 'left') document.getElementById('left-panel').classList.toggle('collapsed'); 
+            if (side === 'right') document.getElementById('legend-panel').classList.toggle('collapsed');
+        }
 
         const i18n = {
             pt: {
@@ -280,6 +299,7 @@
                 selectInst: "Escolher um instrumento...",
                 patternTip: "Use o teclado! Espaço = silêncio.",
                 toggleBtn: "Ocultar / Mostrar painel",
+                toggleLegendBtn: "Ocultar / Mostrar legenda",
                 tsLabel: "Compasso:",
                 tutorialBtn: "Tutorial em vídeo",
                 confirmResize: "Deseja ajustar automaticamente o número de passos de todas as faixas para caber neste novo compasso?"
@@ -312,6 +332,7 @@
                 selectInst: "Choisir un instrument...",
                 patternTip: "Utilisez le clavier ! Espace = silence.",
                 toggleBtn: "Afficher / Masquer le panneau",
+                toggleLegendBtn: "Afficher / Masquer la légende",
                 tsLabel: "Signature:",
                 tutorialBtn: "Tutoriel vidéo",
                 confirmResize: "Voulez-vous ajuster automatiquement le nombre de pas de toutes les pistes pour s'adapter à cette nouvelle signature ?"
@@ -346,7 +367,8 @@
             document.getElementById('saveBtn').title = t('save');
             document.getElementById('loadBtn').title = t('load');
             document.getElementById('selectInstOpt').innerText = t('selectInst');
-            document.getElementById('togglePanelBtn').title = t('toggleBtn');
+            document.getElementById('toggleLeftBtn').title = t('toggleBtn');
+            document.getElementById('toggleLegendBtn').title = t('toggleLegendBtn');
             document.getElementById('tutorialBtn').title = t('tutorialBtn');
         }
 
@@ -382,7 +404,7 @@
         let circles = [];
         let timeSignature = "4/4";
         let maxTicks = 96; 
-        let flashAlpha = 0; // Pour le halo du métronome
+        let flashAlpha = 0; 
 
         Tone.context.lookAhead = 0.04; 
         Tone.context.latencyHint = "interactive"; 
@@ -403,11 +425,11 @@
             { id: 'puxador', name: 'Puxador', type: 'voice', path: 'internal', colors: { active: '#0c19cf', text: '#fff' } }
         ];
 
-        // Métronome façon CLAVE (Onde Carrée, courte et percussive)
+        // Métronome façon CLAVE en bois (percussif et fort)
         const bMetroClick = new Tone.Synth({
             oscillator: { type: "square" },
             envelope: { attack: 0.001, decay: 0.05, sustain: 0.0, release: 0.01 },
-            volume: 2 // Bien fort
+            volume: 4 
         }).toDestination();
 
         instrumentsConfig.forEach(inst => {
@@ -462,15 +484,15 @@
             if (timeSignature === "4/4") return [0, 24, 48, 72];
             if (timeSignature === "3/4") return [0, 24, 48];
             if (timeSignature === "2/4") return [0, 24];
-            if (timeSignature === "6/8") return [0, 12, 24, 36, 48, 60]; // 6 croches
-            if (timeSignature === "12/8") return [0, 12, 24, 36, 48, 60, 72, 84, 96, 108, 120, 132]; // 12 croches
+            if (timeSignature === "6/8") return [0, 12, 24, 36, 48, 60]; 
+            if (timeSignature === "12/8") return [0, 12, 24, 36, 48, 60, 72, 84, 96, 108, 120, 132]; 
             return [0, 24, 48, 72];
         }
 
         function updateRadii() {
             if (circles.length === 0) return;
             const minRadius = 120;
-            const maxRadius = 495; // Un peu de marge pour les repères
+            const maxRadius = 495; 
             
             if (circles.length === 1) { circles[0].radius = (minRadius + maxRadius) / 2; } 
             else {
@@ -484,7 +506,7 @@
         window.generatePatternString = function(circle) {
             let inst = instrumentsConfig[circle.instrumentIdx];
             if (inst.type === 'voice') return circle.lyrics.join(',');
-            return ''; // Pour les carrés, on utilise directement la valeur de chaque case
+            return ''; 
         }
 
         function draw() {
@@ -500,17 +522,17 @@
                 ctx.fillStyle = '#1c1c1c'; ctx.beginPath(); ctx.arc(centerX, centerY, 560, 0, Math.PI * 2); ctx.fill();
             }
 
-            // Halo dynamique du métronome
+            // --- HALO DYNAMIQUE DU METRONOME ---
             if (flashAlpha > 0) {
                 ctx.save();
                 ctx.beginPath(); ctx.arc(centerX, centerY, 568, 0, Math.PI * 2);
                 ctx.strokeStyle = `rgba(241, 196, 15, ${flashAlpha})`; 
                 ctx.lineWidth = 4 + (flashAlpha * 6);
                 ctx.shadowColor = 'rgba(241, 196, 15, 1)';
-                ctx.shadowBlur = 15;
+                ctx.shadowBlur = 20;
                 ctx.stroke();
                 ctx.restore();
-                flashAlpha -= 0.06; // Disparait progressivement
+                flashAlpha -= 0.05; // Fade-out progressif
             }
 
             ctx.beginPath(); ctx.arc(centerX, centerY, 565, 0, Math.PI * 2); ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 8; ctx.stroke();
@@ -632,8 +654,8 @@
             
             const markers = getMarkers();
             if (isMetroOn && markers.includes(currentStepIndex)) { 
-                flashAlpha = 1.0; // Déclenche le flash visuel
-                let note = (currentStepIndex === 0) ? "A5" : "E5"; // Aigu sur le 1er temps
+                flashAlpha = 1.0; 
+                let note = (currentStepIndex === 0) ? "A5" : "E5"; 
                 bMetroClick.triggerAttackRelease(note, "32n", time); 
             }
 
@@ -654,7 +676,7 @@
                         let state = circle.activeSteps[stepIdx];
                         if (state !== 0) {
                             if (inst.type === 'voice') {
-                                // OCTAVE PLUS HAUTE POUR LES VOIX (C5 et E5)
+                                // Voix une octave plus aigües (C5 et E5 au lieu de C3/E3)
                                 if (voiceSynths[inst.id]) voiceSynths[inst.id].triggerAttackRelease(inst.id === 'puxador' ? "E5" : "C5", "8n", time);
                             } else if (samplers[inst.id]) {
                                 let playerGroup = samplers[inst.id]; let targetKey = null;
@@ -700,10 +722,10 @@
 
                 let inputHtml = "";
                 if (inst.type === 'voice') {
-                    // Les voix gardent le champ texte long pour taper des mots entiers
+                    // Champ texte pour les voix
                     inputHtml = `<input type="text" id="pattern-input-${circle.id}" class="pattern-input" value="${circle.lyrics.join(',')}" oninput="onVoicePatternInput(${circle.id}, this.value)" placeholder="${t('patternPhVoice')}">`;
                 } else {
-                    // Les instruments ont le nouveau séquenceur à carrés cliquables !
+                    // --- NOUVEAU SEQUENCEUR EN CARRES AVEC REGROUPEMENT DES TEMPS ---
                     inputHtml = `<div class="step-boxes" id="step-boxes-${circle.id}">`;
                     for(let i=0; i<circle.steps; i++) {
                         let val = circle.activeSteps[i];
@@ -712,7 +734,34 @@
                             if(val === 'GRV') displayVal = 'G'; else if(val === 'grv') displayVal = 'g';
                             else if(val === 'AIG') displayVal = 'A'; else if(val === 'aig') displayVal = 'a';
                         }
-                        inputHtml += `<input type="text" maxlength="1" class="step-box" data-circle="${circle.id}" data-step="${i}" value="${displayVal}" onfocus="this.select()" oninput="onStepBoxInput(this, event)" onkeydown="onStepBoxKey(this, event)">`;
+                        
+                        // Calcul d'espacement pour regrouper visuellement les temps
+                        let extraStyle = "";
+                        let isBeatEnd = false;
+                        if (timeSignature === "6/8" || timeSignature === "12/8") {
+                            if ((i + 1) % 3 === 0) isBeatEnd = true;
+                        } else if (timeSignature === "3/4") {
+                            let div = circle.steps === 12 ? 4 : Math.floor(circle.steps / 3);
+                            if ((i + 1) % div === 0) isBeatEnd = true;
+                        } else { // 4/4 ou 2/4
+                            let div = Math.floor(circle.steps / (timeSignature === "4/4" ? 4 : 2));
+                            if (div === 0) div = 4; // sécurité
+                            if ((i + 1) % div === 0) isBeatEnd = true;
+                        }
+                        
+                        if (isBeatEnd && i !== circle.steps - 1) {
+                            extraStyle = "margin-right: 10px;"; // Séparation des temps
+                        }
+                        
+                        inputHtml += `<input type="text" maxlength="1" class="step-box" style="${extraStyle}" data-circle="${circle.id}" data-step="${i}" value="${displayVal}" onfocus="this.select()" oninput="onStepBoxInput(this, event)" onkeydown="onStepBoxKey(this, event)">`;
+                        
+                        // Cassure de ligne intelligente (16 = 2x8. 24 = 2x12)
+                        let breakAt = circle.steps;
+                        if (circle.steps === 16) breakAt = 8;
+                        if (circle.steps === 24) breakAt = 12;
+                        if ((i + 1) % breakAt === 0 && i !== circle.steps - 1) {
+                             inputHtml += `<div style="flex-basis: 100%; height: 2px;"></div>`;
+                        }
                     }
                     inputHtml += `</div>`;
                 }
@@ -754,7 +803,7 @@
             }
         };
 
-        // GESTION CLAVIER DU SÉQUENCEUR À CARRÉS
+        // NAVIGATION INTELLIGENTE ENTRE LES PETITS CARRES DU SEQUENCEUR
         window.onStepBoxInput = function(el, e) {
             let char = el.value.slice(-1);
             let cId = parseInt(el.getAttribute('data-circle'));
@@ -782,20 +831,23 @@
                     else if(parsed === 'AIG') displayVal = 'A'; else if(parsed === 'aig') displayVal = 'a';
                 }
                 el.value = displayVal;
-                let next = el.nextElementSibling; if (next) { next.focus(); next.select(); }
+                // Passe à la case suivante
+                let next = el.nextElementSibling; if (next && next.tagName === 'INPUT') { next.focus(); next.select(); }
             } else {
                 c.activeSteps[sIdx] = 0; el.value = '';
-                if (char === ' ') { let next = el.nextElementSibling; if (next) { next.focus(); next.select(); } }
+                // Si on tape un Espace, ça passe à la case suivante pour laisser un silence facilement
+                if (char === ' ') { let next = el.nextElementSibling; if (next && next.tagName === 'INPUT') { next.focus(); next.select(); } }
             }
         };
 
         window.onStepBoxKey = function(el, e) {
+            // Flèches pour naviguer
             if (e.key === 'Backspace' && el.value === '') {
-                let prev = el.previousElementSibling; if(prev) { prev.focus(); prev.select(); } e.preventDefault();
+                let prev = el.previousElementSibling; if(prev && prev.tagName === 'INPUT') { prev.focus(); prev.select(); } e.preventDefault();
             } else if (e.key === 'ArrowRight') {
-                let next = el.nextElementSibling; if(next) { next.focus(); next.select(); } e.preventDefault();
+                let next = el.nextElementSibling; if(next && next.tagName === 'INPUT') { next.focus(); next.select(); } e.preventDefault();
             } else if (e.key === 'ArrowLeft') {
-                let prev = el.previousElementSibling; if(prev) { prev.focus(); prev.select(); } e.preventDefault();
+                let prev = el.previousElementSibling; if(prev && prev.tagName === 'INPUT') { prev.focus(); prev.select(); } e.preventDefault();
             }
         };
 
@@ -865,12 +917,21 @@
                                 if (current === 0) circle.activeSteps[i] = 'd'; else if (current === 'd') circle.activeSteps[i] = 'D'; else if (current === 'D') circle.activeSteps[i] = 'g'; else if (current === 'g') circle.activeSteps[i] = 'G'; else circle.activeSteps[i] = 0;
                             }
                             
-                            // Synchronisation visuelle avec les carrés
                             let inputEl = document.getElementById(`step-boxes-${circle.id}`);
                             if (inputEl) {
-                                let box = inputEl.children[i]; let dVal = circle.activeSteps[i];
-                                if(dVal === 0) dVal = ''; else if(inst.type === 'gongue') { if(dVal === 'GRV') dVal = 'G'; else if(dVal === 'grv') dVal = 'g'; else if(dVal === 'AIG') dVal = 'A'; else if(dVal === 'aig') dVal = 'a'; }
-                                box.value = dVal;
+                                // Mise à jour du carré visé
+                                let boxIndex = 0;
+                                for(let node of inputEl.childNodes) {
+                                    if(node.tagName === 'INPUT') {
+                                        if (boxIndex === i) {
+                                            let dVal = circle.activeSteps[i];
+                                            if(dVal === 0) dVal = ''; else if(inst.type === 'gongue') { if(dVal === 'GRV') dVal = 'G'; else if(dVal === 'grv') dVal = 'g'; else if(dVal === 'AIG') dVal = 'A'; else if(dVal === 'aig') dVal = 'a'; }
+                                            node.value = dVal;
+                                            break;
+                                        }
+                                        boxIndex++;
+                                    }
+                                }
                             } else {
                                 let voiceEl = document.getElementById(`pattern-input-${circle.id}`);
                                 if(voiceEl) voiceEl.value = circle.lyrics.join(',');
