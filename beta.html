@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Les cycles du maracatu</title>
+    <title>Baque de maracatu</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         :root {
@@ -124,17 +124,17 @@
 </head>
 <body>
 
-    <div id="loading-overlay">🌿 Chargement des voix du maracatu Samambaia...</div>
+    <div id="loading-overlay">🌿 Carregando vozes...</div>
 
     <div id="left-panel">
-        <div class="panel-title">🎛️ Table de Mixage</div>
+        <div class="panel-title">🎛️ Misturador</div>
         <div id="mixer-section"><div id="tracks-mixer-container"></div></div>
 
         <div id="legend-section">
             <div class="panel-title" style="margin-bottom: 6px;">📖 Légende</div>
             <div class="legend-container">
                 <div style="font-size: 11px; margin-bottom: 4px; color: var(--accent-gold); line-height: 1.35;">
-                    💡 <strong>Règle d'or :</strong><br>
+                    💡 <strong>Regra de ouro:</strong><br>
                     • <strong>Majuscule</strong> = Coup Fort (Accentué)<br>
                     • <strong>Minuscule</strong> = Coup Faible (Fantôme)
                 </div>
@@ -165,7 +165,7 @@
             <div id="header-main">
                 <img src="logo-samambaia.png" alt="Samambaia" onerror="this.style.display='none'; document.getElementById('fallback-emoji').style.display='inline';">
                 <span id="fallback-emoji" style="display:none; background:#f5f5f5; padding:6px; border-radius:6px; font-size:22px;">🌿</span>
-                <span id="header-title-text">Les cycles du maracatu</span>
+                <span id="header-title-text">Baque de maracatu - Samambaia</span>
             </div>
             
             <div id="global-controls">
@@ -186,7 +186,7 @@
                 <div class="control-separator"></div>
                 
                 <div style="position:relative; display:flex; align-items:center;">
-                    <button id="showAddBtn" class="control-btn" style="background-color: var(--accent-green); color: #000; font-weight:bold;">+ Inst</button>
+                    <button id="showAddBtn" class="control-btn" style="background-color: var(--accent-green); color: #000; font-weight:bold;">+ Instrument</button>
                     <select id="addInstrumentSelect" class="preset-select" style="display:none; position:absolute; top:35px; right:0; z-index:100; box-shadow: 0 4px 10px rgba(0,0,0,0.8);">
                         <option value="" disabled selected>Choisir un instrument...</option>
                     </select>
