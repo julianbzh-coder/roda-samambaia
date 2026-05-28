@@ -31,11 +31,11 @@
 
         /* --- PANNEAU DROIT (LÉGENDE) --- */
         #legend-panel {
-            width: 300px; min-width: 300px; background-color: var(--panel-bg); border-left: 1px solid #333;
+            width: 320px; min-width: 320px; background-color: var(--panel-bg); border-left: 1px solid #333;
             display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; z-index: 10; height: 100%;
             transition: margin-right 0.35s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
-        #legend-panel.collapsed { margin-right: -300px; }
+        #legend-panel.collapsed { margin-right: -320px; }
 
         .panel-title {
             font-size: 13px; font-weight: bold; color: var(--text-muted); text-transform: uppercase;
@@ -85,11 +85,12 @@
         .pattern-input::placeholder { color: #555; letter-spacing: normal; font-family: sans-serif; font-size: 11px; }
         .pattern-input:focus { border-color: var(--accent-gold); outline: none; }
 
+        /* LÉGENDE SCROLLABLE */
         .legend-container { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; padding-right: 5px; flex-grow: 1; }
         .legend-group { display: flex; flex-direction: column; gap: 4px; background: #181818; padding: 8px; border-radius: 6px; border: 1px solid #2a2a2a; }
         .legend-group-title { font-weight: bold; color: var(--accent-gold); margin-bottom: 2px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .legend-item { display: flex; align-items: center; gap: 8px; color: var(--text-main); font-size: 11px; }
-        .legend-badge { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 18px; font-size: 9px; font-weight: bold; border-radius: 4px; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; }
+        .legend-item { display: flex; align-items: center; gap: 8px; color: var(--text-main); font-size: 11px; line-height: 1.3; }
+        .legend-badge { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 18px; font-size: 9px; font-weight: bold; border-radius: 4px; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; flex-shrink: 0; }
 
         /* --- INTERFACE CENTRALE --- */
         #center-panel { flex-grow: 1; display: flex; flex-direction: column; position: relative; min-width: 0; }
@@ -101,12 +102,12 @@
         
         #global-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
         
-        /* -- AGRANDISSEMENT DES BOUTONS ET ICONES -- */
+        /* -- BOUTONS ET ICONES (Agrandis et harmonisés) -- */
         .preset-select { background-color: var(--control-bg); color: var(--text-main); border: 1px solid #444; padding: 6px; border-radius: 6px; font-size: 13px; font-weight: bold; }
         button.control-btn { background-color: #333; color: #fff; border: 1px solid #444; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; }
         button.control-btn:hover { background-color: #444; }
         button#metroBtn.metro-on { background-color: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
-        .icon-btn { font-size: 22px; padding: 6px 12px; }
+        .icon-btn { font-size: 22px !important; padding: 4px 10px !important; line-height: 1; }
 
         .control-separator { width: 1px; height: 28px; background-color: #444; margin: 0 4px; }
         label.control-label { font-size: 13px; display: flex; align-items: center; gap: 6px; color: var(--text-main); font-weight: bold; }
@@ -157,7 +158,7 @@
     <div id="center-panel">
         <div id="top-bar">
             <div id="header-main">
-                <button id="toggleLeftBtn" class="control-btn" title="Ocultar / Mostrar painel" onclick="togglePanel('left')" style="background: transparent; border: 1px solid #444; padding: 8px;">
+                <button id="toggleLeftBtn" class="control-btn icon-btn" title="Ocultar / Mostrar painel" onclick="togglePanel('left')" style="background: transparent; border: 1px solid #444;">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>
                     </svg>
@@ -186,19 +187,19 @@
                 </label>
                 
                 <div class="control-separator"></div>
-                <label class="control-label">BPM: <input type="number" id="bpm" value="83" min="40" max="240"></label>
+                <label class="control-label">BPM: <input type="number" id="bpm" value="83" min="40" max="240" step="1"></label>
                 
                 <div class="control-separator"></div>
                 <label class="control-label">Vol: <input type="range" id="masterVol" class="master-vol-fader" min="-40" max="6" value="-6"></label>
                 
                 <div class="control-separator"></div>
-                <button id="metroBtn" class="control-btn" title="Metrônomo" style="padding: 6px 12px;">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <button id="metroBtn" class="control-btn icon-btn" title="Metrônomo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polygon points="12 2 5 22 19 22"></polygon><circle cx="12" cy="16" r="2" fill="currentColor"></circle><line x1="12" y1="16" x2="7" y2="7"></line>
                     </svg>
                 </button>
                 
-                <button id="langBtn" class="control-btn" onclick="toggleLang()" style="background:#8e44ad; font-size: 22px; width: 50px; padding: 4px;" title="Changer de langue / Mudar idioma">🇫🇷</button>
+                <button id="langBtn" class="control-btn icon-btn" onclick="toggleLang()" style="background:#8e44ad;" title="Changer de langue / Mudar idioma">🇫🇷</button>
                 <button id="tutorialBtn" class="control-btn icon-btn" title="Tutorial / Ajuda" onclick="window.open('https://www.youtube.com/results?search_query=maracatu+tutorial', '_blank')" style="background:#e67e22;">📺</button>
                 
                 <div class="control-separator"></div>
@@ -216,8 +217,7 @@
                 <input type="file" id="fileInput" accept=".json">
 
                 <div class="control-separator"></div>
-                <!-- BOUTON LEGENDE -->
-                <button id="toggleLegendBtn" class="control-btn" title="Ocultar / Mostrar legenda" onclick="togglePanel('right')" style="background: transparent; border: 1px solid #444; font-size: 22px; padding: 6px 12px;">📖</button>
+                <button id="toggleLegendBtn" class="control-btn icon-btn" title="Ocultar / Mostrar legenda" onclick="togglePanel('right')" style="background: transparent; border: 1px solid #444;">📖</button>
             </div>
         </div>
 
@@ -230,7 +230,24 @@
     <div id="legend-panel" class="collapsed">
         <div class="panel-title" id="title-legend">📖 Legenda</div>
         <div class="legend-container">
-            <div style="font-size: 11px; margin-bottom: 4px; color: var(--accent-gold); line-height: 1.35;" id="legend-gold">
+            
+            <!-- EXPLICATIONS GENERALES -->
+            <div class="legend-group">
+                <span class="legend-group-title" id="legend-seq-title">⌨️ Dicas de digitação</span>
+                <div class="legend-item" id="legend-seq-1"><span>Pressione <strong>Espaço</strong> no teclado para avançar e deixar um silêncio.</span></div>
+                <div class="legend-item" id="legend-seq-2"><span>Use as <strong>Setas</strong> (←/→) para navegar entre os quadrados.</span></div>
+            </div>
+
+            <!-- CHANT & NOTES -->
+            <div class="legend-group">
+                <span class="legend-group-title" id="legend-voice-title">🎤 Vozes / Canto</span>
+                <div class="legend-item" id="legend-voice-1"><span>Para compor a melodia, você pode adicionar a Nota Musical + dois pontos (:) + a sílaba.</span></div>
+                <div class="legend-item" id="legend-voice-2"><span>Ex: <strong>C5:Vou, D5:va</strong></span></div>
+                <div class="legend-item" id="legend-voice-3"><span>(Sem nota definida, usa C5 por padrão).</span></div>
+            </div>
+
+            <!-- REGLES OR -->
+            <div style="font-size: 11px; margin-top: 8px; margin-bottom: 4px; color: var(--accent-gold); line-height: 1.35;" id="legend-gold">
                 💡 <strong>Regra de ouro:</strong><br>• <strong>Maiúscula</strong> = Golpe Forte (Acentuado)<br>• <strong>Minúscula</strong> = Golpe Fraco (Fantasma)
             </div>
             
@@ -271,6 +288,13 @@
                 loading: "Carregando vozes...",
                 mixer: "🎛️ Misturador",
                 legend: "📖 Legenda",
+                seqLegendTitle: "⌨️ Dicas de digitação",
+                seqLegend1: "Pressione <strong>Espaço</strong> no teclado para avançar e deixar um silêncio.",
+                seqLegend2: "Use as <strong>Setas</strong> (←/→) para navegar entre os quadrados.",
+                voiceLegendTitle: "🎤 Vozes / Canto",
+                voiceLegend1: "Para compor a melodia, você pode adicionar a Nota Musical + dois pontos (:) + a sílaba.",
+                voiceLegend2: "Ex: <strong>C5:Vou, D5:va</strong>",
+                voiceLegend3: "(Sem nota definida, usa C5 por padrão).",
                 goldRule: "💡 <strong>Regra de ouro:</strong><br>• <strong>Maiúscula</strong> = Golpe Forte (Acentuado)<br>• <strong>Minúscula</strong> = Golpe Fraco (Fantasma)",
                 alfaiaCaixa: "🥁 Alfaia & Caixa",
                 mainDroite: "Mão Direita",
@@ -291,7 +315,7 @@
                 stepsNum: "Número de passos :",
                 pattern: "⌨️ Padrão :",
                 patternPhText: "Ex: D g  d G",
-                patternPhVoice: "Letras, com vírgulas",
+                patternPhVoice: "Letras, com vírgulas (Ex: C5:Vou, D5:va)",
                 selectInst: "Escolher um instrumento...",
                 patternTip: "Use o teclado! Espaço = silêncio.",
                 toggleBtn: "Ocultar / Mostrar painel",
@@ -304,6 +328,13 @@
                 loading: "Chargement des voix...",
                 mixer: "🎛️ Mixeur",
                 legend: "📖 Légende",
+                seqLegendTitle: "⌨️ Astuces Séquenceur",
+                seqLegend1: "Appuyez sur <strong>Espace</strong> pour avancer et laisser un silence.",
+                seqLegend2: "Utilisez les <strong>Flèches</strong> (←/→) pour naviguer entre les cases.",
+                voiceLegendTitle: "🎤 Voix / Chant",
+                voiceLegend1: "Pour composer la mélodie, ajoutez la Note de musique + deux points (:) + la syllabe.",
+                voiceLegend2: "Ex: <strong>C5:Vou, D5:va</strong>",
+                voiceLegend3: "(Sans note définie, utilise C5 par défaut).",
                 goldRule: "💡 <strong>Règle d'or :</strong><br>• <strong>Majuscule</strong> = Coup Fort (Accentué)<br>• <strong>Minuscule</strong> = Coup Faible (Fantôme)",
                 alfaiaCaixa: "🥁 Alfaia & Caixa",
                 mainDroite: "Main Droite",
@@ -324,7 +355,7 @@
                 stepsNum: "Nombre de pas :",
                 pattern: "⌨️ Motif :",
                 patternPhText: "Ex: D g  d G",
-                patternPhVoice: "Paroles, avec virgules",
+                patternPhVoice: "Paroles, avec virgules (Ex: C5:Vou, D5:va)",
                 selectInst: "Choisir un instrument...",
                 patternTip: "Utilisez le clavier ! Espace = silence.",
                 toggleBtn: "Afficher / Masquer le panneau",
@@ -342,6 +373,16 @@
             document.getElementById('loading-text').innerText = t('loading');
             document.getElementById('title-mixer').innerText = t('mixer');
             document.getElementById('title-legend').innerText = t('legend');
+            
+            document.getElementById('legend-seq-title').innerText = t('seqLegendTitle');
+            document.getElementById('legend-seq-1').innerHTML = `<span>${t('seqLegend1')}</span>`;
+            document.getElementById('legend-seq-2').innerHTML = `<span>${t('seqLegend2')}</span>`;
+
+            document.getElementById('legend-voice-title').innerText = t('voiceLegendTitle');
+            document.getElementById('legend-voice-1').innerHTML = `<span>${t('voiceLegend1')}</span>`;
+            document.getElementById('legend-voice-2').innerHTML = `<span>${t('voiceLegend2')}</span>`;
+            document.getElementById('legend-voice-3').innerHTML = `<span>${t('voiceLegend3')}</span>`;
+
             document.getElementById('legend-gold').innerHTML = t('goldRule');
             document.getElementById('tsLabel').innerText = t('tsLabel');
             
@@ -381,7 +422,7 @@
                 {"id":4,"steps":16,"activeSteps":["D","D","g","D","D","g","D","g","D","D","g","D","D","g","D","g"],"instrumentIdx":3,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":90},
                 {"id":5,"steps":16,"activeSteps":[0,"GRV",0,0,"GRV",0,"GRV",0,0,"GRV",0,0,"GRV",0,"GRV",0],"instrumentIdx":4,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":62},
                 {"id":6,"steps":16,"activeSteps":["G",0,"d","g","D",0,"g","d","G",0,"d","g","D",0,"g","d"],"instrumentIdx":5,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":8,"steps":16,"activeSteps":["X",0,"X",0,"X",0,"X",0,0,"X",0,"X","X",0,0,0],"instrumentIdx":7,"lyrics":["Vou","","va","","di","","ar","","Car","Car","na","na","val","","!",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":8,"steps":16,"activeSteps":["C5",0,"C5",0,"D5",0,"D5",0,0,"E5",0,"E5","C5",0,0,0],"instrumentIdx":7,"lyrics":["Vou","","va","","di","","ar","","Car","Car","na","na","val","","!",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
                 {"id":1779,"steps":16,"activeSteps":["X",0,"X",0,"X",0,"X",0,0,"X",0,"X","X",0,"X",0],"instrumentIdx":8,"lyrics":["Vou","","Pra","","Ba","","hi","","","a","","Brin","car","","Eu",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100}
             ]
         };
@@ -421,7 +462,6 @@
             { id: 'puxador', name: 'Puxador', type: 'voice', path: 'internal', colors: { active: '#0c19cf', text: '#fff' } }
         ];
 
-        // Métronome façon CLAVE en bois (percussif et fort)
         const bMetroClick = new Tone.Synth({
             oscillator: { type: "square" },
             envelope: { attack: 0.001, decay: 0.05, sustain: 0.0, release: 0.01 },
@@ -501,7 +541,19 @@
 
         window.generatePatternString = function(circle) {
             let inst = instrumentsConfig[circle.instrumentIdx];
-            if (inst.type === 'voice') return circle.lyrics.join(',');
+            if (inst.type === 'voice') {
+                let arr = [];
+                for(let i=0; i<circle.steps; i++) {
+                    if (circle.activeSteps[i] !== 0 && circle.activeSteps[i] !== 'X') {
+                        arr.push(circle.activeSteps[i] + ':' + (circle.lyrics[i] || ''));
+                    } else if (circle.activeSteps[i] === 'X') {
+                        arr.push(circle.lyrics[i]);
+                    } else {
+                        arr.push('');
+                    }
+                }
+                return arr.join(',');
+            }
             return ''; 
         }
 
@@ -671,7 +723,14 @@
                         let state = circle.activeSteps[stepIdx];
                         if (state !== 0) {
                             if (inst.type === 'voice') {
-                                if (voiceSynths[inst.id]) voiceSynths[inst.id].triggerAttackRelease(inst.id === 'puxador' ? "E5" : "C5", "8n", time);
+                                // LECTURE DE LA NOTE MELODIQUE
+                                let note = (state !== 'X') ? state : (inst.id === 'puxador' ? "E5" : "C5");
+                                try {
+                                    if (voiceSynths[inst.id]) voiceSynths[inst.id].triggerAttackRelease(note, "8n", time);
+                                } catch(err) {
+                                    // Si la note écrite est invalide, on joue un Do
+                                    if (voiceSynths[inst.id]) voiceSynths[inst.id].triggerAttackRelease("C5", "8n", time);
+                                }
                             } else if (samplers[inst.id]) {
                                 let playerGroup = samplers[inst.id]; let targetKey = null;
                                 if (inst.type === 'gongue') {
@@ -682,7 +741,6 @@
                                 }
                                 
                                 if (targetKey && playerGroup.has(targetKey)) {
-                                    // CORRECTION DU DELAI DE L'AGBÉ : Suppression de l'offset mathématique 0.02s !
                                     try { let player = playerGroup.player(targetKey); if (player.loaded) player.start(time); } catch (err) {}
                                 }
                             }
@@ -717,7 +775,7 @@
 
                 let inputHtml = "";
                 if (inst.type === 'voice') {
-                    inputHtml = `<input type="text" id="pattern-input-${circle.id}" class="pattern-input" value="${circle.lyrics.join(',')}" oninput="onVoicePatternInput(${circle.id}, this.value)" placeholder="${t('patternPhVoice')}">`;
+                    inputHtml = `<input type="text" id="pattern-input-${circle.id}" class="pattern-input" value="${generatePatternString(circle)}" oninput="onVoicePatternInput(${circle.id}, this.value)" placeholder="${t('patternPhVoice')}">`;
                 } else {
                     inputHtml = `<div class="step-boxes" id="step-boxes-${circle.id}">`;
                     for(let i=0; i<circle.steps; i++) {
@@ -741,9 +799,7 @@
                             if ((i + 1) % div === 0) isBeatEnd = true;
                         }
                         
-                        if (isBeatEnd && i !== circle.steps - 1) {
-                            extraStyle = "margin-right: 10px;"; 
-                        }
+                        if (isBeatEnd && i !== circle.steps - 1) { extraStyle = "margin-right: 10px;"; }
                         
                         inputHtml += `<input type="text" maxlength="1" class="step-box" style="${extraStyle}" data-circle="${circle.id}" data-step="${i}" value="${displayVal}" onfocus="this.select()" oninput="onStepBoxInput(this, event)" onkeydown="onStepBoxKey(this, event)">`;
                         
@@ -789,8 +845,19 @@
             let c = circles.find(x => x.id === id); if (!c) return;
             let parts = value.split(',');
             for (let i = 0; i < c.steps; i++) {
-                let word = parts[i] !== undefined ? parts[i].trim() : "";
-                c.activeSteps[i] = word ? 'X' : 0; c.lyrics[i] = word.substring(0, 15);
+                let segment = parts[i] !== undefined ? parts[i].trim() : "";
+                if (segment) {
+                    if (segment.includes(':')) {
+                        let s = segment.split(':');
+                        c.activeSteps[i] = s[0].trim();
+                        c.lyrics[i] = s[1].substring(0, 15);
+                    } else {
+                        c.activeSteps[i] = 'X';
+                        c.lyrics[i] = segment.substring(0, 15);
+                    }
+                } else {
+                    c.activeSteps[i] = 0; c.lyrics[i] = "";
+                }
             }
         };
 
@@ -897,9 +964,16 @@
                                 if (current === 0) circle.activeSteps[i] = 'grv'; else if (current === 'grv') circle.activeSteps[i] = 'GRV'; else if (current === 'GRV') circle.activeSteps[i] = 'aig'; else if (current === 'aig') circle.activeSteps[i] = 'AIG'; else circle.activeSteps[i] = 0;
                             } else if (inst.type === 'voice') {
                                 if (current === 0) {
-                                    let lyric = prompt("Paroles (ex: Égua do babado) :");
-                                    if (lyric !== null) { circle.activeSteps[i] = lyric.trim() ? 'X' : 0; if(!circle.lyrics) circle.lyrics = []; circle.lyrics[i] = lyric.substring(0, 15); }
-                                } else { circle.activeSteps[i] = 0; }
+                                    let lyric = prompt("Paroles / Letras (ex: C5:Vou ou Vou) :");
+                                    if (lyric !== null && lyric.trim() !== '') {
+                                        if (lyric.includes(':')) {
+                                            let s = lyric.split(':');
+                                            circle.activeSteps[i] = s[0].trim(); circle.lyrics[i] = s[1].substring(0, 15);
+                                        } else {
+                                            circle.activeSteps[i] = 'X'; circle.lyrics[i] = lyric.trim().substring(0, 15);
+                                        }
+                                    }
+                                } else { circle.activeSteps[i] = 0; circle.lyrics[i] = ""; }
                             } else {
                                 if (current === 0) circle.activeSteps[i] = 'd'; else if (current === 'd') circle.activeSteps[i] = 'D'; else if (current === 'D') circle.activeSteps[i] = 'g'; else if (current === 'g') circle.activeSteps[i] = 'G'; else circle.activeSteps[i] = 0;
                             }
@@ -919,7 +993,7 @@
                                 }
                             } else {
                                 let voiceEl = document.getElementById(`pattern-input-${circle.id}`);
-                                if(voiceEl) voiceEl.value = circle.lyrics.join(',');
+                                if(voiceEl) voiceEl.value = window.generatePatternString(circle);
                             }
                             return;
                         }
@@ -939,7 +1013,14 @@
             }
         }
 
-        document.getElementById('bpm').addEventListener('input', (e) => { Tone.Transport.bpm.value = e.target.value; });
+        // CORRECTION BPM (Garantit toujours un nombre entier !)
+        document.getElementById('bpm').addEventListener('change', (e) => { 
+            let val = Math.round(Number(e.target.value));
+            if (val < 40) val = 40; if (val > 240) val = 240;
+            e.target.value = val;
+            Tone.Transport.bpm.value = val;
+        });
+        
         document.getElementById('masterVol').addEventListener('input', (e) => { let val = parseFloat(e.target.value); Tone.Destination.volume.value = val === -40 ? -Infinity : val; });
         const metroBtn = document.getElementById('metroBtn'); metroBtn.addEventListener('click', () => { isMetroOn = !isMetroOn; metroBtn.classList.toggle('metro-on', isMetroOn); });
         document.getElementById('clearBtn').addEventListener('click', () => { circles = []; refreshCirclesLayout(); });
@@ -978,7 +1059,7 @@
             reader.onload = function(evt) {
                 try { 
                     const d = JSON.parse(evt.target.result); 
-                    if (d.bpm) { document.getElementById('bpm').value = d.bpm; Tone.Transport.bpm.value = d.bpm; } 
+                    if (d.bpm) { document.getElementById('bpm').value = Math.round(d.bpm); Tone.Transport.bpm.value = Math.round(d.bpm); } 
                     if (d.circles) { circles = d.circles; } 
                     if (d.timeSig) { updateTimeSig(d.timeSig, 'skip'); } else { updateTimeSig("4/4", 'skip'); }
                     refreshCirclesLayout(); 
@@ -992,7 +1073,7 @@
             fetch(fileName).then(res => { if (!res.ok) throw new Error("Fichier introuvable"); return res.json(); })
                 .then(data => { 
                     if (data.circles) circles = JSON.parse(JSON.stringify(data.circles)); 
-                    if (data.bpm) { document.getElementById('bpm').value = data.bpm; Tone.Transport.bpm.value = data.bpm; } 
+                    if (data.bpm) { document.getElementById('bpm').value = Math.round(data.bpm); Tone.Transport.bpm.value = Math.round(data.bpm); } 
                     if (data.timeSig) { updateTimeSig(data.timeSig, 'skip'); } else { updateTimeSig("4/4", 'skip'); }
                     refreshCirclesLayout(); 
                 })
@@ -1003,7 +1084,7 @@
             let p = name === 'baque-de-imale' ? baqueDeImalePreset : vouVadiarPreset;
             if (p) { 
                 circles = JSON.parse(JSON.stringify(p.circles)); 
-                document.getElementById('bpm').value = p.bpm; Tone.Transport.bpm.value = p.bpm; 
+                document.getElementById('bpm').value = Math.round(p.bpm); Tone.Transport.bpm.value = Math.round(p.bpm); 
                 updateTimeSig(p.timeSig || "4/4", 'skip');
             }
             refreshCirclesLayout(); measureCount = 0; 
