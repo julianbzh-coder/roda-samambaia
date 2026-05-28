@@ -5,144 +5,121 @@
     <title>Baque de maracatu - Samambaia</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
-        :root {
-            --bg-dark: #121212; --panel-bg: #1e1e1e; --control-bg: #252525;
-            --text-main: #f5f5f5; --text-muted: #888;
-            --accent-gold: #f1c40f; --accent-green: #2ecc71; --accent-red: #e74c3c;
-        }
+        :root { --bg-dark: #121212; --panel-bg: #1e1e1e; --control-bg: #252525; --text-main: #f5f5f5; --text-muted: #888; --accent-gold: #f1c40f; --accent-green: #2ecc71; --accent-red: #e74c3c; }
         body { margin: 0; background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', Roboto, sans-serif; display: flex; height: 100vh; overflow: hidden; }
         #left-panel { width: 340px; background-color: var(--panel-bg); border-right: 1px solid #333; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; z-index: 10; height: 100%; }
         .panel-title { font-size: 13px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; }
         #mixer-section { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
         .track-mixer { background-color: var(--control-bg); border: 1px solid #3a3a3a; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
         .track-mixer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .track-name { font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
-        .track-name select { background-color: #111; color: #fff; border: 1px solid #555; font-size: 11px; padding: 2px 4px; border-radius: 4px; max-width: 110px; }
-        .track-mute-solo { display: flex; gap: 4px; }
-        .btn-mute-solo { width: 24px; height: 24px; background-color: #333; color: #fff; border: none; border-radius: 4px; font-weight: bold; font-size: 10px; cursor: pointer; }
-        .btn-mute-solo.mute-on { background-color: var(--accent-red); }
-        .btn-mute-solo.solo-on { background-color: var(--accent-gold); color: #000; }
-        .btn-delete { background-color: #444; } .btn-delete:hover { background-color: var(--accent-red); }
-        .fader-group { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-        .fader { flex-grow: 1; -webkit-appearance: none; height: 6px; border-radius: 3px; background: #444; outline: none; width: 70px; }
-        .fader::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #fff; cursor: pointer; }
-        .pattern-input { flex-grow: 1; background: #111; border: 1px solid #555; color: var(--accent-gold); padding: 4px 6px; border-radius: 4px; font-family: monospace; font-size: 13px; width: 100%; box-sizing: border-box; }
-        
-        #legend-section { border-top: 1px solid #333; padding-top: 12px; margin-top: 12px; }
-        .legend-badge { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 18px; font-size: 9px; font-weight: bold; border-radius: 4px; background: #333; }
+        .pattern-input { flex-grow: 1; background: #111; border: 1px solid #555; color: var(--accent-gold); padding: 5px; border-radius: 4px; font-family: monospace; width: 100%; box-sizing: border-box; }
         
         #right-panel { flex-grow: 1; display: flex; flex-direction: column; position: relative; }
-        #top-bar { height: 60px; background-color: var(--panel-bg); border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 10; }
-        #header-main { display: flex; align-items: center; gap: 12px; }
-        #header-main img { height: 45px; border-radius: 6px; background-color: #fff; padding: 3px; }
-        #canvas-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; background-color: var(--bg-dark); }
+        #top-bar { height: 60px; background-color: var(--panel-bg); border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+        #canvas-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; }
         canvas { max-width: 100%; max-height: 100%; aspect-ratio: 1 / 1; cursor: pointer; }
+        button.control-btn { background-color: #333; color: #fff; border: 1px solid #444; padding: 6px 14px; border-radius: 20px; cursor: pointer; }
     </style>
 </head>
 <body>
-
     <div id="left-panel">
         <div class="panel-title">Mesa de Som</div>
         <div id="mixer-section"><div id="tracks-mixer-container"></div></div>
         <div id="legend-section">
             <div class="panel-title">Legenda</div>
-            <div style="font-size: 11px; color: #888; line-height: 1.4;">
+            <div style="font-size: 11px; color: #888;">
                 • Alfaia: <b>D</b>(Dir)/<b>d</b>(dir), <b>E</b>(Esq)/<b>e</b>(esq)<br>
-                • Gonguê: <b>G</b>(Grave)/<b>A</b>(Agudo)<br>
-                • Agbê: <b>D</b>(Dir)/<b>G</b>(Esq)
+                • Agbê: <b>D</b>(Dir)/<b>G</b>(Esq)<br>
+                • Gonguê: <b>G</b>(Grave)/<b>A</b>(Agudo)
             </div>
         </div>
     </div>
-
     <div id="right-panel">
         <div id="top-bar">
-            <div id="header-main">
-                <img src="logo-samambaia.png" alt="Samambaia">
-                <span id="header-title-text" style="font-weight:bold; font-size:16px;">Baque de maracatu - Samambaia</span>
-            </div>
-            <div id="global-controls">
-                <button id="showAddBtn" class="control-btn" style="background-color: var(--accent-green);">+ Instrumento</button>
-                <select id="addInstrumentSelect" style="display:none;"></select>
-                <button id="clearBtn" class="control-btn">🗑️</button>
+            <div style="font-weight:bold; font-size:16px;">Baque de maracatu - Samambaia</div>
+            <div>
+                <button id="addBtn" class="control-btn" style="background: var(--accent-green);">+ Instrumento</button>
+                <button id="playBtn" class="control-btn">▶ Play</button>
             </div>
         </div>
         <div id="canvas-container"><canvas id="canvas" width="1200" height="1200"></canvas></div>
     </div>
 
     <script>
-        // Configuration Instruments (Portugais)
         const instrumentsConfig = [
-            { id: 'marcante', name: 'Alfaia Marcante', type: 'hands', colors: { 'd': '#5a0000', 'D': '#8b0000', 'e': '#ff7676', 'E': '#ff4d4d', text: '#fff' } },
-            { id: 'meiao', name: 'Alfaia Meião', type: 'hands', colors: { 'd': '#a04000', 'D': '#d35400', 'e': '#fbc531', 'E': '#f39c12', text: '#fff' } },
-            { id: 'repique', name: 'Alfaia Repique', type: 'hands', colors: { 'd': '#b59510', 'D': '#f1c40f', 'e': '#fff5cc', 'E': '#ffeaa7', text: '#121212' } },
-            { id: 'caixa', name: 'Caixa', type: 'hands', colors: { 'd': '#320b61', 'D': '#4a148c', 'e': '#be5be0', 'E': '#9c27b0', text: '#fff' } },
-            { id: 'gongue', name: 'Gonguê', type: 'gongue', colors: { 'g': '#222', 'G': '#000', 'a': '#7f8c8d', 'A': '#bdc3c7', text: '#fff' } },
-            { id: 'agbe', name: 'Agbê', type: 'shake', colors: { 'g': '#113b14', 'G': '#1b5e20', 'd': '#74d478', 'D': '#4caf50', text: '#fff' } }
+            { id: 'alf', name: 'Alfaia', type: 'hands' }, { id: 'cxa', name: 'Caixa', type: 'hands' }, 
+            { id: 'gon', name: 'Gonguê', type: 'gongue' }, { id: 'agb', name: 'Agbê', type: 'shake' }
         ];
 
         let circles = [];
         let isPlaying = false;
+        let currentStepIndex = 0;
 
         function renderMixer() {
             const container = document.getElementById('tracks-mixer-container');
             container.innerHTML = "";
-            circles.forEach((circle, index) => {
-                const inst = instrumentsConfig[circle.instrumentIdx];
+            circles.forEach((c) => {
+                const inst = instrumentsConfig[c.instrumentIdx];
                 const div = document.createElement('div'); div.className = "track-mixer";
                 div.innerHTML = `
                     <div class="track-mixer-header">
-                        <span class="track-name">${index + 1}. ${inst.name}</span>
-                        <button class="btn-delete" onclick="deleteCircle(${circle.id})">🗑️</button>
+                        <span>${inst.name}</span>
+                        <button onclick="circles=circles.filter(x=>x.id!=${c.id}); renderMixer();">🗑️</button>
                     </div>
-                    <div class="pattern-row">
-                        <input type="text" class="pattern-input" value="${getPatternStr(circle)}" oninput="updatePattern(${circle.id}, this.value)">
-                    </div>
+                    <input type="text" class="pattern-input" value="${c.activeSteps.join('')}" oninput="updatePattern(${c.id}, this.value)">
                 `;
                 container.appendChild(div);
             });
-        }
-
-        // Logique de pattern (G,g,D,d pour Agbê)
-        function getPatternStr(c) {
-            return c.activeSteps.map(s => s === 0 ? " " : s).join("");
         }
 
         window.updatePattern = function(id, val) {
             let c = circles.find(x => x.id === id);
             if(c) {
                 let chars = val.split('');
-                c.activeSteps = c.activeSteps.map((_, i) => chars[i] || 0);
+                c.activeSteps = Array(16).fill(0).map((_, i) => chars[i] || 0);
             }
         };
 
-        window.deleteCircle = function(id) { circles = circles.filter(x => x.id !== id); renderMixer(); };
-
-        document.getElementById('showAddBtn').addEventListener('click', () => {
-            const sel = document.getElementById('addInstrumentSelect');
-            if (sel.style.display === 'none') {
-                sel.innerHTML = instrumentsConfig.map((inst, i) => `<option value="${i}">${inst.name}</option>`).join('');
-                sel.style.display = 'block';
-            } else {
-                let idx = parseInt(sel.value);
-                if (circles.length < 10) {
-                    // Radius uniforme: 120 + (index * 70)
-                    circles.push({ id: Date.now(), radius: 120 + (circles.length * 70), steps: 16, activeSteps: Array(16).fill(0), instrumentIdx: idx });
-                    renderMixer();
-                }
-                sel.style.display = 'none';
+        document.getElementById('addBtn').addEventListener('click', () => {
+            if (circles.length < 10) {
+                // Espacement uniforme : 120 + (index * 60)
+                circles.push({ 
+                    id: Date.now(), 
+                    radius: 120 + (circles.length * 60), 
+                    steps: 16, 
+                    activeSteps: Array(16).fill(0), 
+                    instrumentIdx: 0 
+                });
+                renderMixer();
             }
         });
 
-        // Loop de rendu (Canvas)
         function draw() {
-            const ctx = document.getElementById('canvas').getContext('2d');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, 1200, 1200);
+            
             circles.forEach(c => {
-                ctx.beginPath(); ctx.arc(600, 600, c.radius, 0, Math.PI*2); ctx.stroke();
-                // Rendu des notes ici...
+                ctx.beginPath(); ctx.arc(600, 600, c.radius, 0, Math.PI*2); ctx.strokeStyle = '#555'; ctx.stroke();
+                
+                c.activeSteps.forEach((step, i) => {
+                    if(step !== 0) {
+                        let angle = (i / 16) * Math.PI * 2 - Math.PI/2;
+                        let x = 600 + Math.cos(angle) * c.radius;
+                        let y = 600 + Math.sin(angle) * c.radius;
+                        ctx.fillStyle = '#f1c40f'; ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI*2); ctx.fill();
+                        ctx.fillStyle = '#fff'; ctx.fillText(step, x-3, y+3);
+                    }
+                });
             });
             requestAnimationFrame(draw);
         }
+        
+        document.getElementById('playBtn').addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            document.getElementById('playBtn').textContent = isPlaying ? "⏹ Stop" : "▶ Play";
+        });
+
         draw();
     </script>
 </body>
