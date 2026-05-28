@@ -1,82 +1,209 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Ciclos de Maracatu</title>
+    <title>Les cycles du maracatu</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         :root {
-            --bg-dark: #121212; --panel-bg: #1e1e1e; --control-bg: #252525;
-            --text-main: #f5f5f5; --text-muted: #888;
-            --accent-gold: #f1c40f; --accent-green: #2ecc71; --accent-red: #e74c3c;
+            --bg-dark: #121212; 
+            --panel-bg: #1e1e1e; 
+            --control-bg: #252525;
+            --text-main: #f5f5f5; 
+            --text-muted: #888;
+            --accent-gold: #f1c40f; 
+            --accent-green: #2ecc71; 
+            --accent-red: #e74c3c;
         }
 
         body {
-            margin: 0; background-color: var(--bg-dark); color: var(--text-main);
-            font-family: 'Segoe UI', Roboto, sans-serif; display: flex; height: 100vh; overflow: hidden;
+            margin: 0; 
+            background-color: var(--bg-dark); 
+            color: var(--text-main);
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden;
         }
 
         #left-panel {
-            width: 350px; background-color: var(--panel-bg); border-right: 1px solid #333;
-            display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; z-index: 10; height: 100%;
+            width: 340px; 
+            background-color: var(--panel-bg); 
+            border-right: 1px solid #333;
+            display: flex; 
+            flex-direction: column; 
+            padding: 20px; 
+            box-sizing: border-box; 
+            z-index: 10; 
+            height: 100%;
         }
 
         .panel-title {
-            font-size: 13px; font-weight: bold; color: var(--text-muted); text-transform: uppercase;
-            letter-spacing: 1.5px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;
+            font-size: 13px; 
+            font-weight: bold; 
+            color: var(--text-muted); 
+            text-transform: uppercase;
+            letter-spacing: 1.5px; 
+            margin-bottom: 15px; 
+            border-bottom: 1px solid #333; 
+            padding-bottom: 5px;
         }
 
-        #mixer-section { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
+        #mixer-section { 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            padding-right: 5px; 
+        }
 
-        .track-mixer { background-color: var(--control-bg); border: 1px solid #3a3a3a; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
-        .track-mixer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .track-name { font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
-        .track-name select { background-color: #111; color: #fff; border: 1px solid #555; font-size: 11px; padding: 2px 4px; border-radius: 4px; max-width: 120px; }
+        .track-mixer { 
+            background-color: var(--control-bg); 
+            border: 1px solid #3a3a3a; 
+            border-radius: 8px; 
+            padding: 12px; 
+            margin-bottom: 10px; 
+        }
+        
+        .track-mixer-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 8px; 
+        }
+        
+        .track-name { 
+            font-size: 13px; 
+            font-weight: bold; 
+            display: flex; 
+            align-items: center; 
+            gap: 5px; 
+        }
+        
+        .track-name select { 
+            background-color: #111; 
+            color: #fff; 
+            border: 1px solid #555; 
+            font-size: 11px; 
+            padding: 2px 4px; 
+            border-radius: 4px; 
+            max-width: 110px; 
+        }
 
-        .track-mute-solo { display: flex; gap: 4px; }
-        .btn-mute-solo { width: 24px; height: 24px; background-color: #333; color: #fff; border: none; border-radius: 4px; font-weight: bold; font-size: 10px; cursor: pointer; }
+        .track-mute-solo { 
+            display: flex; 
+            gap: 4px; 
+        }
+        
+        .btn-mute-solo { 
+            width: 24px; height: 24px; 
+            background-color: #333; color: #fff; 
+            border: none; border-radius: 4px; 
+            font-weight: bold; font-size: 10px; 
+            cursor: pointer; 
+        }
         .btn-mute-solo.mute-on { background-color: var(--accent-red); }
         .btn-mute-solo.solo-on { background-color: var(--accent-gold); color: #000; }
         .btn-mute-solo.hidden-on { background-color: #34495e; color: #95a5a6; }
-        .btn-delete { background-color: #444; } .btn-delete:hover { background-color: var(--accent-red); }
+        .btn-delete { background-color: #444; } 
+        .btn-delete:hover { background-color: var(--accent-red); }
 
-        .fader-group { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-        .fader { flex-grow: 1; -webkit-appearance: none; height: 6px; border-radius: 3px; background: #444; outline: none; width: 70px; }
-        .fader::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #fff; cursor: pointer; }
-
-        .vol-meter-bg { width: 35px; height: 8px; background-color: #000; border-radius: 2px; position: relative; overflow: hidden; }
-        .vol-meter-bar { height: 100%; background-color: var(--accent-green); width: 0%; transition: width 0.05s; }
-
-        .steps-config { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); border-top: 1px dashed #444; padding-top: 8px; }
-        .steps-config input[type="number"] { width: 35px; background: #111; border: 1px solid #555; color: #fff; padding: 2px; border-radius: 4px; text-align: center; }
+        .fader-group { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            margin-bottom: 8px; 
+        }
         
-        .pattern-input { flex-grow: 1; background: #111; color: var(--accent-gold); border: 1px solid #555; padding: 4px 6px; border-radius: 4px; font-family: monospace; font-size: 11px; letter-spacing: 1px; }
-        .pattern-input:focus { border-color: var(--accent-green); outline: none; }
+        .fader { 
+            flex-grow: 1; -webkit-appearance: none; height: 6px; 
+            border-radius: 3px; background: #444; outline: none; width: 70px; 
+        }
+        .fader::-webkit-slider-thumb { 
+            -webkit-appearance: none; width: 14px; height: 14px; 
+            border-radius: 50%; background: #fff; cursor: pointer; 
+        }
 
-        /* --- LEGENDE --- */
-        #legend-section { border-top: 1px solid #333; padding-top: 12px; margin-top: 12px; display: flex; flex-direction: column; flex-shrink: 0; }
-        .legend-container { display: flex; flex-direction: column; gap: 6px; max-height: 250px; overflow-y: auto; padding-right: 5px; }
-        .legend-group { display: flex; flex-direction: column; gap: 4px; background: #181818; padding: 8px; border-radius: 6px; border: 1px solid #2a2a2a; }
-        .legend-group-title { font-weight: bold; color: var(--accent-gold); margin-bottom: 2px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .legend-item { display: flex; align-items: center; gap: 8px; color: var(--text-main); font-size: 11px; }
-        .legend-badge { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 18px; font-size: 9px; font-weight: bold; border-radius: 4px; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; }
+        .vol-meter-bg { 
+            width: 35px; height: 8px; background-color: #000; 
+            border-radius: 2px; position: relative; overflow: hidden; 
+        }
+        .vol-meter-bar { 
+            height: 100%; background-color: var(--accent-green); 
+            width: 0%; transition: width 0.05s; 
+        }
+
+        .steps-config { 
+            display: flex; justify-content: space-between; 
+            align-items: center; font-size: 11px; 
+            color: var(--text-muted); border-top: 1px dashed #444; 
+            padding-top: 6px; 
+        }
+        .steps-config input { 
+            width: 40px; background: #111; border: 1px solid #555; 
+            color: #fff; padding: 2px; border-radius: 4px; text-align: center; 
+        }
+
+        /* --- LÉGENDE --- */
+        #legend-section { 
+            border-top: 1px solid #333; padding-top: 12px; margin-top: 12px; 
+            display: flex; flex-direction: column; flex-shrink: 0; 
+        }
+        .legend-container { 
+            display: flex; flex-direction: column; gap: 6px; 
+            max-height: 220px; overflow-y: auto; padding-right: 5px; 
+        }
+        .legend-group { 
+            display: flex; flex-direction: column; gap: 4px; 
+            background: #181818; padding: 8px; border-radius: 6px; 
+            border: 1px solid #2a2a2a; 
+        }
+        .legend-group-title { 
+            font-weight: bold; color: var(--accent-gold); margin-bottom: 2px; 
+            font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; 
+        }
+        .legend-item { 
+            display: flex; align-items: center; gap: 8px; 
+            color: var(--text-main); font-size: 11px; 
+        }
+        .legend-badge { 
+            display: inline-flex; align-items: center; justify-content: center; 
+            width: 44px; height: 18px; font-size: 9px; font-weight: bold; 
+            border-radius: 4px; text-align: center; border: 1px solid rgba(255,255,255,0.1); 
+            box-sizing: border-box; 
+        }
 
         /* --- INTERFACE DROITE & CANVAS --- */
-        #right-panel { flex-grow: 1; display: flex; flex-direction: column; position: relative; }
-        #top-bar { height: 60px; background-color: var(--panel-bg); border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-sizing: border-box; z-index: 10; }
+        #right-panel { 
+            flex-grow: 1; display: flex; flex-direction: column; position: relative; 
+        }
+        #top-bar { 
+            height: 60px; background-color: var(--panel-bg); 
+            border-bottom: 1px solid #333; display: flex; align-items: center; 
+            justify-content: space-between; padding: 0 20px; box-sizing: border-box; 
+            z-index: 10; 
+        }
 
         #header-main { display: flex; align-items: center; gap: 10px; }
         #header-main img { height: 45px; width: auto; border-radius: 4px; }
         #header-title-text { font-size: 16px; font-weight: bold; letter-spacing: 1px; }
+        
         #global-controls { display: flex; align-items: center; gap: 10px; }
 
-        .preset-select { background-color: var(--control-bg); color: var(--text-main); border: 1px solid #444; padding: 5px; border-radius: 6px; font-size: 12px; font-weight: bold; }
+        .preset-select { 
+            background-color: var(--control-bg); color: var(--text-main); 
+            border: 1px solid #444; padding: 5px; border-radius: 6px; 
+            font-size: 12px; font-weight: bold; 
+        }
 
-        button.control-btn { background-color: #333; color: #fff; border: 1px solid #444; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold; transition: background-color 0.2s; }
+        button.control-btn { 
+            background-color: #333; color: #fff; border: 1px solid #444; 
+            padding: 6px 14px; border-radius: 20px; cursor: pointer; 
+            font-size: 12px; font-weight: bold; transition: background-color 0.2s; 
+        }
         button.control-btn:hover { background-color: #444; }
         button#metroBtn.metro-on { background-color: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
 
         .icon-btn { font-size: 16px; padding: 6px 10px; }
+
         .control-separator { width: 1px; height: 24px; background-color: #444; margin: 0 4px; }
         label.control-label { font-size: 12px; display: flex; align-items: center; gap: 4px; color: var(--text-main); font-weight: bold; }
         #bpm { width: 44px; background-color: var(--control-bg); color: var(--text-main); border: 1px solid #444; padding: 4px; border-radius: 6px; text-align: center; }
@@ -84,13 +211,25 @@
         .master-vol-fader { -webkit-appearance: none; height: 6px; border-radius: 3px; background: #444; outline: none; width: 70px; }
         .master-vol-fader::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-gold); cursor: pointer; }
 
-        #canvas-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; background-color: var(--bg-dark); background-image: url('atelier.png'); background-size: cover; background-position: center; background-repeat: no-repeat; }
-        canvas { max-width: 100%; max-height: 100%; aspect-ratio: 1 / 1; cursor: pointer; }
+        #canvas-container { 
+            flex-grow: 1; display: flex; align-items: center; justify-content: center; 
+            background-color: var(--bg-dark); background-image: url('atelier.png'); 
+            background-size: cover; background-position: center; background-repeat: no-repeat; 
+        }
+        
+        canvas { 
+            max-width: 100%; max-height: 100%; 
+            aspect-ratio: 1 / 1; cursor: pointer; 
+        }
+        
         #fileInput { display: none; }
         
-        #loading-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(18,18,18,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; color: var(--accent-gold); cursor: pointer; }
-        #loading-overlay h2 { margin: 0 0 10px 0; font-size: 20px; }
-        #loading-overlay p { margin: 0; font-size: 13px; color: #bbb; }
+        #loading-overlay { 
+            position: absolute; top:0; left:0; width:100%; height:100%; 
+            background: rgba(18,18,18,0.9); display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; z-index: 9999; 
+            font-size: 18px; font-weight: bold; color: var(--accent-gold); 
+        }
 
         @media (max-width: 768px) {
             body { flex-direction: column; overflow-y: auto; height: auto; }
@@ -106,40 +245,39 @@
 </head>
 <body>
 
-    <div id="loading-overlay" onclick="this.style.display='none'">
-        <h2>🌿 Carregando vozes...</h2>
-        <p>(Cliquez ici pour forcer l'ouverture)</p>
-    </div>
+    <div id="loading-overlay">🌿 Chargement des voix du maracatu Samambaia...</div>
 
     <div id="left-panel">
-        <div class="panel-title" title="Table de mixage">🎛️ Mesa de Som</div>
+        <div class="panel-title">🎛️ Table de Mixage</div>
         <div id="mixer-section"><div id="tracks-mixer-container"></div></div>
 
         <div id="legend-section">
-            <div class="panel-title" style="margin-bottom: 6px;" title="Légende">📖 Legenda</div>
+            <div class="panel-title" style="margin-bottom: 6px;">📖 Légende</div>
             <div class="legend-container">
-                <div style="font-size: 11px; margin-bottom: 4px; color: var(--accent-gold); line-height: 1.35;" title="Règle d'or : Majuscule = Fort, Minuscule = Faible">
-                    💡 <strong>Regra de Ouro:</strong><br>
-                    • <strong>Maiúscula</strong> = Toque Forte<br>
-                    • <strong>Minúscula</strong> = Toque Fraco
+                <div style="font-size: 11px; margin-bottom: 4px; color: var(--accent-gold); line-height: 1.35;">
+                    💡 <strong>Règle d'or :</strong><br>
+                    • <strong>Majuscule</strong> = Coup Fort (Accentué)<br>
+                    • <strong>Minuscule</strong> = Coup Faible (Fantôme)
                 </div>
                 
                 <div class="legend-group">
-                    <span class="legend-group-title" title="Tambours & Agbê">🥁 Alfaia, Caixa & Agbê</span>
-                    <div class="legend-item"><span class="legend-badge" style="background:#8b0000; color:#fff;">D / d</span> <span>Mão Direita / → Direita <span style="opacity:0.6; font-size:9px;">(Droite)</span></span></div>
-                    <div class="legend-item"><span class="legend-badge" style="background:#f39c12; color:#121212;">G / g</span> <span>Mão Esquerda / ← Esquerda <span style="opacity:0.6; font-size:9px;">(Gauche)</span></span></div>
+                    <span class="legend-group-title">🥁 Alfaia & Caixa</span>
+                    <div class="legend-item"><span class="legend-badge" style="background:#8b0000; color:#fff;">D / d</span> <span>Main Droite (Mão Direita)</span></div>
+                    <div class="legend-item"><span class="legend-badge" style="background:#f39c12; color:#121212;">G / g</span> <span>Main Gauche (Mão Esquerda)</span></div>
                 </div>
 
                 <div class="legend-group">
-                    <span class="legend-group-title" title="Cloche">🔔 Gonguê</span>
-                    <div class="legend-item"><span class="legend-badge" style="background:#222; color:#fff;">G / g</span> <span>Som Grave <span style="opacity:0.6; font-size:9px;">(Ouvert)</span></span></div>
-                    <div class="legend-item"><span class="legend-badge" style="background:#bdc3c7; color:#000;">A / a</span> <span>Som Agudo <span style="opacity:0.6; font-size:9px;">(Fermé)</span></span></div>
+                    <span class="legend-group-title">🔔 Gonguê</span>
+                    <div class="legend-item"><span class="legend-badge" style="background:#222; color:#fff;">GRV / grv</span> <span>Son Grave Fort / Faible</span></div>
+                    <div class="legend-item"><span class="legend-badge" style="background:#bdc3c7; color:#000;">AIG / aig</span> <span>Son Aigu Fort / Faible</span></div>
                 </div>
 
                 <div class="legend-group">
-                    <span class="legend-group-title" title="Secoué Vertical">🌾 Mineiro</span>
-                    <div class="legend-item"><span class="legend-badge" style="background:#1b5e20; color:#fff; border: 2px solid #fff;">P / p</span> <span>↑ Cima <span style="opacity:0.6; font-size:9px;">(Haut)</span></span></div>
-                    <div class="legend-item"><span class="legend-badge" style="background:#4caf50; color:#121212; border: 2px solid #fff;">T / t</span> <span>↓ Baixo <span style="opacity:0.6; font-size:9px;">(Bas)</span></span></div>
+                    <span class="legend-group-title">🌾 Agbê (Horizontal)</span>
+                    <div class="legend-item"><span class="legend-badge" style="background:#1b5e20; color:#fff; border: 2px solid #fff;">←</span> <span>Vers la gauche (Fort)</span></div>
+                    <div class="legend-item"><span class="legend-badge" style="background:#113b14; color:#fff; opacity:0.8;">←</span> <span>Vers la gauche (Faible)</span></div>
+                    <div class="legend-item"><span class="legend-badge" style="background:#4caf50; color:#121212; border: 2px solid #fff;">→</span> <span>Vers la droite (Fort)</span></div>
+                    <div class="legend-item"><span class="legend-badge" style="background:#74d478; color:#121212; opacity:0.8;">→</span> <span>Vers la droite (Faible)</span></div>
                 </div>
             </div>
         </div>
@@ -150,7 +288,7 @@
             <div id="header-main">
                 <img src="logo-samambaia.png" alt="Samambaia" onerror="this.style.display='none'; document.getElementById('fallback-emoji').style.display='inline';">
                 <span id="fallback-emoji" style="display:none; color:var(--accent-green); font-size:22px;">🌿</span>
-                <span id="header-title-text" title="Les cycles du maracatu">Ciclos de Maracatu</span>
+                <span id="header-title-text">Les cycles du maracatu</span>
             </div>
             
             <div id="global-controls">
@@ -171,15 +309,15 @@
                 <div class="control-separator"></div>
                 
                 <div style="position:relative; display:flex; align-items:center;">
-                    <button id="showAddBtn" class="control-btn" style="background-color: var(--accent-green); color: #000; font-weight:bold;" title="Ajouter un instrument">+ Inst</button>
+                    <button id="showAddBtn" class="control-btn" style="background-color: var(--accent-green); color: #000; font-weight:bold;">+ Inst</button>
                     <select id="addInstrumentSelect" class="preset-select" style="display:none; position:absolute; top:35px; right:0; z-index:100; box-shadow: 0 4px 10px rgba(0,0,0,0.8);">
-                        <option value="" disabled selected>Escolha um instrumento...</option>
+                        <option value="" disabled selected>Choisir un instrument...</option>
                     </select>
                 </div>
                 
-                <button id="clearBtn" class="control-btn icon-btn" title="Limpar Roda (Vider)">🗑️</button>
-                <button id="saveBtn" class="control-btn icon-btn" title="Salvar (Sauvegarder)" style="background:#2980b9;">💾</button>
-                <button id="loadBtn" class="control-btn icon-btn" title="Carregar (Charger)" style="background:#2980b9;">📂</button>
+                <button id="clearBtn" class="control-btn icon-btn" title="Vider la Roda">🗑️</button>
+                <button id="saveBtn" class="control-btn icon-btn" title="Sauvegarder" style="background:#2980b9;">💾</button>
+                <button id="loadBtn" class="control-btn icon-btn" title="Charger" style="background:#2980b9;">📂</button>
                 <input type="file" id="fileInput" accept=".json">
             </div>
         </div>
@@ -216,10 +354,15 @@
         let circles = JSON.parse(JSON.stringify(vouVadiarPreset.circles));
 
         // --- CORE AUDIO ---
-        Tone.context.lookAhead = 0.04; Tone.context.latencyHint = "interactive"; Tone.Transport.swing = 0.0; 
+        Tone.context.lookAhead = 0.04; 
+        Tone.context.latencyHint = "interactive"; 
+        Tone.Transport.swing = 0.0; 
         Tone.Destination.volume.value = -6;
 
-        const channels = {}; const meters = {}; const samplers = {}; const voiceSynths = {};
+        const channels = {}; 
+        const meters = {}; 
+        const samplers = {}; 
+        const voiceSynths = {};
 
         const instrumentsConfig = [
             { id: 'marcante', name: 'Alfaia Marcante', type: 'hands', path: 'Alfaia/Marcante', colors: { 'd': '#5a0000', 'D': '#8b0000', 'g': '#ff7676', 'G': '#ff4d4d', text: '#fff' } },
@@ -229,20 +372,15 @@
             { id: 'gongue', name: 'Gonguê', type: 'gongue', path: 'Gongue', colors: { 'grv': '#222222', 'GRV': '#000000', 'aig': '#7f8c8d', 'AIG': '#bdc3c7', text: '#fff' } },
             { id: 'agbe', name: 'Agbê', type: 'shake', path: 'Graines/Agbe', colors: { 'p': '#113b14', 'P': '#1b5e20', 't': '#74d478', 'T': '#4caf50', text: '#fff' } },
             { id: 'mineiro', name: 'Mineiro', type: 'shake', path: 'Graines/Mineiro', colors: { 'p': '#113b14', 'P': '#1b5e20', 't': '#74d478', 'T': '#4caf50', text: '#fff' } },
-            { id: 'chant', name: 'Voz (Chant)', type: 'voice', path: 'internal', colors: { active: '#2980b9', text: '#fff' } },
-            { id: 'puxador', name: 'Voz Puxador', type: 'voice', path: 'internal', colors: { active: '#0c19cf', text: '#fff' } }
+            { id: 'chant', name: 'Chant', type: 'voice', path: 'internal', colors: { active: '#2980b9', text: '#fff' } },
+            { id: 'puxador', name: 'Puxador', type: 'voice', path: 'internal', colors: { active: '#0c19cf', text: '#fff' } }
         ];
 
-        const bMetroClick = new Tone.Synth({ oscillator: { type: "sine" }, envelope: { attack: 0.001, decay: 0.04, sustain: 0, release: 0.04 }, volume: -8 }).toDestination();
-
-        let loadedCount = 0; const totalAudioInstruments = instrumentsConfig.filter(i => i.type !== 'voice').length;
-        function checkAllLoaded() {
-            loadedCount++;
-            if (loadedCount >= totalAudioInstruments) { const o = document.getElementById('loading-overlay'); if (o) o.style.display = 'none'; }
-        }
-        
-        // Sécurité ultime au cas où Github bloque le chargement d'un son
-        window.addEventListener('load', () => { setTimeout(() => { const o = document.getElementById('loading-overlay'); if (o) o.style.display = 'none'; }, 2000); });
+        const bMetroClick = new Tone.Synth({ 
+            oscillator: { type: "sine" }, 
+            envelope: { attack: 0.001, decay: 0.04, sustain: 0, release: 0.04 }, 
+            volume: -8 
+        }).toDestination();
 
         instrumentsConfig.forEach(inst => {
             channels[inst.id] = new Tone.Channel({ volume: 0 }).toDestination();
@@ -250,27 +388,715 @@
             channels[inst.id].connect(meters[inst.id]);
 
             if (inst.type === 'voice') {
-                voiceSynths[inst.id] = new Tone.Synth({ oscillator: { type: inst.id === 'puxador' ? 'triangle' : 'sine' }, envelope: { attack: 0.05, decay: 0.2 }, volume: -10 }).connect(channels[inst.id]);
+                voiceSynths[inst.id] = new Tone.Synth({ 
+                    oscillator: { type: inst.id === 'puxador' ? 'triangle' : 'sine' }, 
+                    envelope: { attack: 0.05, decay: 0.2 }, 
+                    volume: -10 
+                }).connect(channels[inst.id]);
             } else {
-                let urls = inst.type === 'gongue' ? { "faible-grave": "faible-grave.wav", "fort-grave": "fort-grave.wav", "faible-aigue": "faible-aigue.wav", "fort-aigue": "fort-aigue.wav" } : { "faible": "faible.wav", "fort": "fort.wav" };
-                try {
-                    samplers[inst.id] = new Tone.Players({ 
-                        urls: urls, baseUrl: `sons-maracatu/${inst.path}/`, 
-                        onload: () => checkAllLoaded(),
-                        onerror: () => checkAllLoaded() // Ignorer silencieusement les erreurs 404
-                    }).connect(channels[inst.id]);
-                } catch(e) { checkAllLoaded(); }
+                let urls = inst.type === 'gongue' ? 
+                    { "faible-grave": "faible-grave.wav", "fort-grave": "fort-grave.wav", "faible-aigue": "faible-aigue.wav", "fort-aigue": "fort-aigue.wav" } : 
+                    { "faible": "faible.wav", "fort": "fort.wav" };
+                samplers[inst.id] = new Tone.Players({ 
+                    urls: urls, 
+                    baseUrl: `sons-maracatu/${inst.path}/`, 
+                    onload: () => checkAllLoaded() 
+                }).connect(channels[inst.id]);
             }
         });
 
-        const bgImg = new Image(); bgImg.src = 'tambour.png'; let bgLoaded = false; bgImg.onload = () => { bgLoaded = true; };
-
-        const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
-        const centerX = canvas.width / 2; const centerY = canvas.height / 2;
-        let isPlaying = false; 
+        let loadedCount = 0; 
+        const totalAudioInstruments = instrumentsConfig.filter(i => i.type !== 'voice').length;
         
-        // --- VARIABLES DE SÉQUENCE VOCALE ---
-        let measureCount = 0;
+        function checkAllLoaded() {
+            loadedCount++;
+            if (loadedCount >= totalAudioInstruments) { 
+                const o = document.getElementById('loading-overlay'); 
+                if (o) o.style.display = 'none'; 
+            }
+        }
+        
+        setTimeout(() => { 
+            const o = document.getElementById('loading-overlay'); 
+            if (o) o.style.display = 'none'; 
+        }, 1500);
+
+        const bgImg = new Image(); 
+        bgImg.src = 'tambour.png'; 
+        let bgLoaded = false; 
+        bgImg.onload = () => { bgLoaded = true; };
+
+        const canvas = document.getElementById('canvas'); 
+        const ctx = canvas.getContext('2d');
+        const centerX = canvas.width / 2; 
+        const centerY = canvas.height / 2;
+        
+        // --- LES VARIABLES ESSENTIELLES (dont la fameuse disparue !) ---
+        let isPlaying = false; 
+        let isMetroOn = false; 
+        let measureCount = 0; 
 
         function draw() {
-            ctx.clearRect(0
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Ombre de fond
+            ctx.save(); 
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.65)'; 
+            ctx.shadowBlur = 32; 
+            ctx.shadowOffsetX = 0; 
+            ctx.shadowOffsetY = 12;
+            ctx.beginPath(); 
+            ctx.arc(centerX, centerY, 520, 0, Math.PI * 2); 
+            ctx.fillStyle = '#000000'; 
+            ctx.fill(); 
+            ctx.restore();
+
+            // Fond texturé
+            if (bgLoaded) {
+                ctx.save(); 
+                ctx.beginPath(); 
+                ctx.arc(centerX, centerY, 520, 0, Math.PI * 2); 
+                ctx.clip();
+                ctx.drawImage(bgImg, centerX - 520, centerY - 520, 1040, 1040); 
+                ctx.restore();
+                ctx.beginPath(); 
+                ctx.arc(centerX, centerY, 520, 0, Math.PI * 2); 
+                ctx.fillStyle = 'rgba(15, 15, 15, 0.5)'; 
+                ctx.fill();
+            } else {
+                ctx.fillStyle = '#1c1c1c'; 
+                ctx.beginPath(); 
+                ctx.arc(centerX, centerY, 520, 0, Math.PI * 2); 
+                ctx.fill();
+            }
+
+            // Anneau Métronome
+            if (isMetroOn && isPlaying && currentStepIndex % 24 === 0) {
+                ctx.beginPath(); 
+                ctx.arc(centerX, centerY, 535, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(241, 196, 15, 0.5)'; 
+                ctx.lineWidth = 5; 
+                ctx.stroke();
+            }
+
+            // Contour
+            ctx.beginPath(); 
+            ctx.arc(centerX, centerY, 525, 0, Math.PI * 2); 
+            ctx.strokeStyle = '#2c3e50'; 
+            ctx.lineWidth = 8; 
+            ctx.stroke();
+
+            // Identification du cercle vocal actif pour la mise en évidence
+            let voiceCircles = circles.filter(c => instrumentsConfig[c.instrumentIdx].type === 'voice');
+            let activeVoiceCircleId = voiceCircles.length > 0 ? voiceCircles[measureCount % voiceCircles.length].id : null;
+
+            let currentAngle = -Math.PI / 2;
+            if (isPlaying && Tone.Transport.state === "started") {
+                const bpm = Tone.Transport.bpm.value;
+                const progressInMeasure = (Tone.Transport.seconds % ((60 / bpm) * 4)) / ((60 / bpm) * 4);
+                currentAngle = -Math.PI / 2 + (progressInMeasure * Math.PI * 2);
+            }
+
+            circles.forEach((circle) => {
+                if (circle.isHidden) return;
+
+                const inst = instrumentsConfig[circle.instrumentIdx];
+                let hasActiveSolo = circles.some(c => c.isSolo);
+                let isTargeted = hasActiveSolo ? circle.isSolo : !circle.isMute;
+                
+                // Si c'est une voix, on grise les cercles qui ne sont pas en train d'être lus dans la boucle actuelle
+                if (inst.type === 'voice' && voiceCircles.length > 1 && circle.id !== activeVoiceCircleId) {
+                    isTargeted = false; 
+                }
+                
+                ctx.save(); 
+                ctx.globalAlpha = isTargeted ? 1.0 : 0.15;
+                ctx.beginPath(); 
+                ctx.arc(centerX, centerY, circle.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = circle.isSolo ? '#f1c40f' : 'rgba(255,255,255,0.25)'; 
+                ctx.lineWidth = 1.5; 
+                ctx.stroke();
+
+                const pulsePerStep = 96 / circle.steps;
+                const currentStep = (isPlaying && currentStepIndex >= 0) ? Math.floor(currentStepIndex / pulsePerStep) : -1;
+
+                for (let i = 0; i < circle.steps; i++) {
+                    const stepAngle = -Math.PI / 2 + (i * (Math.PI * 2 / circle.steps));
+                    const x = centerX + Math.cos(stepAngle) * circle.radius; 
+                    const y = centerY + Math.sin(stepAngle) * circle.radius;
+                    
+                    let state = circle.activeSteps[i]; 
+                    let fillColor = 'rgba(255,255,255,0.2)'; 
+                    let radiusSize = 5; 
+                    let isAccent = false;
+                    let textSymbol = state;
+
+                    if (state !== 0) {
+                        radiusSize = 10;
+                        if (inst.type === 'voice') {
+                            fillColor = inst.colors.active;
+                            textSymbol = (circle.lyrics && circle.lyrics[i]) ? circle.lyrics[i] : 'X';
+                        } else {
+                            fillColor = inst.colors[state] || '#fff'; 
+                            isAccent = (state === state.toUpperCase()); 
+                            radiusSize = isAccent ? 12 : 9;
+                            
+                            if (inst.type === 'shake') {
+                                if (inst.id === 'mineiro') { 
+                                    if (state.toLowerCase() === 'p') textSymbol = '↑'; 
+                                    else if (state.toLowerCase() === 't') textSymbol = '↓'; 
+                                } else { 
+                                    if (state.toLowerCase() === 'p') textSymbol = '←'; 
+                                    else if (state.toLowerCase() === 't') textSymbol = '→'; 
+                                }
+                            }
+                        }
+                    }
+
+                    if (i === currentStep) {
+                        ctx.beginPath(); 
+                        ctx.arc(x, y, radiusSize + 5, 0, Math.PI * 2); 
+                        ctx.strokeStyle = 'rgba(46, 204, 113, 0.7)'; 
+                        ctx.lineWidth = 2.5; 
+                        ctx.stroke();
+                    }
+
+                    if (isAccent) {
+                        ctx.beginPath(); 
+                        ctx.arc(x, y, radiusSize + 4, 0, Math.PI * 2); 
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'; 
+                        ctx.lineWidth = 2; 
+                        ctx.stroke();
+                    }
+
+                    ctx.beginPath(); 
+                    ctx.arc(x, y, radiusSize, 0, Math.PI * 2); 
+                    ctx.fillStyle = fillColor; 
+                    ctx.fill(); 
+                    ctx.strokeStyle = '#121212'; 
+                    ctx.lineWidth = 1.5; 
+                    ctx.stroke();
+                    
+                    if (state !== 0) {
+                        let txtColor = inst.colors.text || '#fff';
+                        if (inst.id === 'gongue' && (state === 'aig' || state === 'AIG')) {
+                            txtColor = '#000000';
+                        }
+                        
+                        ctx.fillStyle = txtColor;
+                        ctx.font = inst.type === 'shake' ? 'bold 12px sans-serif' : 'bold 9px sans-serif';
+                        ctx.textAlign = 'center'; 
+                        ctx.textBaseline = 'middle'; 
+                        // Affichage rallongé jusqu'à 12 caractères pour les paroles
+                        ctx.fillText(textSymbol.substring(0, 12), x, y);
+                    }
+                    if (i === 0) {
+                        ctx.save(); 
+                        ctx.globalAlpha = 1.0; 
+                        ctx.fillStyle = '#bbb'; 
+                        ctx.font = 'bold 10px sans-serif'; 
+                        ctx.textAlign = 'left';
+                        
+                        // Ajout du numéro de la voix (ex: Chant 1, Chant 2)
+                        let displayName = inst.name;
+                        if (inst.type === 'voice') {
+                            let vIndex = voiceCircles.indexOf(circle) + 1;
+                            if (voiceCircles.length > 1) displayName += ` ${vIndex}`;
+                        }
+                        ctx.fillText(displayName, x + 15, y + 3); 
+                        ctx.restore();
+                    }
+                }
+                ctx.restore();
+            });
+
+            // Baguette rotative
+            ctx.save(); 
+            ctx.translate(centerX, centerY); 
+            ctx.rotate(currentAngle);
+            const stickLength = circles.length > 0 ? circles[circles.length - 1].radius + 35 : 120;
+            ctx.beginPath(); 
+            ctx.moveTo(0, -2); 
+            ctx.lineTo(stickLength - 15, -1); 
+            ctx.lineTo(stickLength - 15, 1); 
+            ctx.lineTo(0, 2);
+            ctx.closePath(); 
+            ctx.fillStyle = '#e0ae6f'; 
+            ctx.fill();
+            
+            ctx.beginPath(); 
+            ctx.ellipse(stickLength - 10, 0, 7, 3.5, 0, 0, Math.PI * 2); 
+            ctx.fillStyle = '#c69552'; 
+            ctx.fill();
+            ctx.restore();
+
+            // --- BOUTON PLAY CENTRAL ---
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 50, 0, Math.PI * 2);
+            ctx.fillStyle = isPlaying ? 'rgba(231, 76, 60, 0.9)' : 'rgba(46, 204, 113, 0.9)';
+            ctx.fill();
+            ctx.strokeStyle = '#121212'; 
+            ctx.lineWidth = 4; 
+            ctx.stroke();
+            
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 30px sans-serif';
+            ctx.textAlign = 'center'; 
+            ctx.textBaseline = 'middle';
+            // Léger décalage optique vers la droite pour le symbole ▶
+            ctx.fillText(isPlaying ? "⏹" : "▶", isPlaying ? centerX : centerX + 5, centerY + 2);
+
+            requestAnimationFrame(draw);
+        }
+
+        // --- SEQUENCEUR AUDIO ---
+        let currentStepIndex = -1;
+        const mainLoop = new Tone.Loop((time) => {
+            
+            // Détection du début de la mesure pour incrémenter le compteur de voix
+            if (currentStepIndex === 95) { 
+                measureCount++; 
+            }
+            currentStepIndex = (currentStepIndex + 1) % 96;
+            
+            if (isMetroOn && currentStepIndex % 24 === 0) { 
+                bMetroClick.triggerAttackRelease("A5", "32n", time); 
+            }
+
+            let voiceCircles = circles.filter(c => instrumentsConfig[c.instrumentIdx].type === 'voice');
+            let activeVoiceCircleId = voiceCircles.length > 0 ? voiceCircles[measureCount % voiceCircles.length].id : null;
+
+            const hasActiveSolo = circles.some(c => c.isSolo);
+            circles.forEach(circle => {
+                let canPlay = hasActiveSolo ? circle.isSolo : !circle.isMute;
+                
+                if (canPlay) {
+                    let inst = instrumentsConfig[circle.instrumentIdx];
+                    
+                    // Si c'est une voix, on vérifie si c'est son tour
+                    if (inst.type === 'voice' && voiceCircles.length > 1 && circle.id !== activeVoiceCircleId) {
+                        return; // Ce n'est pas son tour, on saute cette voix
+                    }
+
+                    const pulsePerStep = 96 / circle.steps;
+                    if (currentStepIndex % pulsePerStep === 0) {
+                        const stepIdx = Math.floor(currentStepIndex / pulsePerStep);
+                        let state = circle.activeSteps[stepIdx];
+                        
+                        if (state !== 0) {
+                            if (inst.type === 'voice') {
+                                if (voiceSynths[inst.id]) {
+                                    let note = inst.id === 'puxador' ? "E3" : "C3";
+                                    voiceSynths[inst.id].triggerAttackRelease(note, "8n", time);
+                                }
+                            } else if (samplers[inst.id]) {
+                                let playerGroup = samplers[inst.id];
+                                let targetKey = null;
+
+                                if (inst.type === 'gongue') {
+                                    if (state === 'GRV') targetKey = 'fort-grave'; 
+                                    else if (state === 'grv') targetKey = 'faible-grave';
+                                    else if (state === 'AIG') targetKey = 'fort-aigue'; 
+                                    else if (state === 'aig') targetKey = 'faible-aigue';
+                                } else {
+                                    if (['D', 'G', 'P', 'T'].includes(state)) targetKey = 'fort'; 
+                                    else if (['d', 'g', 'p', 't'].includes(state)) targetKey = 'faible';
+                                }
+                                
+                                if (targetKey && playerGroup.has(targetKey)) {
+                                    try {
+                                        let player = playerGroup.player(targetKey);
+                                        if (player.loaded) {
+                                            let startTimeOffset = (inst.type === 'shake' && targetKey === 'faible') ? 0.02 : 0;
+                                            player.start(time, startTimeOffset);
+                                        }
+                                    } catch (err) {}
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }, "96n");
+
+        function drawMeters() {
+            const dbToPct = (db) => { 
+                if (db < -50) return 0; 
+                if (db > 0) return 100; 
+                return Math.floor(((db + 50) / 50) * 100); 
+            };
+            
+            circles.forEach(c => {
+                let inst = instrumentsConfig[c.instrumentIdx];
+                let bar = document.getElementById(`meter-bar-${c.id}`); 
+                let meter = meters[inst.id];
+                if (bar && meter) { 
+                    bar.style.width = isPlaying ? dbToPct(meter.getValue()) + '%' : '0%'; 
+                }
+            });
+        }
+        setInterval(drawMeters, 40);
+
+        function renderMixer() {
+            const container = document.getElementById('tracks-mixer-container'); 
+            if (!container) return;
+            
+            container.innerHTML = "";
+            circles.forEach((circle, index) => {
+                const inst = instrumentsConfig[circle.instrumentIdx];
+                
+                let instSelectHtml = `<select onchange="updateInstrument(${circle.id}, this.value)">`;
+                instrumentsConfig.forEach((opt, idx) => {
+                    const isSelected = idx === circle.instrumentIdx ? 'selected' : '';
+                    instSelectHtml += `<option value="${idx}" ${isSelected}>${opt.name}</option>`;
+                });
+                instSelectHtml += `</select>`;
+
+                const div = document.createElement('div'); 
+                div.className = "track-mixer";
+                div.innerHTML = `
+                    <div class="track-mixer-header">
+                        <span class="track-name">${index + 1}. ${instSelectHtml}</span>
+                        <div class="track-mute-solo">
+                            <button class="btn-mute-solo ${circle.isMute ? 'mute-on' : ''}" onclick="toggleMute(${circle.id})">M</button>
+                            <button class="btn-mute-solo ${circle.isSolo ? 'solo-on' : ''}" onclick="toggleSolo(${circle.id})">S</button>
+                            <button class="btn-mute-solo ${circle.isHidden ? 'hidden-on' : ''}" onclick="toggleHide(${circle.id})">${circle.isHidden ? '🙈' : '👁️'}</button>
+                            <button class="btn-mute-solo btn-delete" onclick="deleteCircle(${circle.id})">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="fader-group">
+                        <input type="range" class="fader" min="0" max="100" value="${circle.volumeVal}" oninput="updateVolume(${circle.id}, this.value)">
+                        <div class="vol-meter-bg"><div class="vol-meter-bar" id="meter-bar-${circle.id}"></div></div>
+                    </div>
+                    <div class="steps-config">
+                        <span>Nombre de pas :</span>
+                        <input type="number" value="${circle.steps}" min="2" max="32" onchange="updateSteps(${circle.id}, this.value)">
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        window.toggleMute = function(id) { 
+            let c = circles.find(x => x.id === id); 
+            if(c) c.isMute = !c.isMute; 
+            renderMixer(); 
+        };
+        
+        window.toggleSolo = function(id) { 
+            let c = circles.find(x => x.id === id); 
+            if(c) c.isSolo = !c.isSolo; 
+            renderMixer(); 
+        };
+        
+        window.toggleHide = function(id) { 
+            let c = circles.find(x => x.id === id); 
+            if (c) c.isHidden = !c.isHidden; 
+            renderMixer(); 
+        };
+        
+        window.deleteCircle = function(id) { 
+            circles = circles.filter(x => x.id !== id); 
+            renderMixer(); 
+        };
+
+        window.updateInstrument = function(id, instIdx) {
+            let c = circles.find(x => x.id === id);
+            if (c) {
+                c.instrumentIdx = parseInt(instIdx); 
+                c.activeSteps = Array(c.steps).fill(0); 
+                c.lyrics = Array(c.steps).fill("");
+                
+                let instId = instrumentsConfig[c.instrumentIdx].id; 
+                let db = Tone.gainToDb(c.volumeVal / 100); 
+                if (c.volumeVal <= 4) db = -Infinity; 
+                
+                channels[instId].volume.value = db;
+                renderMixer();
+            }
+        };
+
+        window.updateVolume = function(id, v) {
+            let c = circles.find(x => x.id === id);
+            if(c) { 
+                c.volumeVal = parseInt(v); 
+                let instId = instrumentsConfig[c.instrumentIdx].id; 
+                let db = Tone.gainToDb(v / 100); 
+                if(v <= 4) db = -Infinity; 
+                
+                channels[instId].volume.value = db; 
+            }
+        };
+        
+        window.updateSteps = function(id, s) {
+            let c = circles.find(x => x.id === id);
+            if (c) { 
+                let sn = parseInt(s) || 4; 
+                c.steps = sn; 
+                let na = Array(sn).fill(0); 
+                for(let i=0; i<Math.min(sn, c.activeSteps.length); i++) {
+                    na[i] = c.activeSteps[i]; 
+                }
+                c.activeSteps = na; 
+            }
+        };
+
+        // --- GESTION DU CLIC CANVAS ---
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect(); 
+            const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width); 
+            const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+            
+            const dx = mouseX - centerX; 
+            const dy = mouseY - centerY; 
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Clic sur le bouton central
+            if (distance < 50) {
+                togglePlay();
+                return;
+            }
+
+            circles.forEach((circle) => {
+                if (circle.isHidden) return;
+                
+                if (Math.abs(distance - circle.radius) < 14) {
+                    let clickAngle = Math.atan2(dy, dx) + Math.PI / 2; 
+                    if (clickAngle < 0) clickAngle += Math.PI * 2;
+                    
+                    const stepAngleSize = (Math.PI * 2) / circle.steps;
+                    
+                    for (let i = 0; i < circle.steps; i++) {
+                        const targetAngle = i * stepAngleSize; 
+                        let angleDiff = Math.abs(clickAngle - targetAngle);
+                        if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
+
+                        if (angleDiff < stepAngleSize / 2) {
+                            const inst = instrumentsConfig[circle.instrumentIdx]; 
+                            let current = circle.activeSteps[i];
+                            
+                            if (inst.type === 'shake') {
+                                if (current === 0) circle.activeSteps[i] = 'p'; 
+                                else if (current === 'p') circle.activeSteps[i] = 'P'; 
+                                else if (current === 'P') circle.activeSteps[i] = 't'; 
+                                else if (current === 't') circle.activeSteps[i] = 'T'; 
+                                else circle.activeSteps[i] = 0;
+                            } else if (inst.type === 'gongue') {
+                                if (current === 0) circle.activeSteps[i] = 'grv'; 
+                                else if (current === 'grv') circle.activeSteps[i] = 'GRV'; 
+                                else if (current === 'GRV') circle.activeSteps[i] = 'aig'; 
+                                else if (current === 'aig') circle.activeSteps[i] = 'AIG'; 
+                                else circle.activeSteps[i] = 0;
+                            } else if (inst.type === 'voice') {
+                                if (current === 0) {
+                                    // Limite de texte augmentée pour des mots brésiliens plus longs
+                                    let lyric = prompt("Paroles (ex: Égua do babado) :");
+                                    if (lyric) { 
+                                        circle.activeSteps[i] = 'X'; 
+                                        if(!circle.lyrics) circle.lyrics = []; 
+                                        circle.lyrics[i] = lyric.substring(0, 15); 
+                                    }
+                                } else { 
+                                    circle.activeSteps[i] = 0; 
+                                }
+                            } else {
+                                if (current === 0) circle.activeSteps[i] = 'd'; 
+                                else if (current === 'd') circle.activeSteps[i] = 'D'; 
+                                else if (current === 'D') circle.activeSteps[i] = 'g'; 
+                                else if (current === 'g') circle.activeSteps[i] = 'G'; 
+                                else circle.activeSteps[i] = 0;
+                            }
+                            return;
+                        }
+                    }
+                }
+            });
+        });
+
+        async function togglePlay() {
+            if (!isPlaying) {
+                await Tone.start(); 
+                currentStepIndex = -1; 
+                measureCount = 0; 
+                mainLoop.stop(); 
+                Tone.Transport.stop(); 
+                Tone.Transport.cancel(0);
+                
+                mainLoop.start(0); 
+                Tone.Transport.start("+0.02"); 
+                isPlaying = true;
+            } else {
+                mainLoop.stop(); 
+                Tone.Transport.stop();
+                instrumentsConfig.forEach(inst => { 
+                    if (samplers[inst.id]) samplers[inst.id].stopAll(); 
+                    if (voiceSynths[inst.id]) voiceSynths[inst.id].triggerRelease(); 
+                });
+                isPlaying = false;
+            }
+        }
+
+        document.getElementById('bpm').addEventListener('input', (e) => { 
+            Tone.Transport.bpm.value = e.target.value; 
+        });
+        
+        document.getElementById('masterVol').addEventListener('input', (e) => { 
+            let val = parseFloat(e.target.value); 
+            Tone.Destination.volume.value = val === -40 ? -Infinity : val; 
+        });
+        
+        const metroBtn = document.getElementById('metroBtn'); 
+        metroBtn.addEventListener('click', () => { 
+            isMetroOn = !isMetroOn; 
+            metroBtn.classList.toggle('metro-on', isMetroOn); 
+        });
+        
+        document.getElementById('clearBtn').addEventListener('click', () => { 
+            circles = []; 
+            renderMixer(); 
+        });
+
+        // --- GESTION DU MENU D'AJOUT D'INSTRUMENT ---
+        const showAddBtn = document.getElementById('showAddBtn');
+        const addSelect = document.getElementById('addInstrumentSelect');
+
+        showAddBtn.addEventListener('click', () => {
+            addSelect.style.display = addSelect.style.display === 'none' ? 'block' : 'none';
+        });
+
+        if (addSelect) {
+            instrumentsConfig.forEach((inst, idx) => {
+                const opt = document.createElement('option'); 
+                opt.value = idx; 
+                opt.textContent = inst.name; 
+                addSelect.appendChild(opt);
+            });
+        }
+
+        addSelect.addEventListener('change', function() {
+            if (this.value !== "") {
+                if (circles.length >= 12) { 
+                    alert("Nombre maximum de 12 instruments atteint !"); 
+                    this.value = ""; 
+                    return; 
+                }
+                
+                const instIdx = parseInt(this.value);
+                const nextRadius = circles.length > 0 ? circles[circles.length - 1].radius + 50 : 100; // Espacement généreux
+                
+                circles.push({ 
+                    id: Date.now(), 
+                    radius: nextRadius, 
+                    steps: 16, 
+                    activeSteps: Array(16).fill(0), 
+                    instrumentIdx: instIdx, 
+                    lyrics: Array(16).fill(""), 
+                    isMute: false, 
+                    isSolo: false, 
+                    isHidden: false, 
+                    volumeVal: 100 
+                });
+                renderMixer();
+                
+                this.value = ""; 
+                this.style.display = 'none'; 
+            }
+        });
+
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ bpm: Tone.Transport.bpm.value, circles: circles }));
+            const dl = document.createElement('a'); 
+            dl.href = dataStr; 
+            dl.download = "rythme_samambaia.json"; 
+            dl.click();
+        });
+
+        const fileInput = document.getElementById('fileInput'); 
+        document.getElementById('loadBtn').addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0]; 
+            if (!file) return;
+            const reader = new FileReader();
+            
+            reader.onload = function(evt) {
+                try {
+                    const d = JSON.parse(evt.target.result);
+                    if (d.bpm) { 
+                        document.getElementById('bpm').value = d.bpm; 
+                        Tone.Transport.bpm.value = d.bpm; 
+                    }
+                    if (d.circles) { 
+                        circles = d.circles; 
+                        renderMixer(); 
+                    }
+                } catch (err) { alert("Fichier invalide !"); }
+            }; 
+            reader.readAsText(file);
+        });
+
+        function onPresetChange(value) { 
+            if (value.endsWith('.json')) loadPresetFile(value); 
+            else loadFallbackPreset(value); 
+        }
+
+        function loadPresetFile(fileName) {
+            fetch(fileName)
+                .then(res => { if (!res.ok) throw new Error("Fichier introuvable"); return res.json(); })
+                .then(data => { 
+                    if (data.circles) circles = JSON.parse(JSON.stringify(data.circles)); 
+                    if (data.bpm) { 
+                        document.getElementById('bpm').value = data.bpm; 
+                        Tone.Transport.bpm.value = data.bpm; 
+                    } 
+                    renderMixer(); 
+                })
+                .catch(err => { 
+                    console.warn(`Erreur locale`, err); 
+                    loadFallbackPreset(fileName.includes("Imale") ? 'baque-de-imale' : 'vou-vadiar'); 
+                });
+        }
+
+        function loadFallbackPreset(name) {
+            let p = name === 'baque-de-imale' ? baqueDeImalePreset : vouVadiarPreset;
+            if (p) { 
+                circles = JSON.parse(JSON.stringify(p.circles)); 
+                document.getElementById('bpm').value = p.bpm; 
+                Tone.Transport.bpm.value = p.bpm; 
+            }
+            renderMixer(); 
+            measureCount = 0; 
+        }
+
+        fetch('catalog.json')
+            .then(response => { if (!response.ok) throw new Error("Fichier manquant"); return response.json(); })
+            .then(presets => {
+                const select = document.getElementById('presetSelect'); 
+                select.innerHTML = ''; 
+                presets.forEach(p => { 
+                    const opt = document.createElement('option'); 
+                    opt.value = p.file; 
+                    opt.textContent = p.name; 
+                    select.appendChild(opt); 
+                });
+                if (presets.length > 0) loadPresetFile(presets[0].file);
+            })
+            .catch(err => { 
+                loadFallbackPreset('vou-vadiar'); 
+                document.getElementById('presetSelect').value = 'vou-vadiar'; 
+            });
+
+        // --- GESTION DU CLAVIER ---
+        window.addEventListener('keydown', (e) => { 
+            // Sécurité : On ne lance pas Play si on tape dans un champ de texte ou un menu déroulant
+            if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') { 
+                e.preventDefault(); 
+                togglePlay(); 
+            } 
+        });
+
+        renderMixer();
+        draw();
+    </script>
+</body>
+</html>
