@@ -21,9 +21,14 @@
             font-family: 'Segoe UI', Roboto, sans-serif; display: flex; height: 100vh; overflow: hidden;
         }
 
+        /* --- PANNEAU GAUCHE & ANIMATION REPLI --- */
         #left-panel {
-            width: 350px; background-color: var(--panel-bg); border-right: 1px solid #333;
+            width: 350px; min-width: 350px; background-color: var(--panel-bg); border-right: 1px solid #333;
             display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; z-index: 10; height: 100%;
+            transition: margin-left 0.35s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        #left-panel.collapsed {
+            margin-left: -350px; /* Cache le panneau vers la gauche de façon fluide */
         }
 
         .panel-title {
@@ -71,20 +76,21 @@
         .legend-item { display: flex; align-items: center; gap: 8px; color: var(--text-main); font-size: 11px; }
         .legend-badge { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 18px; font-size: 9px; font-weight: bold; border-radius: 4px; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; }
 
-        #right-panel { flex-grow: 1; display: flex; flex-direction: column; position: relative; }
-        #top-bar { height: 60px; background-color: var(--panel-bg); border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-sizing: border-box; z-index: 10; }
+        /* --- INTERFACE DROITE --- */
+        #right-panel { flex-grow: 1; display: flex; flex-direction: column; position: relative; min-width: 0; }
+        #top-bar { height: 60px; background-color: var(--panel-bg); border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-sizing: border-box; z-index: 10; }
 
         #header-main { display: flex; align-items: center; gap: 12px; }
         #header-main img { 
-            height: 50px; width: auto; border-radius: 6px; 
+            height: 44px; width: auto; border-radius: 6px; 
             background-color: #f5f5f5; padding: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
         #header-title-text { font-size: 16px; font-weight: bold; letter-spacing: 1px; }
         
-        #global-controls { display: flex; align-items: center; gap: 10px; }
+        #global-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
         .preset-select { background-color: var(--control-bg); color: var(--text-main); border: 1px solid #444; padding: 5px; border-radius: 6px; font-size: 12px; font-weight: bold; }
 
-        button.control-btn { background-color: #333; color: #fff; border: 1px solid #444; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold; transition: background-color 0.2s; }
+        button.control-btn { background-color: #333; color: #fff; border: 1px solid #444; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; }
         button.control-btn:hover { background-color: #444; }
         button#metroBtn.metro-on { background-color: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
         .icon-btn { font-size: 16px; padding: 6px 10px; }
@@ -96,7 +102,7 @@
         .master-vol-fader { -webkit-appearance: none; height: 6px; border-radius: 3px; background: #444; outline: none; width: 70px; }
         .master-vol-fader::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-gold); cursor: pointer; }
 
-        /* Optimisation maximale du Canevas pour tous les écrans */
+        /* --- CANEVAS CORRIGÉ : Précision du clic parfaite --- */
         #canvas-container { 
             flex-grow: 1; display: flex; align-items: center; justify-content: center; 
             background-color: var(--bg-dark); background-image: url('atelier.png'); 
@@ -104,11 +110,11 @@
             padding: 10px; box-sizing: border-box; overflow: hidden;
         }
         canvas { 
-            width: 100%; height: 100%; 
-            max-width: 100%; max-height: 100%; 
+            max-width: 100%; 
+            max-height: 100%; 
             aspect-ratio: 1 / 1; 
-            object-fit: contain; 
-            cursor: pointer; 
+            cursor: pointer;
+            /* La suppression du width/height 100% empêche le canevas de s'étirer et fausser les clics */
         }
         
         #fileInput { display: none; }
@@ -118,13 +124,16 @@
         @media (max-width: 768px) {
             body { flex-direction: column; overflow-y: auto; height: auto; }
             #right-panel { order: 1; width: 100%; height: auto; flex-grow: 0; }
-            #left-panel { order: 2; width: 100%; height: auto; border-right: none; border-top: 1px solid #333; padding: 15px; }
+            #left-panel { order: 2; min-width: 100%; width: 100%; height: auto; border-right: none; border-top: 1px solid #333; margin-left: 0 !important; }
+            #left-panel.collapsed { display: none; } /* Sur mobile, masquer complètement prend moins de place */
+            
             #top-bar { height: auto; flex-direction: column; gap: 12px; padding: 15px; align-items: center; }
+            #header-main { width: 100%; justify-content: center; position: relative; }
+            #togglePanelBtn { position: absolute; left: 0; }
+            
             #global-controls { flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; }
             .control-separator { display: none; }
             #canvas-container { padding: 5px; min-height: 350px; }
-            /* Les max-width ont été retirés pour laisser le canvas prendre tout l'espace disponible */
-            canvas { width: 100% !important; height: auto !important; max-width: 100vw; max-height: 100vw; }
         }
     </style>
 </head>
@@ -173,9 +182,17 @@
     <div id="right-panel">
         <div id="top-bar">
             <div id="header-main">
+                <button id="togglePanelBtn" class="control-btn" title="Ocultar / Mostrar painel" onclick="togglePanel()" style="background: transparent; border: 1px solid #444; padding: 8px;">
+                    <!-- Icône Menu Hamburger -->
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
                 <img src="logo-samambaia.png" alt="Samambaia" onerror="this.style.display='none'; document.getElementById('fallback-emoji').style.display='inline';">
                 <span id="fallback-emoji" style="display:none; background:#f5f5f5; padding:6px; border-radius:6px; font-size:22px;">🌿</span>
-                <span id="header-title-text">Baque de Maracatu - Samambaia</span>
+                <span id="header-title-text" style="display:none;">Baque de Maracatu</span>
             </div>
             
             <div id="global-controls">
@@ -191,7 +208,15 @@
                 <label class="control-label">Vol: <input type="range" id="masterVol" class="master-vol-fader" min="-40" max="6" value="-6"></label>
                 
                 <div class="control-separator"></div>
-                <button id="metroBtn" class="control-btn" title="Métronome">⏱️</button>
+                <!-- Nouveau bouton Métronome, clair et large -->
+                <button id="metroBtn" class="control-btn" title="Metrônomo" style="padding: 6px 12px;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 5 22 19 22"></polygon>
+                        <circle cx="12" cy="16" r="2" fill="currentColor"></circle>
+                        <line x1="12" y1="16" x2="7" y2="7"></line>
+                    </svg>
+                </button>
+                
                 <button id="langBtn" class="control-btn" onclick="toggleLang()" style="background:#8e44ad; width: 44px; text-align: center;" title="Changer de langue / Mudar idioma">🇫🇷</button>
                 
                 <div class="control-separator"></div>
@@ -216,6 +241,12 @@
     </div>
 
     <script>
+        // --- GESTION DES PANNEAUX ---
+        function togglePanel() {
+            const panel = document.getElementById('left-panel');
+            panel.classList.toggle('collapsed');
+        }
+
         // --- GESTION DES LANGUES (PT-BR / FR) ---
         const i18n = {
             pt: {
@@ -244,7 +275,8 @@
                 patternPhText: "Ex: D g  d G",
                 patternPhVoice: "Letras, com vírgulas",
                 selectInst: "Escolher um instrumento...",
-                patternTip: "Use o teclado! Espaço = silêncio."
+                patternTip: "Use o teclado! Espaço = silêncio.",
+                toggleBtn: "Ocultar / Mostrar painel"
             },
             fr: {
                 loading: "Chargement des voix...",
@@ -272,7 +304,8 @@
                 patternPhText: "Ex: D g  d G",
                 patternPhVoice: "Paroles, avec virgules",
                 selectInst: "Choisir un instrument...",
-                patternTip: "Utilisez le clavier ! Espace = silence."
+                patternTip: "Utilisez le clavier ! Espace = silence.",
+                toggleBtn: "Afficher / Masquer le panneau"
             }
         };
 
@@ -306,6 +339,7 @@
             document.getElementById('saveBtn').title = t('save');
             document.getElementById('loadBtn').title = t('load');
             document.getElementById('selectInstOpt').innerText = t('selectInst');
+            document.getElementById('togglePanelBtn').title = t('toggleBtn');
         }
 
         function toggleLang() {
@@ -315,7 +349,6 @@
             renderMixer(); // Re-render text patterns placeholders
         }
 
-        // Modification des presets pour appliquer G/g/D/d à l'Agbê au lieu de P/p/T/t
         const vouVadiarPreset = {
             bpm: 83,
             circles: [
@@ -348,7 +381,6 @@
 
         const channels = {}; const meters = {}; const samplers = {}; const voiceSynths = {};
 
-        // SÉPARATION CLAIRE : Agbê utilise g/G/d/D pour les couleurs aussi
         const instrumentsConfig = [
             { id: 'marcante', name: 'Alfaia Marcante', type: 'hands', path: 'Alfaia/Marcante', colors: { 'd': '#5a0000', 'D': '#8b0000', 'g': '#ff7676', 'G': '#ff4d4d', text: '#fff' } },
             { id: 'meiao', name: 'Alfaia Meião', type: 'hands', path: 'Alfaia/Meiao', colors: { 'd': '#a04000', 'D': '#d35400', 'g': '#fbc531', 'G': '#f39c12', text: '#fff' } },
@@ -406,7 +438,6 @@
             }
         }
         
-        // Nouvelle fonction mère pour les rechargements structurels
         function refreshCirclesLayout() {
             updateRadii();
             renderMixer();
@@ -501,7 +532,6 @@
                                 if (state.toLowerCase() === 'p') textSymbol = '↑'; 
                                 else if (state.toLowerCase() === 't') textSymbol = '↓';
                             } else if (inst.id === 'agbe') {
-                                // Agbê utilise la notation mixer G,g,D,d mais affiche ← / → ici :
                                 if (state.toLowerCase() === 'g') textSymbol = '←'; 
                                 else if (state.toLowerCase() === 'd') textSymbol = '→'; 
                             }
@@ -678,10 +708,10 @@
                         if (char === 'G') c.activeSteps[i] = 'GRV'; else if (char === 'g') c.activeSteps[i] = 'grv';
                         else if (char === 'A') c.activeSteps[i] = 'AIG'; else if (char === 'a') c.activeSteps[i] = 'aig';
                         else c.activeSteps[i] = 0;
-                    } else if (inst.id === 'mineiro') { // Maintient P/p/T/t
+                    } else if (inst.id === 'mineiro') { 
                         if (char === 'P' || char === 'T' || char === 'p' || char === 't') c.activeSteps[i] = char;
                         else c.activeSteps[i] = 0;
-                    } else { // Alfaia, Caixa, ET Agbê : utilisent tous G,g,D,d !
+                    } else { 
                         if (char === 'D' || char === 'G' || char === 'd' || char === 'g') c.activeSteps[i] = char;
                         else c.activeSteps[i] = 0;
                     }
@@ -719,8 +749,10 @@
             }
         };
 
+        // --- GESTION EXACTE DES CLICS ---
         canvas.addEventListener('click', (e) => {
             const rect = canvas.getBoundingClientRect(); 
+            // Le calcul de coordonnée est désormais 100% exact puisque le canevas conserve un ratio 1:1 parfait sans déformation stretch
             const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width); 
             const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
             const dx = mouseX - centerX; const dy = mouseY - centerY; const distance = Math.sqrt(dx * dx + dy * dy);
@@ -729,6 +761,7 @@
 
             circles.forEach((circle) => {
                 if (circle.isHidden) return;
+                // Sensibilité du clic : rayon exact +/- 14 pixels
                 if (Math.abs(distance - circle.radius) < 14) {
                     let clickAngle = Math.atan2(dy, dx) + Math.PI / 2; if (clickAngle < 0) clickAngle += Math.PI * 2;
                     const stepAngleSize = (Math.PI * 2) / circle.steps;
@@ -737,6 +770,7 @@
                         const targetAngle = i * stepAngleSize; let angleDiff = Math.abs(clickAngle - targetAngle);
                         if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
 
+                        // Vérification de l'angle du clic
                         if (angleDiff < stepAngleSize / 2) {
                             const inst = instrumentsConfig[circle.instrumentIdx]; let current = circle.activeSteps[i];
                             
