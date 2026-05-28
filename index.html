@@ -1,187 +1,99 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Les cycles du maracatu</title>
+    <title>Baque de maracatu - Samambaia</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         :root {
-            --bg-dark: #121212;
-            --panel-bg: #1e1e1e;
+            --bg-dark: #121212; 
+            --panel-bg: #1e1e1e; 
             --control-bg: #252525;
-            --text-main: #f5f5f5;
+            --text-main: #f5f5f5; 
             --text-muted: #888;
-            --accent-gold: #f1c40f;
-            --accent-green: #2ecc71;
+            --accent-gold: #f1c40f; 
+            --accent-green: #2ecc71; 
             --accent-red: #e74c3c;
         }
 
         body {
-            margin: 0;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
+            margin: 0; background-color: var(--bg-dark); color: var(--text-main);
+            font-family: 'Segoe UI', Roboto, sans-serif; display: flex; height: 100vh; overflow: hidden;
         }
 
+        /* --- PANNEAU GAUCHE & ANIMATION REPLI --- */
         #left-panel {
-            width: 340px;
-            background-color: var(--panel-bg);
-            border-right: 1px solid #333;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            box-sizing: border-box;
-            z-index: 10;
-            height: 100%;
+            width: 350px; min-width: 350px; background-color: var(--panel-bg); border-right: 1px solid #333;
+            display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; z-index: 10; height: 100%;
+            transition: margin-left 0.35s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        #left-panel.collapsed {
+            margin-left: -350px;
         }
 
         .panel-title {
-            font-size: 13px;
-            font-weight: bold;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 5px;
+            font-size: 13px; font-weight: bold; color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 1.5px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;
         }
 
-        #mixer-section { 
-            flex-grow: 1; 
-            overflow-y: auto; 
-            padding-right: 5px;
-        }
+        #mixer-section { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
 
-        .track-mixer {
-            background-color: var(--control-bg);
-            border: 1px solid #3a3a3a;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 10px;
-        }
-
+        .track-mixer { background-color: var(--control-bg); border: 1px solid #3a3a3a; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
         .track-mixer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .track-name { font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
-        
-        .track-name select {
-            background-color: #111;
-            color: #fff;
-            border: 1px solid #555;
-            font-size: 11px;
-            padding: 2px 4px;
-            border-radius: 4px;
-            max-width: 110px;
-        }
+        .track-name select { background-color: #111; color: #fff; border: 1px solid #555; font-size: 11px; padding: 2px 4px; border-radius: 4px; max-width: 110px; }
 
         .track-mute-solo { display: flex; gap: 4px; }
-
-        .btn-mute-solo {
-            width: 24px; height: 24px; background-color: #333; color: #fff;
-            border: none; border-radius: 4px; font-weight: bold; font-size: 10px; cursor: pointer;
-        }
+        .btn-mute-solo { width: 24px; height: 24px; background-color: #333; color: #fff; border: none; border-radius: 4px; font-weight: bold; font-size: 10px; cursor: pointer; }
         .btn-mute-solo.mute-on { background-color: var(--accent-red); }
         .btn-mute-solo.solo-on { background-color: var(--accent-gold); color: #000; }
         .btn-mute-solo.hidden-on { background-color: #34495e; color: #95a5a6; }
-        .btn-delete { background-color: #444; }
-        .btn-delete:hover { background-color: var(--accent-red); }
+        .btn-delete { background-color: #444; } .btn-delete:hover { background-color: var(--accent-red); }
 
         .fader-group { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
         .fader { flex-grow: 1; -webkit-appearance: none; height: 6px; border-radius: 3px; background: #444; outline: none; width: 70px; }
         .fader::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #fff; cursor: pointer; }
 
         .vol-meter-bg { width: 35px; height: 8px; background-color: #000; border-radius: 2px; position: relative; overflow: hidden; }
-        .vol-meter-bar { height: 100%; background-color: var(--accent-green); width: 0%; }
+        .vol-meter-bar { height: 100%; background-color: var(--accent-green); width: 0%; transition: width 0.05s; }
 
         .steps-config { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); border-top: 1px dashed #444; padding-top: 6px; }
         .steps-config input { width: 40px; background: #111; border: 1px solid #555; color: #fff; padding: 2px; border-radius: 4px; text-align: center; }
 
-        #legend-section {
-            border-top: 1px solid #333;
-            padding-top: 12px;
-            margin-top: 12px;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
+        .pattern-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; border-top: 1px dashed #444; padding-top: 8px; }
+        .pattern-label { font-size: 11px; color: var(--text-muted); white-space: nowrap; cursor: help; }
+        .pattern-input { 
+            flex-grow: 1; background: #111; border: 1px solid #555; color: var(--accent-gold); 
+            padding: 4px 6px; border-radius: 4px; font-family: monospace; font-size: 13px; letter-spacing: 2px; width: 100%; box-sizing: border-box;
         }
+        .pattern-input::placeholder { color: #555; letter-spacing: normal; font-family: sans-serif; font-size: 11px; }
+        .pattern-input:focus { border-color: var(--accent-gold); outline: none; }
 
-        .legend-container {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            max-height: 220px;
-            overflow-y: auto;
-            padding-right: 5px;
+        #legend-section { border-top: 1px solid #333; padding-top: 12px; margin-top: 12px; display: flex; flex-direction: column; flex-shrink: 0; }
+        .legend-container { display: flex; flex-direction: column; gap: 6px; max-height: 250px; overflow-y: auto; padding-right: 5px; }
+        .legend-group { display: flex; flex-direction: column; gap: 4px; background: #181818; padding: 8px; border-radius: 6px; border: 1px solid #2a2a2a; }
+        .legend-group-title { font-weight: bold; color: var(--accent-gold); margin-bottom: 2px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; color: var(--text-main); font-size: 11px; }
+        .legend-badge { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 18px; font-size: 9px; font-weight: bold; border-radius: 4px; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; }
+
+        /* --- INTERFACE DROITE --- */
+        #right-panel { flex-grow: 1; display: flex; flex-direction: column; position: relative; min-width: 0; }
+        #top-bar { height: 60px; background-color: var(--panel-bg); border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-sizing: border-box; z-index: 10; }
+
+        #header-main { display: flex; align-items: center; gap: 12px; }
+        #header-main img { 
+            height: 44px; width: auto; border-radius: 6px; 
+            background-color: #f5f5f5; padding: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
-
-        .legend-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            background: #181818;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #2a2a2a;
-        }
-
-        .legend-group-title {
-            font-weight: bold;
-            color: var(--accent-gold);
-            margin-bottom: 2px;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-main);
-            font-size: 11px;
-        }
-
-        .legend-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 44px;
-            height: 18px;
-            font-size: 9px;
-            font-weight: bold;
-            border-radius: 4px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-sizing: border-box;
-        }
-
-        #right-panel { flex-grow: 1; display: flex; flex-direction: column; position: relative; }
-        #top-bar {
-            height: 60px; background-color: var(--panel-bg); border-bottom: 1px solid #333;
-            display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-sizing: border-box; z-index: 10;
-        }
-
-        #header-main { display: flex; align-items: center; gap: 10px; }
-        #header-main img { height: 45px; width: auto; max-height: 100%; border-radius: 4px; }
         #header-title-text { font-size: 16px; font-weight: bold; letter-spacing: 1px; }
-        #global-controls { display: flex; align-items: center; gap: 10px; }
-
-        .preset-select {
-            background-color: var(--control-bg); color: var(--text-main);
-            border: 1px solid #444; padding: 5px; border-radius: 6px; font-size: 12px; font-weight: bold;
-        }
-
-        button.control-btn {
-            background-color: #333; color: #fff; border: 1px solid #444; padding: 6px 14px;
-            border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold; transition: background-color 0.2s;
-        }
-        button.control-btn:hover { background-color: #444; }
         
-        button#playBtn { background-color: var(--accent-green); border-color: var(--accent-green); min-width: 50px; font-size: 16px; color: #000; }
-        button#playBtn.playing { background-color: var(--accent-red); border-color: var(--accent-red); color: #fff; }
+        #global-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+        .preset-select { background-color: var(--control-bg); color: var(--text-main); border: 1px solid #444; padding: 5px; border-radius: 6px; font-size: 12px; font-weight: bold; }
+
+        button.control-btn { background-color: #333; color: #fff; border: 1px solid #444; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; }
+        button.control-btn:hover { background-color: #444; }
         button#metroBtn.metro-on { background-color: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
+        .icon-btn { font-size: 16px; padding: 6px 10px; }
 
         .control-separator { width: 1px; height: 24px; background-color: #444; margin: 0 4px; }
         label.control-label { font-size: 12px; display: flex; align-items: center; gap: 4px; color: var(--text-main); font-weight: bold; }
@@ -191,89 +103,75 @@
         .master-vol-fader::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-gold); cursor: pointer; }
 
         #canvas-container { 
-            flex-grow: 1; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            background-color: var(--bg-dark); 
-            background-image: url('atelier.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            flex-grow: 1; display: flex; align-items: center; justify-content: center; 
+            background-color: var(--bg-dark); background-image: url('atelier.png'); 
+            background-size: cover; background-position: center; background-repeat: no-repeat; 
+            padding: 10px; box-sizing: border-box; overflow: hidden;
         }
-
-        canvas { max-width: 100%; height: auto; aspect-ratio: 1 / 1; }
+        canvas { 
+            max-width: 100%; 
+            max-height: 100%; 
+            aspect-ratio: 1 / 1; 
+            cursor: pointer;
+        }
+        
         #fileInput { display: none; }
         
-        #loading-overlay {
-            position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(18,18,18,0.9);
-            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;
-            font-size: 18px; font-weight: bold; color: var(--accent-gold); text-align: center;
-        }
-
-        #debug-log {
-            font-size: 12px; color: #ff7676; margin-top: 15px; font-weight: normal; max-width: 80%;
-        }
+        #loading-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(18,18,18,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; font-size: 18px; font-weight: bold; color: var(--accent-gold); }
 
         @media (max-width: 768px) {
             body { flex-direction: column; overflow-y: auto; height: auto; }
             #right-panel { order: 1; width: 100%; height: auto; flex-grow: 0; }
-            #left-panel { order: 2; width: 100%; height: auto; border-right: none; border-top: 1px solid #333; padding: 15px; }
+            #left-panel { order: 2; min-width: 100%; width: 100%; height: auto; border-right: none; border-top: 1px solid #333; margin-left: 0 !important; }
+            #left-panel.collapsed { display: none; } 
+            
             #top-bar { height: auto; flex-direction: column; gap: 12px; padding: 15px; align-items: center; }
+            #header-main { width: 100%; justify-content: center; position: relative; }
+            #togglePanelBtn { position: absolute; left: 0; }
+            
             #global-controls { flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; }
             .control-separator { display: none; }
-            #canvas-container { padding: 15px 5px; min-height: 320px; }
-            canvas { width: 95vw !important; height: 95vw !important; max-width: 480px; max-height: 480px; }
+            #canvas-container { padding: 5px; min-height: 350px; }
         }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay">
-        🌿 Chargement des voix du maracatu Samambaia...
-        <div id="debug-log"></div>
-    </div>
+    <div id="loading-overlay">🌿 <span id="loading-text">Carregando vozes...</span></div>
 
     <div id="left-panel">
-        <div class="panel-title">🎛️ Table de Mixage</div>
+        <div class="panel-title" id="title-mixer">🎛️ Misturador</div>
         <div id="mixer-section"><div id="tracks-mixer-container"></div></div>
 
-        <!-- SECTION LÉGENDE -->
         <div id="legend-section">
-            <div class="panel-title" style="margin-bottom: 6px;">📖 Légende</div>
+            <div class="panel-title" style="margin-bottom: 6px;" id="title-legend">📖 Legenda</div>
             <div class="legend-container">
-                <div style="font-size: 11px; margin-bottom: 4px; color: var(--accent-gold); line-height: 1.35;">
-                    💡 <strong>Règle d'or :</strong><br>
-                    • <strong>Majuscule</strong> = Coup Fort (Accentué)<br>
-                    • <strong>Minuscule</strong> = Coup Faible (Fantôme)
+                <div style="font-size: 11px; margin-bottom: 4px; color: var(--accent-gold); line-height: 1.35;" id="legend-gold">
+                    💡 <strong>Regra de ouro:</strong><br>• <strong>Maiúscula</strong> = Golpe Forte (Acentuado)<br>• <strong>Minúscula</strong> = Golpe Fraco (Fantasma)
                 </div>
                 
                 <div class="legend-group">
-                    <span class="legend-group-title">🥁 Alfaia & Caixa (Tambours)</span>
-                    <div class="legend-item"><span class="legend-badge" style="background:#8b0000; color:#fff;">D / d</span> <span>Main Droite</span></div>
-                    <div class="legend-item"><span class="legend-badge" style="background:#f39c12; color:#121212;">G / g</span> <span>Main Gauche</span></div>
+                    <span class="legend-group-title" id="legend-ac-title">🥁 Alfaia & Caixa</span>
+                    <div class="legend-item" id="legend-ac-1"><span class="legend-badge" style="background:#8b0000; color:#fff;">D / d</span> <span>Mão Direita</span></div>
+                    <div class="legend-item" id="legend-ac-2"><span class="legend-badge" style="background:#f39c12; color:#121212;">G / g</span> <span>Mão Esquerda</span></div>
                 </div>
 
                 <div class="legend-group">
-                    <span class="legend-group-title">🔔 Gonguê (Cloche de fer)</span>
-                    <div class="legend-item"><span class="legend-badge" style="background:#222; color:#fff;">GRV / grv</span> <span>Son Grave (Ouvert)</span></div>
-                    <div class="legend-item"><span class="legend-badge" style="background:#bdc3c7; color:#000;">AIG / aig</span> <span>Son Aigu (Étouffé)</span></div>
+                    <span class="legend-group-title" id="legend-go-title">🔔 Gonguê</span>
+                    <div class="legend-item" id="legend-go-1"><span class="legend-badge" style="background:#222; color:#fff;">G / g</span> <span>Grave Forte / Fraco</span></div>
+                    <div class="legend-item" id="legend-go-2"><span class="legend-badge" style="background:#bdc3c7; color:#000;">A / a</span> <span>Agudo Forte / Fraco</span></div>
                 </div>
 
                 <div class="legend-group">
-                    <span class="legend-group-title">🌾 Agbê (Secoué Horizontal)</span>
-                    <div class="legend-item"><span class="legend-badge" style="background:#1b5e20; color:#fff; border: 2px solid #fff;">←</span> <span>Poussé Fort</span></div>
-                    <div class="legend-item"><span class="legend-badge" style="background:#113b14; color:#fff; opacity:0.8;">←</span> <span>Poussé Faible</span></div>
-                    <div class="legend-item"><span class="legend-badge" style="background:#4caf50; color:#121212; border: 2px solid #fff;">→</span> <span>Tiré Fort</span></div>
-                    <div class="legend-item"><span class="legend-badge" style="background:#74d478; color:#121212; opacity:0.8;">→</span> <span>Tiré Faible</span></div>
+                    <span class="legend-group-title" id="legend-ag-title">🌾 Agbê</span>
+                    <div class="legend-item" id="legend-ag-1"><span class="legend-badge" style="background:#1b5e20; color:#fff;">G / g</span> <span>Esquerda (Forte / Fraco)</span></div>
+                    <div class="legend-item" id="legend-ag-2"><span class="legend-badge" style="background:#4caf50; color:#121212;">D / d</span> <span>Direita (Forte / Fraco)</span></div>
                 </div>
 
                 <div class="legend-group">
-                    <span class="legend-group-title">🌾 Mineiro (Secoué Vertical)</span>
-                    <div class="legend-item"><span class="legend-badge" style="background:#1b5e20; color:#fff; border: 2px solid #fff;">↑</span> <span>Poussé Fort</span></div>
-                    <div class="legend-item"><span class="legend-badge" style="background:#113b14; color:#fff; opacity:0.8;">↑</span> <span>Poussé Faible</span></div>
-                    <div class="legend-item"><span class="legend-badge" style="background:#4caf50; color:#121212; border: 2px solid #fff;">↓</span> <span>Tiré Fort</span></div>
-                    <div class="legend-item"><span class="legend-badge" style="background:#74d478; color:#121212; opacity:0.8;">↓</span> <span>Tiré Faible</span></div>
+                    <span class="legend-group-title" id="legend-mi-title">🌾 Mineiro</span>
+                    <div class="legend-item" id="legend-mi-1"><span class="legend-badge" style="background:#1b5e20; color:#fff;">P / p</span> <span>Cima (Forte / Fraco)</span></div>
+                    <div class="legend-item" id="legend-mi-2"><span class="legend-badge" style="background:#4caf50; color:#121212;">T / t</span> <span>Baixo (Forte / Fraco)</span></div>
                 </div>
             </div>
         </div>
@@ -281,90 +179,218 @@
 
     <div id="right-panel">
         <div id="top-bar">
-            <div id="header-main" style="display: flex; align-items: center; gap: 12px;">
+            <div id="header-main">
+                <button id="togglePanelBtn" class="control-btn" title="Ocultar / Mostrar painel" onclick="togglePanel()" style="background: transparent; border: 1px solid #444; padding: 8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
                 <img src="logo-samambaia.png" alt="Samambaia" onerror="this.style.display='none'; document.getElementById('fallback-emoji').style.display='inline';">
-                <span id="fallback-emoji" style="display:none; color:var(--accent-green); font-size:22px;">🌿</span>
-                <span id="header-title-text">Les cycles du maracatu</span>
+                <span id="fallback-emoji" style="display:none; background:#f5f5f5; padding:6px; border-radius:6px; font-size:22px;">🌿</span>
+                <span id="header-title-text" style="display:none;">Baque de Maracatu</span>
             </div>
+            
             <div id="global-controls">
-                
                 <select id="presetSelect" class="preset-select" onchange="onPresetChange(this.value)">
                     <option value="vou-vadiar" selected>Vou vadiar carnaval</option>
                     <option value="baque-de-imale">Baque de Imale</option>
                 </select>
+
+                <div class="control-separator"></div>
+                <label class="control-label">
+                    <span id="tsLabel">Compasso:</span> 
+                    <select id="timeSigSelect" class="preset-select" onchange="updateTimeSig(this.value, false)">
+                        <option value="4/4" selected>4/4</option>
+                        <option value="3/4">3/4</option>
+                        <option value="2/4">2/4</option>
+                        <option value="6/8">6/8</option>
+                    </select>
+                </label>
                 
                 <div class="control-separator"></div>
                 <label class="control-label">BPM: <input type="number" id="bpm" value="83" min="40" max="240"></label>
-                <div class="control-separator"></div>
                 
+                <div class="control-separator"></div>
                 <label class="control-label">Vol: <input type="range" id="masterVol" class="master-vol-fader" min="-40" max="6" value="-6"></label>
+                
                 <div class="control-separator"></div>
-
-                <button id="metroBtn" class="control-btn">⏱️ Métronome</button>
+                <button id="metroBtn" class="control-btn" title="Metrônomo" style="padding: 6px 12px;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 5 22 19 22"></polygon>
+                        <circle cx="12" cy="16" r="2" fill="currentColor"></circle>
+                        <line x1="12" y1="16" x2="7" y2="7"></line>
+                    </svg>
+                </button>
                 
-                <select id="addInstrumentSelect" class="preset-select"></select>
-                <button id="addCircleBtn" class="control-btn" style="background-color: var(--accent-green); border-color: var(--accent-green); color: #000;">+ Ajouter</button>
+                <button id="langBtn" class="control-btn" onclick="toggleLang()" style="background:#8e44ad; width: 44px; text-align: center;" title="Changer de langue / Mudar idioma">🇫🇷</button>
                 
-                <button id="clearBtn" class="control-btn">Vider</button>
-                <button id="saveBtn" class="control-btn" style="background:#2980b9;">💾 Sauver</button>
-                <button id="loadBtn" class="control-btn" style="background:#2980b9;">📂 Charger</button>
+                <div class="control-separator"></div>
+                
+                <div style="position:relative; display:flex; align-items:center;">
+                    <button id="showAddBtn" class="control-btn" style="background-color: var(--accent-green); color: #000; font-weight:bold;">+ Instrumento</button>
+                    <select id="addInstrumentSelect" class="preset-select" style="display:none; position:absolute; top:35px; right:0; z-index:100; box-shadow: 0 4px 10px rgba(0,0,0,0.8);">
+                        <option value="" disabled selected id="selectInstOpt">Escolher um instrumento...</option>
+                    </select>
+                </div>
+                
+                <button id="clearBtn" class="control-btn icon-btn" title="Limpar a Roda">🗑️</button>
+                <button id="saveBtn" class="control-btn icon-btn" title="Salvar" style="background:#2980b9;">💾</button>
+                <button id="loadBtn" class="control-btn icon-btn" title="Carregar" style="background:#2980b9;">📂</button>
                 <input type="file" id="fileInput" accept=".json">
-                
-                <div class="control-separator"></div>
-                <button id="playBtn" class="control-btn">▶</button>
             </div>
         </div>
 
         <div id="canvas-container">
-            <canvas id="canvas" width="760" height="760"></canvas>
+            <canvas id="canvas" width="1200" height="1200"></canvas>
         </div>
     </div>
 
     <script>
-        // --- SYSTÈME DE DÉBOGAGE ---
-        window.onerror = function(msg, url, line) {
-            const d = document.getElementById('debug-log');
-            if(d) d.innerHTML += "⚠️ ERREUR : " + msg + " (Ligne " + line + ")<br>";
-        };
-        window.addEventListener('unhandledrejection', function(e) {
-            const d = document.getElementById('debug-log');
-            if(d) d.innerHTML += "⚠️ ERREUR AUDIO : Impossible de charger certains sons.<br>";
-        });
+        function togglePanel() {
+            document.getElementById('left-panel').classList.toggle('collapsed');
+        }
 
-        // --- PRESETS D'URGENCE ---
+        const i18n = {
+            pt: {
+                loading: "Carregando vozes...",
+                mixer: "🎛️ Misturador",
+                legend: "📖 Legenda",
+                goldRule: "💡 <strong>Regra de ouro:</strong><br>• <strong>Maiúscula</strong> = Golpe Forte (Acentuado)<br>• <strong>Minúscula</strong> = Golpe Fraco (Fantasma)",
+                alfaiaCaixa: "🥁 Alfaia & Caixa",
+                mainDroite: "Mão Direita",
+                mainGauche: "Mão Esquerda",
+                gongueLegend: "🔔 Gonguê",
+                gongueGrave: "Grave Forte / Fraco",
+                gongueAigu: "Agudo Forte / Fraco",
+                agbeLegend: "🌾 Agbê",
+                agbeG: "Esquerda (Forte / Fraco)",
+                agbeD: "Direita (Forte / Fraco)",
+                mineiroLegend: "🌾 Mineiro",
+                mineiroP: "Cima (Forte / Fraco)",
+                mineiroT: "Baixo (Forte / Fraco)",
+                addInst: "+ Instrumento",
+                clear: "Limpar a Roda",
+                save: "Salvar",
+                load: "Carregar",
+                stepsNum: "Número de passos :",
+                pattern: "⌨️ Padrão :",
+                patternPhText: "Ex: D g  d G",
+                patternPhVoice: "Letras, com vírgulas",
+                selectInst: "Escolher um instrumento...",
+                patternTip: "Use o teclado! Espaço = silêncio.",
+                toggleBtn: "Ocultar / Mostrar painel",
+                tsLabel: "Compasso:",
+                confirmResize: "Deseja ajustar automaticamente o número de passos de todas as faixas para caber neste novo compasso?"
+            },
+            fr: {
+                loading: "Chargement des voix...",
+                mixer: "🎛️ Mixeur",
+                legend: "📖 Légende",
+                goldRule: "💡 <strong>Règle d'or :</strong><br>• <strong>Majuscule</strong> = Coup Fort (Accentué)<br>• <strong>Minuscule</strong> = Coup Faible (Fantôme)",
+                alfaiaCaixa: "🥁 Alfaia & Caixa",
+                mainDroite: "Main Droite",
+                mainGauche: "Main Gauche",
+                gongueLegend: "🔔 Gonguê",
+                gongueGrave: "Grave Fort / Faible",
+                gongueAigu: "Aigu Fort / Faible",
+                agbeLegend: "🌾 Agbê",
+                agbeG: "Gauche (Fort / Faible)",
+                agbeD: "Droite (Fort / Faible)",
+                mineiroLegend: "🌾 Mineiro",
+                mineiroP: "Haut (Fort / Faible)",
+                mineiroT: "Bas (Fort / Faible)",
+                addInst: "+ Instrument",
+                clear: "Vider la Roda",
+                save: "Sauvegarder",
+                load: "Charger",
+                stepsNum: "Nombre de pas :",
+                pattern: "⌨️ Motif :",
+                patternPhText: "Ex: D g  d G",
+                patternPhVoice: "Paroles, avec virgules",
+                selectInst: "Choisir un instrument...",
+                patternTip: "Utilisez le clavier ! Espace = silence.",
+                toggleBtn: "Afficher / Masquer le panneau",
+                tsLabel: "Signature:",
+                confirmResize: "Voulez-vous ajuster automatiquement le nombre de pas de toutes les pistes pour s'adapter à cette nouvelle signature ?"
+            }
+        };
+
+        let currentLang = 'pt';
+        function t(key) { return i18n[currentLang][key] || key; }
+
+        function updateStaticTexts() {
+            document.getElementById('loading-text').innerText = t('loading');
+            document.getElementById('title-mixer').innerText = t('mixer');
+            document.getElementById('title-legend').innerText = t('legend');
+            document.getElementById('legend-gold').innerHTML = t('goldRule');
+            document.getElementById('tsLabel').innerText = t('tsLabel');
+            
+            document.getElementById('legend-ac-title').innerText = t('alfaiaCaixa');
+            document.getElementById('legend-ac-1').innerHTML = `<span class="legend-badge" style="background:#8b0000; color:#fff;">D / d</span> <span>${t('mainDroite')}</span>`;
+            document.getElementById('legend-ac-2').innerHTML = `<span class="legend-badge" style="background:#f39c12; color:#121212;">G / g</span> <span>${t('mainGauche')}</span>`;
+            
+            document.getElementById('legend-go-title').innerText = t('gongueLegend');
+            document.getElementById('legend-go-1').innerHTML = `<span class="legend-badge" style="background:#222; color:#fff;">G / g</span> <span>${t('gongueGrave')}</span>`;
+            document.getElementById('legend-go-2').innerHTML = `<span class="legend-badge" style="background:#bdc3c7; color:#000;">A / a</span> <span>${t('gongueAigu')}</span>`;
+
+            document.getElementById('legend-ag-title').innerText = t('agbeLegend');
+            document.getElementById('legend-ag-1').innerHTML = `<span class="legend-badge" style="background:#1b5e20; color:#fff;">G / g</span> <span>${t('agbeG')}</span>`;
+            document.getElementById('legend-ag-2').innerHTML = `<span class="legend-badge" style="background:#4caf50; color:#121212;">D / d</span> <span>${t('agbeD')}</span>`;
+
+            document.getElementById('legend-mi-title').innerText = t('mineiroLegend');
+            document.getElementById('legend-mi-1').innerHTML = `<span class="legend-badge" style="background:#1b5e20; color:#fff;">P / p</span> <span>${t('mineiroP')}</span>`;
+            document.getElementById('legend-mi-2').innerHTML = `<span class="legend-badge" style="background:#4caf50; color:#121212;">T / t</span> <span>${t('mineiroT')}</span>`;
+
+            document.getElementById('showAddBtn').innerText = t('addInst');
+            document.getElementById('clearBtn').title = t('clear');
+            document.getElementById('saveBtn').title = t('save');
+            document.getElementById('loadBtn').title = t('load');
+            document.getElementById('selectInstOpt').innerText = t('selectInst');
+            document.getElementById('togglePanelBtn').title = t('toggleBtn');
+        }
+
+        function toggleLang() {
+            currentLang = currentLang === 'pt' ? 'fr' : 'pt';
+            document.getElementById('langBtn').innerText = currentLang === 'pt' ? '🇫🇷' : '🇧🇷';
+            updateStaticTexts();
+            renderMixer();
+        }
+
         const vouVadiarPreset = {
-            bpm: 83,
+            bpm: 83, timeSig: "4/4",
             circles: [
-                {"id":1,"radius":85,"steps":16,"activeSteps":["g","D",0,"d","G",0,"D",0,"g","D",0,"d","G",0,0,0],"instrumentIdx":0,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":4,"radius":160,"steps":16,"activeSteps":["D","D","g","D","D","g","D","g","D","D","g","D","D","g","D","g"],"instrumentIdx":3,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":90},
-                {"id":5,"radius":185,"steps":16,"activeSteps":[0,"GRV",0,0,"GRV",0,"GRV",0,0,"GRV",0,0,"GRV",0,"GRV",0],"instrumentIdx":4,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":62},
-                {"id":6,"radius":210,"steps":16,"activeSteps":["P",0,"t","p","T",0,"p","t","P",0,"t","p","T",0,"p","t"],"instrumentIdx":5,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":8,"radius":260,"steps":16,"activeSteps":["X",0,"X",0,"X",0,"X",0,0,"X",0,"X","X",0,0,0],"instrumentIdx":7,"lyrics":["Vou","","va","","di","","ar","","Car","Car","na","na","val","","!",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":1779903228779,"radius":285,"steps":16,"activeSteps":["X",0,"X",0,"X",0,"X",0,0,"X",0,"X","X",0,"X",0],"instrumentIdx":8,"lyrics":["Vou","","Pra","","Ba","","hi","","","a","","Brin","car","","Eu",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100}
+                {"id":1,"steps":16,"activeSteps":["g","D",0,"d","G",0,"D",0,"g","D",0,"d","G",0,0,0],"instrumentIdx":0,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":4,"steps":16,"activeSteps":["D","D","g","D","D","g","D","g","D","D","g","D","D","g","D","g"],"instrumentIdx":3,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":90},
+                {"id":5,"steps":16,"activeSteps":[0,"GRV",0,0,"GRV",0,"GRV",0,0,"GRV",0,0,"GRV",0,"GRV",0],"instrumentIdx":4,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":62},
+                {"id":6,"steps":16,"activeSteps":["G",0,"d","g","D",0,"g","d","G",0,"d","g","D",0,"g","d"],"instrumentIdx":5,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":8,"steps":16,"activeSteps":["X",0,"X",0,"X",0,"X",0,0,"X",0,"X","X",0,0,0],"instrumentIdx":7,"lyrics":["Vou","","va","","di","","ar","","Car","Car","na","na","val","","!",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":1779,"steps":16,"activeSteps":["X",0,"X",0,"X",0,"X",0,0,"X",0,"X","X",0,"X",0],"instrumentIdx":8,"lyrics":["Vou","","Pra","","Ba","","hi","","","a","","Brin","car","","Eu",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100}
             ]
         };
 
         const baqueDeImalePreset = {
-            bpm: 77,
+            bpm: 77, timeSig: "4/4",
             circles: [
-                {"id":1779908305252,"radius":100,"steps":16,"activeSteps":["D",0,0,0,"g",0,"D",0,"g","D",0,0,"g","D",0,0],"instrumentIdx":0,"lyrics":["","","","","","","","","","","","","","","",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":1779908307194,"radius":130,"steps":16,"activeSteps":["G",0,0,"d","g",0,"D",0,"g","D",0,"d","g","D",0,"d"],"instrumentIdx":1,"lyrics":["","","","","","","","","","","","","","","",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":1779908312248,"radius":160,"steps":16,"activeSteps":["G",0,0,"D","g","D",0,"d","g","D",0,"d","g","D",0,"d"],"instrumentIdx":2,"lyrics":["","","","","","","","","","","","","","","",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":1779908314541,"radius":190,"steps":16,"activeSteps":["D","D","g","D","D","g","D","g","D","D","g","D","D","g","D","g"],"instrumentIdx":3,"lyrics":["","","","","","","","","","","","","","","",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":1779908319456,"radius":220,"steps":16,"activeSteps":["GRV",0,"AIG",0,"GRV",0,"AIG",0,"GRV","AIG",0,"aig","GRV",0,"AIG",0],"instrumentIdx":4,"lyrics":["","","","","","","","","","","","","","","",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":1779908323224,"radius":250,"steps":16,"activeSteps":["P",0,"t","p","T",0,"p","t","P",0,"t","p","T",0,"p","t"],"instrumentIdx":5,"lyrics":["","","","","","","","","","","","","","","",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100}
+                {"id":1,"steps":16,"activeSteps":["D",0,0,0,"g",0,"D",0,"g","D",0,0,"g","D",0,0],"instrumentIdx":0,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":2,"steps":16,"activeSteps":["G",0,0,"d","g",0,"D",0,"g","D",0,"d","g","D",0,"d"],"instrumentIdx":1,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":4,"steps":16,"activeSteps":["D","D","g","D","D","g","D","g","D","D","g","D","D","g","D","g"],"instrumentIdx":3,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":5,"steps":16,"activeSteps":["GRV",0,"AIG",0,"GRV",0,"AIG",0,"GRV","AIG",0,"aig","GRV",0,"AIG",0],"instrumentIdx":4,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":6,"steps":16,"activeSteps":["G",0,"d","g","D",0,"g","d","G",0,"d","g","D",0,"g","d"],"instrumentIdx":5,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100}
             ]
         };
 
-        let circles = JSON.parse(JSON.stringify(vouVadiarPreset.circles));
+        let circles = [];
+        let timeSignature = "4/4";
+        let maxTicks = 96; // 96 ticks = 4 beats de 24 ticks
 
-        // --- CORE AUDIO CONFIGURATION ---
         Tone.context.lookAhead = 0.04; 
-        Tone.context.latencyHint = "interactive";
+        Tone.context.latencyHint = "interactive"; 
         Tone.Transport.swing = 0.0; 
         Tone.Destination.volume.value = -6;
 
-        const channels = {}; const meters = {}; const samplers = {};
+        const channels = {}; const meters = {}; const samplers = {}; const voiceSynths = {};
 
         const instrumentsConfig = [
             { id: 'marcante', name: 'Alfaia Marcante', type: 'hands', path: 'Alfaia/Marcante', colors: { 'd': '#5a0000', 'D': '#8b0000', 'g': '#ff7676', 'G': '#ff4d4d', text: '#fff' } },
@@ -372,19 +398,13 @@
             { id: 'repique', name: 'Alfaia Repique', type: 'hands', path: 'Alfaia/Repique', colors: { 'd': '#b59510', 'D': '#f1c40f', 'g': '#fff5cc', 'G': '#ffeaa7', text: '#121212' } },
             { id: 'caixa', name: 'Caixa', type: 'hands', path: 'Caixa', colors: { 'd': '#320b61', 'D': '#4a148c', 'g': '#be5be0', 'G': '#9c27b0', text: '#fff' } },
             { id: 'gongue', name: 'Gonguê', type: 'gongue', path: 'Gongue', colors: { 'grv': '#222222', 'GRV': '#000000', 'aig': '#7f8c8d', 'AIG': '#bdc3c7', text: '#fff' } },
-            { id: 'agbe', name: 'Agbê', type: 'shake', path: 'Graines/Agbe', colors: { 'p': '#113b14', 'P': '#1b5e20', 't': '#74d478', 'T': '#4caf50', text: '#fff' } },
+            { id: 'agbe', name: 'Agbê', type: 'shake', path: 'Graines/Agbe', colors: { 'g': '#113b14', 'G': '#1b5e20', 'd': '#74d478', 'D': '#4caf50', text: '#fff' } },
             { id: 'mineiro', name: 'Mineiro', type: 'shake', path: 'Graines/Mineiro', colors: { 'p': '#113b14', 'P': '#1b5e20', 't': '#74d478', 'T': '#4caf50', text: '#fff' } },
             { id: 'chant', name: 'Chant', type: 'voice', path: 'internal', colors: { active: '#2980b9', text: '#fff' } },
             { id: 'puxador', name: 'Puxador', type: 'voice', path: 'internal', colors: { active: '#0c19cf', text: '#fff' } }
         ];
 
-        const bChantSynth = new Tone.Synth({ volume: -10, envelope: { attack: 0.05, decay: 0.2 } });
-        
-        const bMetroClick = new Tone.Synth({
-            oscillator: { type: "sine" },
-            envelope: { attack: 0.001, decay: 0.04, sustain: 0, release: 0.04 },
-            volume: -8
-        }).toDestination();
+        const bMetroClick = new Tone.Synth({ oscillator: { type: "sine" }, envelope: { attack: 0.001, decay: 0.04, sustain: 0, release: 0.04 }, volume: -8 }).toDestination();
 
         instrumentsConfig.forEach(inst => {
             channels[inst.id] = new Tone.Channel({ volume: 0 }).toDestination();
@@ -392,152 +412,210 @@
             channels[inst.id].connect(meters[inst.id]);
 
             if (inst.type === 'voice') {
-                bChantSynth.connect(channels[inst.id]);
+                voiceSynths[inst.id] = new Tone.Synth({ oscillator: { type: inst.id === 'puxador' ? 'triangle' : 'sine' }, envelope: { attack: 0.05, decay: 0.2 }, volume: -10 }).connect(channels[inst.id]);
             } else {
-                let urls = inst.type === 'gongue' ? 
-                    { "faible-grave": "faible-grave.wav", "fort-grave": "fort-grave.wav", "faible-aigue": "faible-aigue.wav", "fort-aigue": "fort-aigue.wav" } : 
-                    { "faible": "faible.wav", "fort": "fort.wav" };
-
-                samplers[inst.id] = new Tone.Players({
-                    urls: urls,
-                    baseUrl: `sons-maracatu/${inst.path}/`,
-                    onload: () => checkAllLoaded()
-                }).connect(channels[inst.id]);
+                let urls = inst.type === 'gongue' ? { "faible-grave": "faible-grave.wav", "fort-grave": "fort-grave.wav", "faible-aigue": "faible-aigue.wav", "fort-aigue": "fort-aigue.wav" } : { "faible": "faible.wav", "fort": "fort.wav" };
+                samplers[inst.id] = new Tone.Players({ urls: urls, baseUrl: `sons-maracatu/${inst.path}/`, onload: () => checkAllLoaded() }).connect(channels[inst.id]);
             }
         });
 
-        let loadedCount = 0;
+        let loadedCount = 0; const totalAudioInstruments = instrumentsConfig.filter(i => i.type !== 'voice').length;
         function checkAllLoaded() {
             loadedCount++;
-            if (loadedCount >= 7) { document.getElementById('loading-overlay').style.display = 'none'; }
+            if (loadedCount >= totalAudioInstruments) { const o = document.getElementById('loading-overlay'); if (o) o.style.display = 'none'; }
         }
-        setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none'; }, 1500);
+        setTimeout(() => { const o = document.getElementById('loading-overlay'); if (o) o.style.display = 'none'; }, 1500);
 
-        const bgImg = new Image(); bgImg.src = 'tambour.png';
-        let bgLoaded = false; bgImg.onload = () => { bgLoaded = true; };
+        const bgImg = new Image(); bgImg.src = 'tambour.png'; let bgLoaded = false; bgImg.onload = () => { bgLoaded = true; };
 
         const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
         const centerX = canvas.width / 2; const centerY = canvas.height / 2;
         
-        // --- CORRECTION DE LA VARIABLE MANQUANTE ---
-        let isPlaying = false;
-        let isMetroOn = false;
+        let isPlaying = false; let isMetroOn = false; let measureCount = 0; 
+
+        // GESTION SIGNATURE RYTHMIQUE
+        window.updateTimeSig = function(val, forceResize = false) {
+            timeSignature = val;
+            if (val === "4/4") maxTicks = 96;
+            else if (val === "3/4") maxTicks = 72;
+            else if (val === "2/4") maxTicks = 48;
+            else if (val === "6/8") maxTicks = 72; // 6 croches (6 * 12 ticks)
+            
+            document.getElementById('timeSigSelect').value = val;
+            currentStepIndex = -1; measureCount = 0;
+            
+            if (forceResize !== 'skip') {
+                let targetSteps = (val === "3/4" || val === "6/8") ? 12 : (val === "2/4" ? 8 : 16);
+                let shouldResize = forceResize === true || confirm(t('confirmResize'));
+                if (shouldResize) {
+                    circles.forEach(c => updateSteps(c.id, targetSteps));
+                }
+            }
+            renderMixer();
+        };
+
+        function getMarkers() {
+            if (timeSignature === "4/4") return [0, 24, 48, 72];
+            if (timeSignature === "3/4") return [0, 24, 48];
+            if (timeSignature === "2/4") return [0, 24];
+            if (timeSignature === "6/8") return [0, 12, 24, 36, 48, 60];
+            return [0, 24, 48, 72];
+        }
+
+        function updateRadii() {
+            if (circles.length === 0) return;
+            const minRadius = 120;
+            const maxRadius = 500; // Légèrement réduit pour laisser la place aux numéros 1,2,3,4
+            
+            if (circles.length === 1) {
+                circles[0].radius = (minRadius + maxRadius) / 2;
+            } else {
+                const step = (maxRadius - minRadius) / (circles.length - 1);
+                circles.forEach((c, i) => {
+                    c.radius = minRadius + (i * step);
+                });
+            }
+        }
+        
+        function refreshCirclesLayout() { updateRadii(); renderMixer(); }
+
+        window.generatePatternString = function(circle) {
+            let inst = instrumentsConfig[circle.instrumentIdx];
+            if (inst.type === 'voice') return circle.lyrics.join(',');
+            let str = '';
+            for (let i = 0; i < circle.steps; i++) {
+                let s = circle.activeSteps[i];
+                if (s === 0) str += ' ';
+                else {
+                    if (inst.type === 'gongue') {
+                        if (s === 'GRV') str += 'G'; else if (s === 'grv') str += 'g';
+                        else if (s === 'AIG') str += 'A'; else if (s === 'aig') str += 'a';
+                    } else str += s;
+                }
+            }
+            return str;
+        }
 
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Ombre portée 2D
-            ctx.save();
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
-            ctx.shadowBlur = 32;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 12;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 350, 0, Math.PI * 2);
-            ctx.fillStyle = '#000000'; 
-            ctx.fill();
-            ctx.restore();
+            ctx.save(); ctx.shadowColor = 'rgba(0, 0, 0, 0.65)'; ctx.shadowBlur = 32; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 12;
+            ctx.beginPath(); ctx.arc(centerX, centerY, 560, 0, Math.PI * 2); ctx.fillStyle = '#000000'; ctx.fill(); ctx.restore();
 
             if (bgLoaded) {
-                ctx.save(); ctx.beginPath(); ctx.arc(centerX, centerY, 350, 0, Math.PI * 2); ctx.clip();
-                ctx.drawImage(bgImg, centerX - 350, centerY - 350, 700, 700); ctx.restore();
-                ctx.beginPath(); ctx.arc(centerX, centerY, 350, 0, Math.PI * 2); ctx.fillStyle = 'rgba(15, 15, 15, 0.5)'; ctx.fill();
+                ctx.save(); ctx.beginPath(); ctx.arc(centerX, centerY, 560, 0, Math.PI * 2); ctx.clip();
+                ctx.drawImage(bgImg, centerX - 560, centerY - 560, 1120, 1120); ctx.restore();
+                ctx.beginPath(); ctx.arc(centerX, centerY, 560, 0, Math.PI * 2); ctx.fillStyle = 'rgba(15, 15, 15, 0.5)'; ctx.fill();
             } else {
-                ctx.fillStyle = '#1c1c1c'; ctx.beginPath(); ctx.arc(centerX, centerY, 350, 0, Math.PI * 2); ctx.fill();
-                ctx.strokeStyle = '#2d2d2d'; ctx.lineWidth = 4; ctx.stroke();
+                ctx.fillStyle = '#1c1c1c'; ctx.beginPath(); ctx.arc(centerX, centerY, 560, 0, Math.PI * 2); ctx.fill();
             }
 
-            if (isMetroOn && isPlaying && currentStepIndex % 24 === 0) {
-                ctx.beginPath(); ctx.arc(centerX, centerY, 365, 0, Math.PI * 2);
-                ctx.strokeStyle = 'rgba(241, 196, 15, 0.5)'; ctx.lineWidth = 5; ctx.stroke();
-            }
+            ctx.beginPath(); ctx.arc(centerX, centerY, 565, 0, Math.PI * 2); ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 8; ctx.stroke();
 
-            ctx.beginPath(); ctx.arc(centerX, centerY, 355, 0, Math.PI * 2); ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 8; ctx.stroke();
+            // DESSIN DES REPERES VISUELS (TEMPS 1, 2, 3, 4...)
+            const markers = getMarkers();
+            markers.forEach((tick, idx) => {
+                const angle = -Math.PI / 2 + ((tick / maxTicks) * Math.PI * 2);
+                
+                // Petits traits
+                const inRad = 525, outRad = 538;
+                ctx.beginPath();
+                ctx.moveTo(centerX + Math.cos(angle)*inRad, centerY + Math.sin(angle)*inRad);
+                ctx.lineTo(centerX + Math.cos(angle)*outRad, centerY + Math.sin(angle)*outRad);
+                ctx.strokeStyle = (tick === 0) ? 'var(--accent-gold)' : 'rgba(255,255,255,0.4)';
+                ctx.lineWidth = (tick === 0) ? 4 : 2;
+                ctx.stroke();
+
+                // Numéros
+                const textRad = 548;
+                ctx.fillStyle = (tick === 0) ? 'var(--accent-gold)' : 'rgba(255,255,255,0.7)';
+                ctx.font = 'bold 16px sans-serif';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText((idx + 1).toString(), centerX + Math.cos(angle)*textRad, centerY + Math.sin(angle)*textRad);
+            });
+
+            let voiceCircles = circles.filter(c => instrumentsConfig[c.instrumentIdx].type === 'voice');
+            let activeVoiceCircleId = voiceCircles.length > 0 ? voiceCircles[measureCount % voiceCircles.length].id : null;
 
             let currentAngle = -Math.PI / 2;
             if (isPlaying && Tone.Transport.state === "started") {
                 const bpm = Tone.Transport.bpm.value;
-                const progressInMeasure = (Tone.Transport.seconds % ((60 / bpm) * 4)) / ((60 / bpm) * 4);
-                currentAngle = -Math.PI / 2 + (progressInMeasure * Math.PI * 2);
+                const beats = maxTicks / 24; 
+                const measureDuration = (60 / bpm) * beats;
+                const progress = (Tone.Transport.seconds % measureDuration) / measureDuration;
+                currentAngle = -Math.PI / 2 + (progress * Math.PI * 2);
             }
 
             circles.forEach((circle) => {
                 if (circle.isHidden) return;
 
+                const inst = instrumentsConfig[circle.instrumentIdx];
                 let hasActiveSolo = circles.some(c => c.isSolo);
                 let isTargeted = hasActiveSolo ? circle.isSolo : !circle.isMute;
+                if (inst.type === 'voice' && voiceCircles.length > 1 && circle.id !== activeVoiceCircleId) isTargeted = false; 
                 
                 ctx.save(); ctx.globalAlpha = isTargeted ? 1.0 : 0.15;
                 ctx.beginPath(); ctx.arc(centerX, centerY, circle.radius, 0, Math.PI * 2);
                 ctx.strokeStyle = circle.isSolo ? '#f1c40f' : 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1.5; ctx.stroke();
 
-                const inst = instrumentsConfig[circle.instrumentIdx] || instrumentsConfig[0];
-                
-                const pulsePerStep = 96 / circle.steps;
-                const currentStep = (isPlaying && currentStepIndex >= 0) ? Math.floor(currentStepIndex / pulsePerStep) : -1;
+                const currentStep = (isPlaying && currentStepIndex >= 0) ? Math.floor((currentStepIndex / maxTicks) * circle.steps) : -1;
 
                 for (let i = 0; i < circle.steps; i++) {
                     const stepAngle = -Math.PI / 2 + (i * (Math.PI * 2 / circle.steps));
                     const x = centerX + Math.cos(stepAngle) * circle.radius; const y = centerY + Math.sin(stepAngle) * circle.radius;
                     
-                    let state = circle.activeSteps[i]; let fillColor = 'rgba(255,255,255,0.2)'; let radiusSize = 5; let isAccent = false;
+                    let state = circle.activeSteps[i]; let fillColor = 'rgba(255,255,255,0.2)'; let radiusSize = 6; let isAccent = false;
                     let textSymbol = state;
 
+                    // Agrandissement global des frappes
                     if (state !== 0) {
-                        radiusSize = 10;
+                        radiusSize = 13;
                         if (inst.type === 'voice') {
-                            fillColor = inst.colors.active;
-                            textSymbol = (circle.lyrics && circle.lyrics[i]) ? circle.lyrics[i] : 'X';
+                            fillColor = inst.colors.active; textSymbol = (circle.lyrics && circle.lyrics[i]) ? circle.lyrics[i] : 'X';
                         } else {
-                            fillColor = inst.colors[state] || '#fff';
-                            isAccent = (state === state.toUpperCase());
-                            radiusSize = isAccent ? 12 : 9;
+                            fillColor = inst.colors[state] || '#fff'; isAccent = (state === state.toUpperCase()); 
+                            radiusSize = isAccent ? 15 : 12; // Plus grand !
                             
-                            if (inst.type === 'shake') {
-                                if (inst.id === 'mineiro') {
-                                    if (state.toLowerCase() === 'p') textSymbol = '↑';
-                                    else if (state.toLowerCase() === 't') textSymbol = '↓';
-                                } else {
-                                    if (state.toLowerCase() === 'p') textSymbol = '←';
-                                    else if (state.toLowerCase() === 't') textSymbol = '→';
-                                }
+                            if (inst.type === 'gongue') {
+                                if (state === 'GRV') textSymbol = 'G'; else if (state === 'grv') textSymbol = 'g';
+                                else if (state === 'AIG') textSymbol = 'A'; else if (state === 'aig') textSymbol = 'a';
+                            } else if (inst.id === 'mineiro') {
+                                if (state.toLowerCase() === 'p') textSymbol = '↑'; 
+                                else if (state.toLowerCase() === 't') textSymbol = '↓';
+                            } else if (inst.id === 'agbe') {
+                                if (state.toLowerCase() === 'g') textSymbol = '←'; 
+                                else if (state.toLowerCase() === 'd') textSymbol = '→'; 
                             }
                         }
                     }
 
                     if (i === currentStep) {
-                        ctx.beginPath(); ctx.arc(x, y, radiusSize + 5, 0, Math.PI * 2);
-                        ctx.strokeStyle = 'rgba(46, 204, 113, 0.7)'; ctx.lineWidth = 2.5; ctx.stroke();
+                        ctx.beginPath(); ctx.arc(x, y, radiusSize + 5, 0, Math.PI * 2); ctx.strokeStyle = 'rgba(46, 204, 113, 0.7)'; ctx.lineWidth = 2.5; ctx.stroke();
                     }
 
                     if (isAccent) {
-                        ctx.beginPath(); ctx.arc(x, y, radiusSize + 4, 0, Math.PI * 2);
-                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'; ctx.lineWidth = 2; ctx.stroke();
+                        ctx.beginPath(); ctx.arc(x, y, radiusSize + 4, 0, Math.PI * 2); ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'; ctx.lineWidth = 2; ctx.stroke();
                     }
 
-                    ctx.beginPath(); ctx.arc(x, y, radiusSize, 0, Math.PI * 2); ctx.fillStyle = fillColor; ctx.fill();
-                    ctx.strokeStyle = '#121212'; ctx.lineWidth = 1.5; ctx.stroke();
+                    ctx.beginPath(); ctx.arc(x, y, radiusSize, 0, Math.PI * 2); ctx.fillStyle = fillColor; ctx.fill(); ctx.strokeStyle = '#121212'; ctx.lineWidth = 1.5; ctx.stroke();
                     
                     if (state !== 0) {
-                        let txtColor = (inst.colors && inst.colors.text) ? inst.colors.text : '#fff';
+                        let txtColor = inst.colors.text || '#fff';
+                        if (inst.id === 'gongue' && (state === 'aig' || state === 'AIG')) txtColor = '#000000';
                         
-                        if (inst.id === 'gongue' && (state === 'aig' || state === 'AIG')) {
-                            txtColor = '#000000';
-                        }
                         ctx.fillStyle = txtColor;
-                        
-                        if (inst.type === 'shake') {
-                            ctx.font = 'bold 12px sans-serif';
-                        } else {
-                            ctx.font = 'bold 9px sans-serif';
-                        }
-                        
-                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                        ctx.fillText(String(textSymbol).substring(0,5), x, y);
+                        // Police plus grande (16px et 14px)
+                        ctx.font = (inst.type === 'shake' || inst.id === 'agbe') ? 'bold 16px sans-serif' : 'bold 14px sans-serif';
+                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; 
+                        ctx.fillText(textSymbol.substring(0, 15), x, y + 1);
                     }
                     if (i === 0) {
                         ctx.save(); ctx.globalAlpha = 1.0; ctx.fillStyle = '#bbb'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'left';
-                        ctx.fillText(inst.name, x + 15, y + 3); ctx.restore();
+                        let displayName = inst.name;
+                        if (inst.type === 'voice') {
+                            let vIndex = voiceCircles.indexOf(circle) + 1;
+                            if (voiceCircles.length > 1) displayName += ` ${vIndex}`;
+                        }
+                        ctx.fillText(displayName, x + 20, y + 3); ctx.restore(); // Eloigné un peu du grand cercle
                     }
                 }
                 ctx.restore();
@@ -550,73 +628,82 @@
             ctx.beginPath(); ctx.ellipse(stickLength - 10, 0, 7, 3.5, 0, 0, Math.PI * 2); ctx.fillStyle = '#c69552'; ctx.fill();
             ctx.restore();
 
+            ctx.beginPath(); ctx.arc(centerX, centerY, 55, 0, Math.PI * 2);
+            ctx.fillStyle = isPlaying ? 'rgba(231, 76, 60, 0.9)' : 'rgba(46, 204, 113, 0.9)';
+            ctx.fill(); ctx.strokeStyle = '#121212'; ctx.lineWidth = 4; ctx.stroke();
+            ctx.fillStyle = '#000'; ctx.font = 'bold 34px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(isPlaying ? "⏹" : "▶", isPlaying ? centerX : centerX + 5, centerY + 2);
+
             requestAnimationFrame(draw);
         }
 
         let currentStepIndex = -1;
+        
+        // Nouvelle Logique 100% stable pour s'adapter à toutes les métriques et longueurs de pas !
         const mainLoop = new Tone.Loop((time) => {
-            currentStepIndex = (currentStepIndex + 1) % 96;
-            if (isMetroOn && currentStepIndex % 24 === 0) {
-                bMetroClick.triggerAttackRelease("A5", "32n", time);
+            if (currentStepIndex === maxTicks - 1) measureCount++; 
+            currentStepIndex = (currentStepIndex + 1) % maxTicks;
+            
+            const markers = getMarkers();
+            if (isMetroOn && markers.includes(currentStepIndex)) { 
+                let note = (currentStepIndex === 0) ? "A5" : (timeSignature === "6/8" && currentStepIndex === 36 ? "E5" : "C5");
+                bMetroClick.triggerAttackRelease(note, "32n", time); 
             }
+
+            let voiceCircles = circles.filter(c => instrumentsConfig[c.instrumentIdx].type === 'voice');
+            let activeVoiceCircleId = voiceCircles.length > 0 ? voiceCircles[measureCount % voiceCircles.length].id : null;
 
             const hasActiveSolo = circles.some(c => c.isSolo);
             circles.forEach(circle => {
                 let canPlay = hasActiveSolo ? circle.isSolo : !circle.isMute;
                 if (canPlay) {
-                    const pulsePerStep = 96 / circle.steps;
-                    if (currentStepIndex % pulsePerStep === 0) {
-                        const stepIdx = Math.floor(currentStepIndex / pulsePerStep);
+                    let inst = instrumentsConfig[circle.instrumentIdx];
+                    if (inst.type === 'voice' && voiceCircles.length > 1 && circle.id !== activeVoiceCircleId) return; 
+
+                    // Détermine mathématiquement le pas actuel basé sur la position exacte dans la mesure
+                    const stepIdx = Math.floor((currentStepIndex / maxTicks) * circle.steps);
+                    const expectedTick = Math.floor((stepIdx * maxTicks) / circle.steps);
+                    
+                    // Ne déclencher que sur le tout premier tick précis alloué à ce pas
+                    if (currentStepIndex === expectedTick) {
                         let state = circle.activeSteps[stepIdx];
                         if (state !== 0) {
-                            let inst = instrumentsConfig[circle.instrumentIdx] || instrumentsConfig[0];
                             if (inst.type === 'voice') {
-                                bChantSynth.triggerAttackRelease("C3", "8n", time);
+                                if (voiceSynths[inst.id]) voiceSynths[inst.id].triggerAttackRelease(inst.id === 'puxador' ? "E3" : "C3", "8n", time);
                             } else if (samplers[inst.id]) {
-                                let playerGroup = samplers[inst.id];
-                                let targetKey = null;
-
+                                let playerGroup = samplers[inst.id]; let targetKey = null;
                                 if (inst.type === 'gongue') {
-                                    if (state === 'GRV') targetKey = 'fort-grave';
-                                    else if (state === 'grv') targetKey = 'faible-grave';
-                                    else if (state === 'AIG') targetKey = 'fort-aigue';
-                                    else if (state === 'aig') targetKey = 'faible-aigue';
+                                    if (state === 'GRV') targetKey = 'fort-grave'; else if (state === 'grv') targetKey = 'faible-grave';
+                                    else if (state === 'AIG') targetKey = 'fort-aigue'; else if (state === 'aig') targetKey = 'faible-aigue';
                                 } else {
-                                    if (['D', 'G', 'P', 'T'].includes(state)) targetKey = 'fort';
-                                    else if (['d', 'g', 'p', 't'].includes(state)) targetKey = 'faible';
+                                    if (['D', 'G', 'P', 'T'].includes(state)) targetKey = 'fort'; else if (['d', 'g', 'p', 't'].includes(state)) targetKey = 'faible';
                                 }
                                 
                                 if (targetKey && playerGroup.has(targetKey)) {
-                                    let startTimeOffset = 0;
-                                    if (inst.type === 'shake' && targetKey === 'faible') {
-                                        startTimeOffset = 0.02; 
-                                    }
-                                    playerGroup.player(targetKey).start(time, startTimeOffset);
+                                    try { let player = playerGroup.player(targetKey); if (player.loaded) player.start(time, (inst.type === 'shake' && targetKey === 'faible') ? 0.02 : 0); } catch (err) {}
                                 }
                             }
                         }
                     }
                 }
             });
-        }, "96n");
+        }, "96n"); // Tone.js tourne toujours à 96n (24 ticks = noire)
 
         function drawMeters() {
             const dbToPct = (db) => { if (db < -50) return 0; if (db > 0) return 100; return Math.floor(((db + 50) / 50) * 100); };
             circles.forEach(c => {
-                let inst = instrumentsConfig[c.instrumentIdx] || instrumentsConfig[0];
-                let bar = document.getElementById(`meter-bar-${c.id}`);
-                let meter = meters[inst.id];
-                if(bar && meter) { bar.style.width = isPlaying ? dbToPct(meter.getValue()) + '%' : '0%'; }
+                let inst = instrumentsConfig[c.instrumentIdx];
+                let bar = document.getElementById(`meter-bar-${c.id}`); let meter = meters[inst.id];
+                if (bar && meter) bar.style.width = isPlaying ? dbToPct(meter.getValue()) + '%' : '0%'; 
             });
         }
         setInterval(drawMeters, 40);
 
         function renderMixer() {
-            const container = document.getElementById('tracks-mixer-container'); 
-            if (!container) return;
+            const container = document.getElementById('tracks-mixer-container'); if (!container) return;
             container.innerHTML = "";
             circles.forEach((circle, index) => {
-                const inst = instrumentsConfig[circle.instrumentIdx] || instrumentsConfig[0];
+                const inst = instrumentsConfig[circle.instrumentIdx];
                 
                 let instSelectHtml = `<select onchange="updateInstrument(${circle.id}, this.value)">`;
                 instrumentsConfig.forEach((opt, idx) => {
@@ -624,6 +711,8 @@
                     instSelectHtml += `<option value="${idx}" ${isSelected}>${opt.name}</option>`;
                 });
                 instSelectHtml += `</select>`;
+
+                const ph = inst.type === 'voice' ? t('patternPhVoice') : t('patternPhText');
 
                 const div = document.createElement('div'); div.className = "track-mixer";
                 div.innerHTML = `
@@ -641,49 +730,75 @@
                         <div class="vol-meter-bg"><div class="vol-meter-bar" id="meter-bar-${circle.id}"></div></div>
                     </div>
                     <div class="steps-config">
-                        <span>Nombre de pas :</span>
+                        <span>${t('stepsNum')}</span>
                         <input type="number" value="${circle.steps}" min="2" max="32" onchange="updateSteps(${circle.id}, this.value)">
+                    </div>
+                    <div class="pattern-row">
+                        <span class="pattern-label" title="${t('patternTip')}">${t('pattern')}</span>
+                        <input type="text" id="pattern-input-${circle.id}" class="pattern-input" value="${generatePatternString(circle)}" oninput="onPatternInput(${circle.id}, this.value)" placeholder="${ph}" ${inst.type !== 'voice' ? `maxlength="${circle.steps}"` : ''}>
                     </div>
                 `;
                 container.appendChild(div);
             });
         }
 
+        window.onPatternInput = function(id, value) {
+            let c = circles.find(x => x.id === id); if (!c) return;
+            let inst = instrumentsConfig[c.instrumentIdx];
+            
+            if (inst.type === 'voice') {
+                let parts = value.split(',');
+                for (let i = 0; i < c.steps; i++) {
+                    let word = parts[i] !== undefined ? parts[i].trim() : "";
+                    c.activeSteps[i] = word ? 'X' : 0;
+                    c.lyrics[i] = word.substring(0, 15);
+                }
+            } else {
+                let chars = value.split('');
+                for (let i = 0; i < c.steps; i++) {
+                    let char = chars[i] || ' ';
+                    if (inst.type === 'gongue') {
+                        if (char === 'G') c.activeSteps[i] = 'GRV'; else if (char === 'g') c.activeSteps[i] = 'grv';
+                        else if (char === 'A') c.activeSteps[i] = 'AIG'; else if (char === 'a') c.activeSteps[i] = 'aig';
+                        else c.activeSteps[i] = 0;
+                    } else if (inst.id === 'mineiro') { 
+                        if (char === 'P' || char === 'T' || char === 'p' || char === 't') c.activeSteps[i] = char;
+                        else c.activeSteps[i] = 0;
+                    } else { 
+                        if (char === 'D' || char === 'G' || char === 'd' || char === 'g') c.activeSteps[i] = char;
+                        else c.activeSteps[i] = 0;
+                    }
+                }
+            }
+        };
+
         window.toggleMute = function(id) { let c = circles.find(x => x.id === id); if(c) c.isMute = !c.isMute; renderMixer(); };
         window.toggleSolo = function(id) { let c = circles.find(x => x.id === id); if(c) c.isSolo = !c.isSolo; renderMixer(); };
         window.toggleHide = function(id) { let c = circles.find(x => x.id === id); if (c) c.isHidden = !c.isHidden; renderMixer(); };
-        window.deleteCircle = function(id) { circles = circles.filter(x => x.id !== id); renderMixer(); };
+        window.deleteCircle = function(id) { circles = circles.filter(x => x.id !== id); refreshCirclesLayout(); };
 
         window.updateInstrument = function(id, instIdx) {
             let c = circles.find(x => x.id === id);
             if (c) {
-                c.instrumentIdx = parseInt(instIdx);
-                c.activeSteps = Array(c.steps).fill(0);
-                c.lyrics = Array(c.steps).fill("");
-                let instId = (instrumentsConfig[c.instrumentIdx] || instrumentsConfig[0]).id;
-                let db = Tone.gainToDb(c.volumeVal / 100); 
-                if (c.volumeVal <= 4) db = -Infinity;
-                channels[instId].volume.value = db;
+                c.instrumentIdx = parseInt(instIdx); c.activeSteps = Array(c.steps).fill(0); c.lyrics = Array(c.steps).fill("");
+                let instId = instrumentsConfig[c.instrumentIdx].id; let db = Tone.gainToDb(c.volumeVal / 100); 
+                if (c.volumeVal <= 4) db = -Infinity; channels[instId].volume.value = db;
                 renderMixer();
             }
         };
 
         window.updateVolume = function(id, v) {
             let c = circles.find(x => x.id === id);
-            if(c) {
-                c.volumeVal = parseInt(v);
-                let instId = (instrumentsConfig[c.instrumentIdx] || instrumentsConfig[0]).id;
-                let db = Tone.gainToDb(v / 100); if(v <= 4) db = -Infinity;
-                channels[instId].volume.value = db;
-            }
+            if(c) { c.volumeVal = parseInt(v); let instId = instrumentsConfig[c.instrumentIdx].id; let db = Tone.gainToDb(v / 100); if(v <= 4) db = -Infinity; channels[instId].volume.value = db; }
         };
         
         window.updateSteps = function(id, s) {
             let c = circles.find(x => x.id === id);
-            if (c) {
-                let sn = parseInt(s) || 4; c.steps = sn;
-                let na = Array(sn).fill(0); for(let i=0; i<Math.min(sn, c.activeSteps.length); i++) na[i] = c.activeSteps[i];
-                c.activeSteps = na;
+            if (c) { 
+                let sn = parseInt(s) || 4; c.steps = sn; let na = Array(sn).fill(0); 
+                for(let i=0; i<Math.min(sn, c.activeSteps.length); i++) na[i] = c.activeSteps[i]; 
+                c.activeSteps = na; 
+                renderMixer(); 
             }
         };
 
@@ -693,45 +808,40 @@
             const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
             const dx = mouseX - centerX; const dy = mouseY - centerY; const distance = Math.sqrt(dx * dx + dy * dy);
 
+            if (distance < 55) { togglePlay(); return; }
+
             circles.forEach((circle) => {
                 if (circle.isHidden) return;
-                if (Math.abs(distance - circle.radius) < 14) {
-                    let clickAngle = Math.atan2(dy, dx) + Math.PI / 2; 
-                    if (clickAngle < 0) clickAngle += Math.PI * 2;
+                // Sensibilité du clic élargie proportionnellement à la nouvelle taille
+                if (Math.abs(distance - circle.radius) < 18) {
+                    let clickAngle = Math.atan2(dy, dx) + Math.PI / 2; if (clickAngle < 0) clickAngle += Math.PI * 2;
                     const stepAngleSize = (Math.PI * 2) / circle.steps;
                     
                     for (let i = 0; i < circle.steps; i++) {
-                        const targetAngle = i * stepAngleSize; 
-                        let angleDiff = Math.abs(clickAngle - targetAngle);
+                        const targetAngle = i * stepAngleSize; let angleDiff = Math.abs(clickAngle - targetAngle);
                         if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
 
                         if (angleDiff < stepAngleSize / 2) {
-                            const inst = instrumentsConfig[circle.instrumentIdx] || instrumentsConfig[0]; 
-                            let current = circle.activeSteps[i];
-                            if (inst.type === 'shake') {
-                                if (current === 0) circle.activeSteps[i] = 'p'; 
-                                else if (current === 'p') circle.activeSteps[i] = 'P'; 
-                                else if (current === 'P') circle.activeSteps[i] = 't'; 
-                                else if (current === 't') circle.activeSteps[i] = 'T'; 
-                                else circle.activeSteps[i] = 0;
+                            const inst = instrumentsConfig[circle.instrumentIdx]; let current = circle.activeSteps[i];
+                            
+                            if (inst.id === 'mineiro') {
+                                if (current === 0) circle.activeSteps[i] = 'p'; else if (current === 'p') circle.activeSteps[i] = 'P'; else if (current === 'P') circle.activeSteps[i] = 't'; else if (current === 't') circle.activeSteps[i] = 'T'; else circle.activeSteps[i] = 0;
+                            } else if (inst.id === 'agbe') {
+                                if (current === 0) circle.activeSteps[i] = 'g'; else if (current === 'g') circle.activeSteps[i] = 'G'; else if (current === 'G') circle.activeSteps[i] = 'd'; else if (current === 'd') circle.activeSteps[i] = 'D'; else circle.activeSteps[i] = 0;
                             } else if (inst.type === 'gongue') {
-                                if (current === 0) circle.activeSteps[i] = 'grv'; 
-                                else if (current === 'grv') circle.activeSteps[i] = 'GRV'; 
-                                else if (current === 'GRV') circle.activeSteps[i] = 'aig'; 
-                                else if (current === 'aig') circle.activeSteps[i] = 'AIG'; 
-                                else circle.activeSteps[i] = 0;
+                                if (current === 0) circle.activeSteps[i] = 'grv'; else if (current === 'grv') circle.activeSteps[i] = 'GRV'; else if (current === 'GRV') circle.activeSteps[i] = 'aig'; else if (current === 'aig') circle.activeSteps[i] = 'AIG'; else circle.activeSteps[i] = 0;
                             } else if (inst.type === 'voice') {
                                 if (current === 0) {
-                                    let lyric = prompt("Parole :");
-                                    if (lyric) { circle.activeSteps[i] = 'X'; if(!circle.lyrics) circle.lyrics = []; circle.lyrics[i] = lyric.substring(0,5); }
+                                    let lyric = prompt("Paroles (ex: Égua do babado) :");
+                                    if (lyric !== null) { circle.activeSteps[i] = lyric.trim() ? 'X' : 0; if(!circle.lyrics) circle.lyrics = []; circle.lyrics[i] = lyric.substring(0, 15); }
                                 } else { circle.activeSteps[i] = 0; }
                             } else {
-                                if (current === 0) circle.activeSteps[i] = 'd'; 
-                                else if (current === 'd') circle.activeSteps[i] = 'D'; 
-                                else if (current === 'D') circle.activeSteps[i] = 'g'; 
-                                else if (current === 'g') circle.activeSteps[i] = 'G'; 
-                                else circle.activeSteps[i] = 0;
+                                if (current === 0) circle.activeSteps[i] = 'd'; else if (current === 'd') circle.activeSteps[i] = 'D'; else if (current === 'D') circle.activeSteps[i] = 'g'; else if (current === 'g') circle.activeSteps[i] = 'G'; else circle.activeSteps[i] = 0;
                             }
+                            
+                            let inputEl = document.getElementById(`pattern-input-${circle.id}`);
+                            if (inputEl) inputEl.value = window.generatePatternString(circle);
+                            
                             return;
                         }
                     }
@@ -739,125 +849,100 @@
             });
         });
 
-        const playBtn = document.getElementById('playBtn');
-        playBtn.addEventListener('click', async () => {
+        async function togglePlay() {
             if (!isPlaying) {
-                await Tone.start(); currentStepIndex = -1; mainLoop.stop(); Tone.Transport.stop(); Tone.Transport.cancel(0);
-                mainLoop.start(0); Tone.Transport.start("+0.02");
-                playBtn.textContent = "⏹"; playBtn.classList.add('playing'); isPlaying = true;
+                await Tone.start(); currentStepIndex = -1; measureCount = 0; mainLoop.stop(); Tone.Transport.stop(); Tone.Transport.cancel(0);
+                mainLoop.start(0); Tone.Transport.start("+0.02"); isPlaying = true;
             } else {
                 mainLoop.stop(); Tone.Transport.stop();
-                instrumentsConfig.forEach(inst => { if (samplers[inst.id]) samplers[inst.id].stopAll(); });
-                bChantSynth.triggerRelease();
-                playBtn.textContent = "▶"; playBtn.classList.remove('playing'); isPlaying = false;
+                instrumentsConfig.forEach(inst => { if (samplers[inst.id]) samplers[inst.id].stopAll(); if (voiceSynths[inst.id]) voiceSynths[inst.id].triggerRelease(); });
+                isPlaying = false;
             }
-        });
+        }
 
         document.getElementById('bpm').addEventListener('input', (e) => { Tone.Transport.bpm.value = e.target.value; });
-        document.getElementById('masterVol').addEventListener('input', (e) => {
-            let val = parseFloat(e.target.value);
-            Tone.Destination.volume.value = val === -40 ? -Infinity : val;
-        });
+        document.getElementById('masterVol').addEventListener('input', (e) => { let val = parseFloat(e.target.value); Tone.Destination.volume.value = val === -40 ? -Infinity : val; });
+        const metroBtn = document.getElementById('metroBtn'); metroBtn.addEventListener('click', () => { isMetroOn = !isMetroOn; metroBtn.classList.toggle('metro-on', isMetroOn); });
+        document.getElementById('clearBtn').addEventListener('click', () => { circles = []; refreshCirclesLayout(); });
 
-        const metroBtn = document.getElementById('metroBtn');
-        metroBtn.addEventListener('click', () => { isMetroOn = !isMetroOn; metroBtn.classList.toggle('metro-on', isMetroOn); });
-        document.getElementById('clearBtn').addEventListener('click', () => { circles = []; renderMixer(); });
+        const showAddBtn = document.getElementById('showAddBtn');
+        const addSelect = document.getElementById('addInstrumentSelect');
 
-        document.getElementById('addCircleBtn').addEventListener('click', () => {
-            if (circles.length >= 8) return alert("Nombre maximum de 8 instruments atteint !");
-            const steps = 16;
-            const selectElem = document.getElementById('addInstrumentSelect');
-            const choice = selectElem ? parseInt(selectElem.value) : 0;
-            const instIdx = (choice >= 0 && choice < instrumentsConfig.length) ? choice : 0;
-            const nextRadius = circles.length > 0 ? circles[circles.length - 1].radius + 30 : 100;
-            
-            circles.push({ 
-                id: Date.now(), radius: nextRadius, steps: steps, activeSteps: Array(steps).fill(0), 
-                instrumentIdx: instIdx, lyrics: Array(steps).fill(""), isMute: false, isSolo: false, isHidden: false, volumeVal: 100 
-            });
-            renderMixer();
+        showAddBtn.addEventListener('click', () => { addSelect.style.display = addSelect.style.display === 'none' ? 'block' : 'none'; });
+
+        if (addSelect) {
+            instrumentsConfig.forEach((inst, idx) => { const opt = document.createElement('option'); opt.value = idx; opt.textContent = inst.name; addSelect.appendChild(opt); });
+        }
+
+        addSelect.addEventListener('change', function() {
+            if (this.value !== "") {
+                if (circles.length >= 10) { alert("Nombre maximum de 10 instruments atteint !"); this.value = ""; return; }
+                const instIdx = parseInt(this.value);
+                let defaultSteps = (timeSignature === "3/4" || timeSignature === "6/8") ? 12 : (timeSignature === "2/4" ? 8 : 16);
+                circles.push({ id: Date.now(), steps: defaultSteps, activeSteps: Array(defaultSteps).fill(0), instrumentIdx: instIdx, lyrics: Array(defaultSteps).fill(""), isMute: false, isSolo: false, isHidden: false, volumeVal: 100 });
+                refreshCirclesLayout(); this.value = ""; this.style.display = 'none'; 
+            }
         });
 
         document.getElementById('saveBtn').addEventListener('click', () => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ bpm: Tone.Transport.bpm.value, circles: circles }));
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ bpm: Tone.Transport.bpm.value, timeSig: timeSignature, circles: circles }));
             const dl = document.createElement('a'); dl.href = dataStr; dl.download = "rythme_samambaia.json"; dl.click();
         });
 
-        const fileInput = document.getElementById('fileInput');
-        document.getElementById('loadBtn').addEventListener('click', () => fileInput.click());
+        const fileInput = document.getElementById('fileInput'); document.getElementById('loadBtn').addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0]; if (!file) return;
-            const reader = new FileReader();
+            const file = e.target.files[0]; if (!file) return; const reader = new FileReader();
             reader.onload = function(evt) {
-                try {
-                    const d = JSON.parse(evt.target.result);
-                    if (d.bpm) { document.getElementById('bpm').value = d.bpm; Tone.Transport.bpm.value = d.bpm; }
-                    if (d.circles) { circles = d.circles; renderMixer(); }
+                try { 
+                    const d = JSON.parse(evt.target.result); 
+                    if (d.bpm) { document.getElementById('bpm').value = d.bpm; Tone.Transport.bpm.value = d.bpm; } 
+                    if (d.circles) { circles = d.circles; } 
+                    if (d.timeSig) { updateTimeSig(d.timeSig, 'skip'); } else { updateTimeSig("4/4", 'skip'); }
+                    refreshCirclesLayout(); 
                 } catch (err) { alert("Fichier invalide !"); }
-            };
-            reader.readAsText(file);
+            }; reader.readAsText(file);
         });
 
-        function onPresetChange(value) {
-            if (value.endsWith('.json')) { loadPresetFile(value); } else { loadFallbackPreset(value); }
-        }
+        function onPresetChange(value) { if (value.endsWith('.json')) loadPresetFile(value); else loadFallbackPreset(value); }
 
         function loadPresetFile(fileName) {
-            fetch(fileName)
-                .then(res => {
-                    if (!res.ok) throw new Error("Fichier introuvable");
-                    return res.json();
+            fetch(fileName).then(res => { if (!res.ok) throw new Error("Fichier introuvable"); return res.json(); })
+                .then(data => { 
+                    if (data.circles) circles = JSON.parse(JSON.stringify(data.circles)); 
+                    if (data.bpm) { document.getElementById('bpm').value = data.bpm; Tone.Transport.bpm.value = data.bpm; } 
+                    if (data.timeSig) { updateTimeSig(data.timeSig, 'skip'); } else { updateTimeSig("4/4", 'skip'); }
+                    refreshCirclesLayout(); 
                 })
-                .then(data => {
-                    if (data.circles) { circles = JSON.parse(JSON.stringify(data.circles)); }
-                    if (data.bpm) { document.getElementById('bpm').value = data.bpm; Tone.Transport.bpm.value = data.bpm; }
-                    renderMixer();
-                })
-                .catch(err => {
-                    console.warn(`Impossible de lire localement ${fileName}. Passage sur le modèle d'urgence.`, err);
-                    if (fileName.includes("Imale")) { loadFallbackPreset('baque-de-imale'); } else { loadFallbackPreset('vou-vadiar'); }
-                });
+                .catch(err => { loadFallbackPreset(fileName.includes("Imale") ? 'baque-de-imale' : 'vou-vadiar'); });
         }
 
         function loadFallbackPreset(name) {
-            let p = null;
-            if (name === 'vou-vadiar') { p = vouVadiarPreset; } else if (name === 'baque-de-imale') { p = baqueDeImalePreset; }
-            if (p) {
+            let p = name === 'baque-de-imale' ? baqueDeImalePreset : vouVadiarPreset;
+            if (p) { 
                 circles = JSON.parse(JSON.stringify(p.circles)); 
-                document.getElementById('bpm').value = p.bpm; Tone.Transport.bpm.value = p.bpm;
+                document.getElementById('bpm').value = p.bpm; Tone.Transport.bpm.value = p.bpm; 
+                updateTimeSig(p.timeSig || "4/4", 'skip');
             }
-            renderMixer();
+            refreshCirclesLayout(); measureCount = 0; 
         }
 
         fetch('catalog.json')
-            .then(response => {
-                if (!response.ok) throw new Error("Fichier catalog.json manquant ou inaccessible");
-                return response.json();
-            })
+            .then(response => { if (!response.ok) throw new Error("Fichier manquant"); return response.json(); })
             .then(presets => {
-                const select = document.getElementById('presetSelect');
-                select.innerHTML = ''; 
-                presets.forEach(p => {
-                    const opt = document.createElement('option'); opt.value = p.file; opt.textContent = p.name; select.appendChild(opt);
-                });
-                if (presets.length > 0) { loadPresetFile(presets[0].file); }
+                const select = document.getElementById('presetSelect'); select.innerHTML = ''; 
+                presets.forEach(p => { const opt = document.createElement('option'); opt.value = p.file; opt.textContent = p.name; select.appendChild(opt); });
+                if (presets.length > 0) loadPresetFile(presets[0].file);
             })
-            .catch(err => {
-                console.warn("Utilisation des presets d'urgence intégrés (CORS ou catalogue manquant).", err.message);
-                loadFallbackPreset('vou-vadiar'); document.getElementById('presetSelect').value = 'vou-vadiar';
-            });
+            .catch(err => { loadFallbackPreset('vou-vadiar'); document.getElementById('presetSelect').value = 'vou-vadiar'; });
 
-        window.addEventListener('keydown', (e) => { if (e.code === 'Space' && e.target.tagName !== 'INPUT') { e.preventDefault(); playBtn.click(); } });
+        window.addEventListener('keydown', (e) => { 
+            if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') { 
+                e.preventDefault(); togglePlay(); 
+            } 
+        });
 
-        const addSelect = document.getElementById('addInstrumentSelect');
-        if (addSelect) {
-            instrumentsConfig.forEach((inst, idx) => {
-                const opt = document.createElement('option'); opt.value = idx; opt.textContent = inst.name; addSelect.appendChild(opt);
-            });
-        }
-
-        renderMixer();
-        draw();
+        updateStaticTexts();
+        refreshCirclesLayout(); draw();
     </script>
 </body>
 </html>
