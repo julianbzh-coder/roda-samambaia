@@ -22,7 +22,6 @@
             font-family: 'Segoe UI', Roboto, sans-serif; display: flex; height: 100vh; overflow: hidden;
         }
 
-        /* --- PANNEAU GAUCHE (MIXEUR) --- */
         #left-panel {
             width: 400px; min-width: 400px; background-color: var(--panel-bg); border-right: 1px solid #333;
             display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; z-index: 10; height: 100%;
@@ -30,7 +29,6 @@
         }
         #left-panel.collapsed { margin-left: -400px; }
 
-        /* --- PANNEAU DROIT (LÉGENDE ET LETRAS) --- */
         #right-sidebar {
             width: 340px; min-width: 340px; background-color: var(--panel-bg); border-left: 1px solid #333;
             display: flex; flex-direction: column; box-sizing: border-box; z-index: 10; height: 100%;
@@ -71,32 +69,35 @@
 
         .steps-config { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); border-top: 1px dashed #444; padding-top: 6px; }
         .steps-config input { width: 40px; background: #111; border: 1px solid #555; color: #fff; padding: 2px; border-radius: 4px; text-align: center; }
+        .steps-config-right { display: flex; align-items: center; gap: 6px; }
 
         .pattern-row { display: flex; align-items: flex-start; gap: 8px; margin-top: 8px; border-top: 1px dashed #444; padding-top: 8px; }
         .pattern-label { font-size: 11px; color: var(--text-muted); white-space: nowrap; cursor: help; margin-top: 5px; }
         
-        /* NOIX CARRES POUR LES INSTRUMENTS */
-        .step-boxes { display: flex; gap: 4px; flex-wrap: wrap; flex-grow: 1; align-items: center; }
+        .step-boxes { display: flex; gap: 4px; flex-wrap: wrap; flex-grow: 1; align-items: center; justify-content: flex-start;}
         .step-box { width: 22px; height: 22px; background: #111; border: 1px solid #555; color: var(--accent-gold); font-family: monospace; font-size: 14px; font-weight: bold; text-align: center; border-radius: 4px; outline: none; padding: 0; box-sizing: border-box; }
         .step-box:focus { border-color: var(--accent-gold); background: #222; box-shadow: 0 0 4px var(--accent-gold); }
         
-        /* --- CARTES VOIX --- */
-        .v-card { display: flex; flex-direction: column; width: 48px; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 4px; overflow: hidden; }
-        .v-card.inactive .v-syl, .v-card.inactive .v-note { opacity: 0.4; }
+        /* --- CARTES VOIX (4 par ligne + Couleurs) --- */
+        .v-card { display: flex; flex-direction: column; width: 48px; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 4px; overflow: hidden; margin-right: 4px; margin-bottom: 4px; }
         .v-type { font-size: 9px; font-weight: bold; text-align: center; cursor: pointer; padding: 3px 0; color: #fff; user-select: none; }
+        
+        /* Etats des cartes Voix */
+        .v-type.empty { background: #444; color: #aaa; cursor: default; }
         .v-type.pux { background: #0c19cf; }
         .v-type.coro { background: #3498db; }
+        
+        .v-card.inactive .v-syl, .v-card.inactive .v-note { color: #666; }
+        
         .v-syl { width: 100%; border: none; border-bottom: 1px solid #333; background: transparent; color: var(--accent-gold); text-align: center; font-size: 13px; padding: 6px 0; outline: none; font-weight: bold; }
-        .v-note { width: 100%; border: none; background: transparent; color: #888; text-align: center; font-size: 10px; padding: 4px 0; outline: none; }
+        .v-note { width: 100%; border: none; background: transparent; color: #aaa; text-align: center; font-size: 10px; padding: 4px 0; outline: none; }
 
-        /* LÉGENDE SCROLLABLE */
         .legend-container { display: flex; flex-direction: column; gap: 6px; padding-right: 5px; flex-grow: 1; }
         .legend-group { display: flex; flex-direction: column; gap: 4px; background: #181818; padding: 8px; border-radius: 6px; border: 1px solid #2a2a2a; }
         .legend-group-title { font-weight: bold; color: var(--accent-gold); margin-bottom: 2px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
         .legend-item { display: flex; align-items: center; gap: 8px; color: var(--text-main); font-size: 11px; line-height: 1.3; }
         .legend-badge { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 18px; font-size: 9px; font-weight: bold; border-radius: 4px; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; flex-shrink: 0; }
 
-        /* ZONE DE TEXTE RICHE (LETRAS) */
         #letras-textarea {
             width: 100%; flex-grow: 1; background: #111; border: 1px solid #555; border-radius: 4px; 
             padding: 12px; box-sizing: border-box; overflow-y: auto; font-size: 15px; line-height: 1.6; 
@@ -105,7 +106,6 @@
         #letras-textarea:empty:before { content: attr(data-placeholder); color: #555; pointer-events: none; display: block; }
         #letras-textarea:focus { border-color: var(--accent-gold); outline: none; }
 
-        /* --- INTERFACE CENTRALE --- */
         #center-panel { flex-grow: 1; display: flex; flex-direction: column; position: relative; min-width: 0; }
         #top-bar { height: 60px; background-color: var(--panel-bg); border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-sizing: border-box; z-index: 10; }
 
@@ -121,13 +121,12 @@
         button#metroBtn.metro-on { background-color: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
         .icon-btn { font-size: 20px !important; padding: 4px 10px !important; line-height: 1; }
 
-        /* BOUTON REWIND (DESIGN RODA) */
         #rewindBtn {
             width: 40px; height: 40px; padding: 0 !important; border-radius: 50%;
             background-color: var(--accent-red); border: 2px solid #121212;
             box-shadow: 0 3px 6px rgba(0,0,0,0.6);
         }
-        #rewindBtn:hover { background-color: #a00000; }
+        #rewindBtn:hover { background-color: #600000; }
 
         .control-separator { width: 1px; height: 28px; background-color: #444; margin: 0 4px; }
         label.control-label { font-size: 13px; display: flex; align-items: center; gap: 6px; color: var(--text-main); font-weight: bold; }
@@ -214,7 +213,7 @@
                     </svg>
                 </button>
                 
-                <!-- NOUVEAU BOUTON STOP (DESIGN RODA) -->
+                <!-- BOUTON STOP / RETOUR AU DEBUT -->
                 <button id="rewindBtn" title="Parar e Voltar ao início / Stop & Rewind">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="#000" stroke="#000" stroke-width="2" stroke-linejoin="round">
                         <polygon points="19 20 9 12 19 4 19 20"></polygon>
@@ -240,7 +239,6 @@
                 <input type="file" id="fileInput" accept=".json">
 
                 <div class="control-separator"></div>
-                <!-- BOUTONS POUR LE PANNEAU DROIT -->
                 <button id="toggleLegendBtn" class="control-btn icon-btn" title="Legenda" onclick="toggleRightPanel('legend')" style="background: transparent; border: 1px solid #444; margin-right:4px;">📖</button>
                 <button id="toggleLetrasBtn" class="control-btn icon-btn" title="Letras" onclick="toggleRightPanel('letras')" style="background: transparent; border: 1px solid #444;">📝</button>
             </div>
@@ -343,7 +341,7 @@
                 mixer: "🎛️ Misturador",
                 legend: "📖 Legenda",
                 seqLegendTitle: "⌨️ Dicas de digitação",
-                seqLegend1: "Pressione <strong>Espaço</strong> no teclado para avançar e deixar um silêncio.",
+                seqLegend1: "Pressione <strong>Espaço</strong> no teclado para avançar.",
                 seqLegend2: "Use as <strong>Setas</strong> (←/→) para navegar.",
                 voiceLegendTitle: "🎤 Vozes / Coro",
                 voiceLegend1: "Clique no topo da caixa (PUX/CORO) para alterar quem canta.",
@@ -365,9 +363,10 @@
                 clear: "Limpar a Roda",
                 save: "Salvar",
                 load: "Carregar",
-                stepsNum: "Número de passos :",
+                stepsNum: "Passos:",
                 promptVoice: "Sílaba / Letras :",
                 selectInst: "Escolher um instrumento...",
+                patternTip: "Use o teclado! Espaço = silêncio.",
                 toggleBtn: "Ocultar / Mostrar painel",
                 toggleLegendBtn: "Ocultar / Mostrar legenda",
                 toggleLetrasBtn: "Ocultar / Mostrar letras",
@@ -375,7 +374,7 @@
                 tutorialBtn: "Tutorial em vídeo",
                 rewindBtn: "Parar e Voltar ao início",
                 confirmResize: "Deseja ajustar automaticamente o número de passos de todas as faixas?",
-                letrasTitle: "📝 Letras (Paroles)",
+                letrasTitle: "📝 Letras",
                 extractBtn: "🔄 Extrair do mixador",
                 letrasPlaceholder: "Cole as letras completas aqui..."
             },
@@ -406,9 +405,10 @@
                 clear: "Vider la Roda",
                 save: "Sauvegarder",
                 load: "Charger",
-                stepsNum: "Nombre de pas :",
+                stepsNum: "Pas:",
                 promptVoice: "Syllabe / Letras :",
                 selectInst: "Choisir un instrument...",
+                patternTip: "Utilisez le clavier ! Espace = silence.",
                 toggleBtn: "Afficher / Masquer le panneau",
                 toggleLegendBtn: "Afficher / Masquer la légende",
                 toggleLetrasBtn: "Afficher / Masquer les paroles",
@@ -476,7 +476,7 @@
             updateStaticTexts(); renderMixer();
         }
 
-        // EXTRACTION INTELLIGENTE (Couleurs + Recollage des tirets)
+        // EXTRACTION INTELLIGENTE : Recollage des tirets et Couleurs
         window.extractLyrics = function() {
             let voiceCircles = circles.filter(c => instrumentsConfig[c.instrumentIdx].type === 'voice');
             let htmlArr = [];
@@ -490,8 +490,7 @@
                     if(c.activeSteps[i] !== 0 && c.lyrics[i]) {
                         let syl = c.lyrics[i].trim();
                         let isPux = c.activeSteps[i] === 'P';
-                        let color = isPux ? '#54a0ff' : '#3498db'; // Bleu un peu plus clair pour affichage noir
-                        if (isPux) color = '#82ccdd'; // Puxador
+                        let color = isPux ? '#54a0ff' : '#3498db'; // Bleu pour fond sombre
                         
                         if (syl.endsWith('-')) {
                             if (!buffer) currentSpanColor = color;
@@ -521,23 +520,23 @@
         const vouVadiarPreset = {
             bpm: 83, timeSig: "4/4",
             circles: [
-                {"id":1,"steps":16,"activeSteps":["g","D",0,"d","G",0,"D",0,"g","D",0,"d","G",0,0,0],"instrumentIdx":0,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":4,"steps":16,"activeSteps":["D","D","g","D","D","g","D","g","D","D","g","D","D","g","D","g"],"instrumentIdx":3,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":90},
-                {"id":5,"steps":16,"activeSteps":[0,"GRV",0,0,"GRV",0,"GRV",0,0,"GRV",0,0,"GRV",0,"GRV",0],"instrumentIdx":4,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":62},
-                {"id":6,"steps":16,"activeSteps":["G",0,"d","g","D",0,"g","d","G",0,"d","g","D",0,"g","d"],"instrumentIdx":5,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":8,"steps":16,"activeSteps":["P",0,"P",0,"P",0,"P",0,0,"C",0,"C","C",0,0,0],"instrumentIdx":7,"lyrics":["Vou","","va-","","di-","","ar","","Car-","Car-","na-","na-","val","","!",""],"notes":["C4","","C4","","D4","","D4","","","E4","","E4","F4","","",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":1779,"steps":16,"activeSteps":["P",0,"P",0,"P",0,"P",0,0,"C",0,"C","C",0,"C",0],"instrumentIdx":7,"lyrics":["Vou","","Pra","","Ba-","","hi-","","","a","","Brin-","car","","Eu",""],"notes":["","","","","","","","","","","","","","","",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100}
+                {"id":1,"steps":16,"repeats":1,"activeSteps":["g","D",0,"d","G",0,"D",0,"g","D",0,"d","G",0,0,0],"instrumentIdx":0,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":4,"steps":16,"repeats":1,"activeSteps":["D","D","g","D","D","g","D","g","D","D","g","D","D","g","D","g"],"instrumentIdx":3,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":90},
+                {"id":5,"steps":16,"repeats":1,"activeSteps":[0,"GRV",0,0,"GRV",0,"GRV",0,0,"GRV",0,0,"GRV",0,"GRV",0],"instrumentIdx":4,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":62},
+                {"id":6,"steps":16,"repeats":1,"activeSteps":["G",0,"d","g","D",0,"g","d","G",0,"d","g","D",0,"g","d"],"instrumentIdx":5,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":8,"steps":16,"repeats":1,"activeSteps":["P",0,"P",0,"P",0,"P",0,0,"C",0,"C","C",0,0,0],"instrumentIdx":7,"lyrics":["Vou","","va-","","di-","","ar","","Car-","Car-","na-","na-","val","","!",""],"notes":["C4","","C4","","D4","","D4","","","E4","","E4","F4","","",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":1779,"steps":16,"repeats":1,"activeSteps":["P",0,"P",0,"P",0,"P",0,0,"C",0,"C","C",0,"C",0],"instrumentIdx":7,"lyrics":["Vou","","Pra","","Ba-","","hi-","","","a","","Brin-","car","","Eu",""],"notes":["","","","","","","","","","","","","","","",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100}
             ]
         };
 
         const baqueDeImalePreset = {
             bpm: 77, timeSig: "4/4",
             circles: [
-                {"id":1,"steps":16,"activeSteps":["D",0,0,0,"g",0,"D",0,"g","D",0,0,"g","D",0,0],"instrumentIdx":0,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":2,"steps":16,"activeSteps":["G",0,0,"d","g",0,"D",0,"g","D",0,"d","g","D",0,"d"],"instrumentIdx":1,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":4,"steps":16,"activeSteps":["D","D","g","D","D","g","D","g","D","D","g","D","D","g","D","g"],"instrumentIdx":3,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":5,"steps":16,"activeSteps":["GRV",0,"AIG",0,"GRV",0,"AIG",0,"GRV","AIG",0,"aig","GRV",0,"AIG",0],"instrumentIdx":4,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":6,"steps":16,"activeSteps":["G",0,"d","g","D",0,"g","d","G",0,"d","g","D",0,"g","d"],"instrumentIdx":5,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100}
+                {"id":1,"steps":16,"repeats":1,"activeSteps":["D",0,0,0,"g",0,"D",0,"g","D",0,0,"g","D",0,0],"instrumentIdx":0,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":2,"steps":16,"repeats":1,"activeSteps":["G",0,0,"d","g",0,"D",0,"g","D",0,"d","g","D",0,"d"],"instrumentIdx":1,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":4,"steps":16,"repeats":1,"activeSteps":["D","D","g","D","D","g","D","g","D","D","g","D","D","g","D","g"],"instrumentIdx":3,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":5,"steps":16,"repeats":1,"activeSteps":["GRV",0,"AIG",0,"GRV",0,"AIG",0,"GRV","AIG",0,"aig","GRV",0,"AIG",0],"instrumentIdx":4,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":6,"steps":16,"repeats":1,"activeSteps":["G",0,"d","g","D",0,"g","d","G",0,"d","g","D",0,"g","d"],"instrumentIdx":5,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100}
             ]
         };
 
@@ -659,6 +658,7 @@
         };
 
         function normalizeCircleData(c) {
+            if (c.repeats === undefined) c.repeats = 1; // Rétrocompatibilité
             if (!c.notes) c.notes = Array(c.steps).fill("");
             let inst = instrumentsConfig[c.instrumentIdx];
             if (inst && inst.type === 'voice') {
@@ -671,6 +671,26 @@
                     }
                 }
             }
+        }
+
+        // --- NOUVELLE LOGIQUE MULTIPLICATEUR ---
+        // Détermine quelle instance d'un instrument est active pour le tour (mesure) en cours
+        function getActiveCircleIdForInstrument(instIdx) {
+            let group = circles.filter(c => c.instrumentIdx === instIdx);
+            if (group.length === 0) return null;
+            if (group.length === 1) return group[0].id;
+            
+            let totalRepeats = group.reduce((sum, c) => sum + (c.repeats || 1), 0);
+            let currentPos = measureCount % totalRepeats;
+            
+            let runningSum = 0;
+            for (let c of group) {
+                runningSum += (c.repeats || 1);
+                if (currentPos < runningSum) {
+                    return c.id;
+                }
+            }
+            return group[0].id; // Fallback
         }
 
         function draw() {
@@ -734,16 +754,16 @@
             ctx.restore();
             // ------------------------------------------
 
-            let voiceCircles = circles.filter(c => instrumentsConfig[c.instrumentIdx].type === 'voice');
-            let activeVoiceCircleId = voiceCircles.length > 0 ? voiceCircles[measureCount % voiceCircles.length].id : null;
-
             circles.forEach((circle) => {
                 if (circle.isHidden) return;
 
                 const inst = instrumentsConfig[circle.instrumentIdx];
                 let hasActiveSolo = circles.some(c => c.isSolo);
                 let isTargeted = hasActiveSolo ? circle.isSolo : !circle.isMute;
-                if (inst.type === 'voice' && voiceCircles.length > 1 && circle.id !== activeVoiceCircleId) isTargeted = false; 
+                
+                // Vérifie si ce cercle est l'instance "Active" de son instrument
+                let activeGroupId = getActiveCircleIdForInstrument(circle.instrumentIdx);
+                if (circle.id !== activeGroupId) isTargeted = false; 
                 
                 ctx.save(); ctx.globalAlpha = isTargeted ? 1.0 : 0.15;
                 ctx.beginPath(); ctx.arc(centerX, centerY, circle.radius, 0, Math.PI * 2);
@@ -796,7 +816,10 @@
                     if (i === 0) {
                         ctx.save(); ctx.globalAlpha = 1.0; ctx.fillStyle = '#bbb'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'left';
                         let displayName = inst.name;
-                        if (inst.type === 'voice') { let vIndex = voiceCircles.indexOf(circle) + 1; if (voiceCircles.length > 1) displayName += ` ${vIndex}`; }
+                        // On ajoute le numéro de l'instance si l'instrument est multiple
+                        let sameInst = circles.filter(c => c.instrumentIdx === circle.instrumentIdx);
+                        if (sameInst.length > 1) displayName += ` ${sameInst.indexOf(circle) + 1}`;
+                        
                         ctx.fillText(displayName, x + 20, y + 3); ctx.restore();
                     }
                 }
@@ -825,15 +848,15 @@
                 bMetroClick.triggerAttackRelease(note, "32n", time); 
             }
 
-            let voiceCircles = circles.filter(c => instrumentsConfig[c.instrumentIdx].type === 'voice');
-            let activeVoiceCircleId = voiceCircles.length > 0 ? voiceCircles[measureCount % voiceCircles.length].id : null;
-
             const hasActiveSolo = circles.some(c => c.isSolo);
             circles.forEach(circle => {
                 let canPlay = hasActiveSolo ? circle.isSolo : !circle.isMute;
                 if (canPlay) {
                     let inst = instrumentsConfig[circle.instrumentIdx];
-                    if (inst.type === 'voice' && voiceCircles.length > 1 && circle.id !== activeVoiceCircleId) return; 
+                    
+                    // Nouvelle logique de Multiplicateur: On ne joue QUE le cercle actif pour ce groupe !
+                    let activeGroupId = getActiveCircleIdForInstrument(circle.instrumentIdx);
+                    if (circle.id !== activeGroupId) return;
 
                     const stepIdx = Math.floor((currentStepIndex / maxTicks) * circle.steps);
                     const expectedTick = Math.floor((stepIdx * maxTicks) / circle.steps);
@@ -842,13 +865,12 @@
                         let state = circle.activeSteps[stepIdx];
                         if (state !== 0) {
                             if (inst.type === 'voice') {
-                                let note = "C5"; // Par défaut
+                                let note = "C5"; 
                                 if (circle.notes && circle.notes[stepIdx] && circle.notes[stepIdx].trim() !== '') {
                                     note = circle.notes[stepIdx];
                                 } else if (state === 'P') {
-                                    note = "E5"; // Puxador par défaut
+                                    note = "E5"; 
                                 }
-                                
                                 try {
                                     if (voiceSynths[inst.id]) voiceSynths[inst.id].triggerAttackRelease(note, "8n", time);
                                 } catch(err) {
@@ -898,6 +920,7 @@
 
                 let inputHtml = "";
                 if (inst.type === 'voice') {
+                    // BLOCS VOIX (4 PAR LIGNE)
                     inputHtml = `<div class="step-boxes" id="voice-boxes-${circle.id}">`;
                     for(let i=0; i<circle.steps; i++) {
                         let state = circle.activeSteps[i];
@@ -906,32 +929,18 @@
                         let syl = circle.lyrics[i] || '';
                         let note = (circle.notes && circle.notes[i]) ? circle.notes[i] : '';
                         
-                        let extraStyle = "";
-                        let isBeatEnd = false;
-                        if (timeSignature === "6/8" || timeSignature === "12/8") {
-                            if ((i + 1) % 3 === 0) isBeatEnd = true;
-                        } else if (timeSignature === "3/4") {
-                            let div = circle.steps === 12 ? 4 : Math.floor(circle.steps / 3);
-                            if ((i + 1) % div === 0) isBeatEnd = true;
-                        } else { 
-                            let div = Math.floor(circle.steps / (timeSignature === "4/4" ? 4 : 2));
-                            if (div === 0) div = 4;
-                            if ((i + 1) % div === 0) isBeatEnd = true;
-                        }
-                        
-                        if (isBeatEnd && i !== circle.steps - 1) { extraStyle = "margin-right: 12px;"; }
+                        let typeClass = isActive ? (isPux ? 'pux' : 'coro') : 'empty';
+                        let typeText = isActive ? (isPux ? 'PUX' : 'CORO') : '---';
 
                         inputHtml += `
-                        <div class="v-card ${isActive ? '' : 'inactive'}" style="${extraStyle}">
-                            <div class="v-type ${isPux ? 'pux' : 'coro'}" onclick="toggleVoiceType(${circle.id}, ${i})">${isPux ? 'PUX' : 'CORO'}</div>
+                        <div class="v-card ${isActive ? '' : 'inactive'}">
+                            <div class="v-type ${typeClass}" onclick="toggleVoiceType(${circle.id}, ${i})">${typeText}</div>
                             <input type="text" class="v-syl" value="${syl}" placeholder="-" oninput="updateVoiceSyl(${circle.id}, ${i}, this.value, this)" onkeydown="navVoiceBox(this, event, 'syl')">
                             <input type="text" class="v-note" value="${note}" placeholder="Ex:C4" oninput="updateVoiceNote(${circle.id}, ${i}, this.value)" onblur="formatNoteBlur(${circle.id}, ${i}, this)" onkeydown="navVoiceBox(this, event, 'note')">
                         </div>`;
 
-                        let breakAt = circle.steps;
-                        if (circle.steps === 16) breakAt = 8;
-                        if (circle.steps === 24) breakAt = 12;
-                        if ((i + 1) % breakAt === 0 && i !== circle.steps - 1) {
+                        // Couper la ligne tous les 4 pas !
+                        if ((i + 1) % 4 === 0 && i !== circle.steps - 1) {
                              inputHtml += `<div style="flex-basis: 100%; height: 2px;"></div>`;
                         }
                     }
@@ -996,8 +1005,14 @@
                         <div class="vol-meter-bg"><div class="vol-meter-bar" id="meter-bar-${circle.id}"></div></div>
                     </div>
                     <div class="steps-config">
-                        <span>${t('stepsNum')}</span>
-                        <input type="number" value="${circle.steps}" min="2" max="32" onchange="updateSteps(${circle.id}, this.value)">
+                        <div class="steps-config-right">
+                            <span>${t('stepsNum')}</span>
+                            <input type="number" value="${circle.steps}" min="2" max="32" onchange="updateSteps(${circle.id}, this.value)">
+                        </div>
+                        <div class="steps-config-right">
+                            <span title="Repetições / Boucles">🔄 x</span>
+                            <input type="number" value="${circle.repeats || 1}" min="1" max="64" style="width:30px;" onchange="updateRepeats(${circle.id}, this.value)">
+                        </div>
                     </div>
                     <div class="pattern-row">
                         ${inputHtml}
@@ -1007,26 +1022,38 @@
             });
         }
 
-        // --- NOUVELLES FONCTIONS DE CARTES VOIX ---
+        window.updateRepeats = function(id, val) {
+            let c = circles.find(x => x.id === id);
+            if (c) { c.repeats = parseInt(val) || 1; renderMixer(); }
+        }
+
+        // --- FONCTIONS DE CARTES VOIX ---
         window.toggleVoiceType = function(id, sIdx) {
             let c = circles.find(x => x.id === id);
-            if(c.activeSteps[sIdx] === 0) { c.activeSteps[sIdx] = 'P'; } 
-            else if (c.activeSteps[sIdx] === 'P') { c.activeSteps[sIdx] = 'C'; }
-            else { c.activeSteps[sIdx] = 'P'; }
+            if(c.activeSteps[sIdx] === 0) return; // Si vide, on ne fait rien !
+            c.activeSteps[sIdx] = c.activeSteps[sIdx] === 'P' ? 'C' : 'P';
             renderMixer(); 
         }
 
         window.updateVoiceSyl = function(id, sIdx, val, el) {
             let c = circles.find(x => x.id === id);
             c.lyrics[sIdx] = val;
-            if (val.trim() !== '' && c.activeSteps[sIdx] === 0) {
-                c.activeSteps[sIdx] = 'C'; 
-                el.closest('.v-card').classList.remove('inactive');
-                // Rafraîchir l'affichage du type
-                el.closest('.v-card').querySelector('.v-type').innerText = 'CORO';
-            } else if (val.trim() === '') {
+            let card = el.closest('.v-card');
+            let typeEl = card.querySelector('.v-type');
+
+            if (val.trim() !== '') {
+                card.classList.remove('inactive');
+                if(c.activeSteps[sIdx] === 0) {
+                    c.activeSteps[sIdx] = 'C'; 
+                    if (!c.notes[sIdx]) c.notes[sIdx] = 'C4';
+                }
+                typeEl.className = c.activeSteps[sIdx] === 'P' ? 'v-type pux' : 'v-type coro';
+                typeEl.innerText = c.activeSteps[sIdx] === 'P' ? 'PUX' : 'CORO';
+            } else {
                 c.activeSteps[sIdx] = 0;
-                el.closest('.v-card').classList.add('inactive');
+                card.classList.add('inactive');
+                typeEl.className = 'v-type empty';
+                typeEl.innerText = '---';
             }
         }
 
@@ -1035,13 +1062,12 @@
             c.notes[sIdx] = val;
         }
 
-        // AUTO-OCTAVE SUR LE CHAMP "NOTE" 
+        // AUTO-OCTAVE 4
         window.formatNoteBlur = function(id, sIdx, el) {
             let val = el.value.trim();
-            // Si l'utilisateur tape "C", "D#", "Gb"
             if (val.length === 1 || (val.length === 2 && (val.includes('#') || val.includes('b')))) {
                 if (/^[a-gA-G][#b]?$/.test(val)) {
-                    val = val.toUpperCase() + "4"; // Par défaut octave 4
+                    val = val.toUpperCase() + "4";
                     el.value = val;
                     let c = circles.find(x => x.id === id);
                     c.notes[sIdx] = val;
@@ -1180,7 +1206,7 @@
                             } else if (inst.type === 'gongue') {
                                 if (current === 0) circle.activeSteps[i] = 'grv'; else if (current === 'grv') circle.activeSteps[i] = 'GRV'; else if (current === 'GRV') circle.activeSteps[i] = 'aig'; else if (current === 'aig') circle.activeSteps[i] = 'AIG'; else circle.activeSteps[i] = 0;
                             } else if (inst.type === 'voice') {
-                                // Sur le canevas, le clic inverse entre PUX, CORO et VIDE. On ne demande plus de popup !
+                                // Sur le canevas, le clic inverse entre PUX, CORO et VIDE.
                                 if (current === 0) {
                                     circle.activeSteps[i] = 'C'; 
                                     if(!circle.lyrics[i]) circle.lyrics[i] = "La";
@@ -1192,8 +1218,7 @@
                             } else {
                                 if (current === 0) circle.activeSteps[i] = 'd'; else if (current === 'd') circle.activeSteps[i] = 'D'; else if (current === 'D') circle.activeSteps[i] = 'g'; else if (current === 'g') circle.activeSteps[i] = 'G'; else circle.activeSteps[i] = 0;
                             }
-                            
-                            renderMixer(); // On rafraîchit visuellement les boîtes
+                            renderMixer();
                             return;
                         }
                     }
@@ -1206,7 +1231,7 @@
                 await Tone.start(); 
                 mainLoop.start(0); Tone.Transport.start(); isPlaying = true;
             } else {
-                mainLoop.stop(); Tone.Transport.pause(); // LA BAGUETTE SE FIGE
+                mainLoop.stop(); Tone.Transport.pause(); 
                 instrumentsConfig.forEach(inst => { if (samplers[inst.id]) samplers[inst.id].stopAll(); if (voiceSynths[inst.id]) voiceSynths[inst.id].triggerRelease(); });
                 isPlaying = false;
             }
@@ -1247,7 +1272,7 @@
                 if (timeSignature === "2/4") defaultSteps = 8;
                 if (timeSignature === "12/8") defaultSteps = 24;
 
-                circles.push({ id: Date.now(), steps: defaultSteps, activeSteps: Array(defaultSteps).fill(0), instrumentIdx: instIdx, lyrics: Array(defaultSteps).fill(""), notes: Array(defaultSteps).fill(""), isMute: false, isSolo: false, isHidden: false, volumeVal: 100 });
+                circles.push({ id: Date.now(), steps: defaultSteps, repeats: 1, activeSteps: Array(defaultSteps).fill(0), instrumentIdx: instIdx, lyrics: Array(defaultSteps).fill(""), notes: Array(defaultSteps).fill(""), isMute: false, isSolo: false, isHidden: false, volumeVal: 100 });
                 refreshCirclesLayout(); this.value = ""; this.style.display = 'none'; 
             }
         });
