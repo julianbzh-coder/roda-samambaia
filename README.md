@@ -85,4 +85,4 @@ O editor utiliza um sistema de digitação intuitivo pelo teclado para programar
 
 ## 📬 Contato
 Para dúvidas, sugestões ou contribuições para o projeto:
-[Seu endereço de e-mail aqui]
+julian.bzh@gmail.com
