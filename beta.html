@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>BaqueMix - Roda de Samambaia</title>
     
-    <link rel="icon" type="image/x-icon" href="favicon.ico"> <!-- LIGNE POUR TON FAVICON -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     
     <meta name="description" content="BaqueMix: Application web interactive pour composer, apprendre et jouer les rythmes de Maracatu de Baque Virado. Séquenceur, métronome, et outils pédagogiques visuels.">
     <meta name="keywords" content="Maracatu, Baque Virado, Percussion, Tambour, Alfaia, Agbê, Séquenceur, Samambaia, Musique Brésilienne, BaqueMix">
@@ -59,7 +59,7 @@
 
         #mixer-section { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
 
-        .track-mixer { background-color: var(--control-bg); border: 1px solid #3a3a3a; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+        .track-mixer { border: 1px solid #3a3a3a; border-radius: 8px; padding: 12px; margin-bottom: 10px; transition: background 0.3s; }
         .track-mixer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         
         .track-order-btns { display: flex; flex-direction: column; gap: 2px; margin-right: 8px; }
@@ -68,7 +68,16 @@
         .order-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
         .track-name { font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
-        .track-name select { background-color: #111; color: #fff; border: 1px solid #555; font-size: 11px; padding: 2px 4px; border-radius: 4px; max-width: 110px; }
+
+        /* CUSTOM DROPDOWNS POUR LES ICONES D'INSTRUMENTS */
+        .custom-dropdown { position: relative; outline: none; }
+        .dropdown-list { display: none; position: absolute; top: 100%; left: 0; background: #222; border: 1px solid #555; border-radius: 6px; z-index: 100; min-width: 180px; box-shadow: 0 4px 10px rgba(0,0,0,0.8); overflow: hidden; max-height: 250px; overflow-y: auto;}
+        .dropdown-list.show { display: block; }
+        .dropdown-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer; font-size: 13px; color: #fff; border-bottom: 1px solid #333; }
+        .dropdown-item:hover { background: var(--accent-gold); color: #000; }
+        .dropdown-item img { width: 24px; height: 24px; object-fit: contain; border-radius: 3px; }
+        .dropdown-selected { display: flex; align-items: center; gap: 8px; background: #111; border: 1px solid #555; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; color: #fff; }
+        .dropdown-selected img { width: 16px; height: 16px; object-fit: contain; border-radius: 2px; }
 
         .track-mute-solo { display: flex; gap: 4px; }
         .btn-mute-solo { width: 24px; height: 24px; background-color: #333; color: #fff; border: none; border-radius: 4px; font-weight: bold; font-size: 10px; cursor: pointer; }
@@ -84,11 +93,14 @@
         .vol-meter-bg { width: 35px; height: 8px; background-color: #000; border-radius: 2px; position: relative; overflow: hidden; }
         .vol-meter-bar { height: 100%; background-color: var(--accent-green); width: 0%; transition: width 0.05s; }
 
-        .steps-config { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); border-top: 1px dashed #444; padding-top: 6px; }
+        .steps-config { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 6px; }
         .steps-config input { width: 40px; background: #111; border: 1px solid #555; color: #fff; padding: 2px; border-radius: 4px; text-align: center; }
         .steps-config-right { display: flex; align-items: center; gap: 6px; }
+
+        .pattern-row { display: flex; align-items: flex-start; gap: 8px; margin-top: 8px; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 8px; }
+        .pattern-label { font-size: 11px; color: var(--text-muted); white-space: nowrap; cursor: help; margin-top: 5px; }
         
-        .step-boxes { display: flex; gap: 4px; flex-wrap: wrap; flex-grow: 1; align-items: center; justify-content: flex-start; margin-top: 8px; border-top: 1px dashed #444; padding-top: 8px;}
+        .step-boxes { display: flex; gap: 4px; flex-wrap: wrap; flex-grow: 1; align-items: center; justify-content: flex-start;}
         .step-box { width: 22px; height: 22px; background: #111; border: 1px solid #555; color: var(--accent-gold); font-family: monospace; font-size: 14px; font-weight: bold; text-align: center; border-radius: 4px; outline: none; padding: 0; box-sizing: border-box; transition: background-color 0.2s;}
         .step-box:focus { border-color: var(--accent-gold) !important; box-shadow: 0 0 4px var(--accent-gold); }
         
@@ -112,12 +124,18 @@
         #letras-textarea {
             width: 100%; flex-grow: 1; background: #111; border: 1px solid #555; border-radius: 4px; 
             padding: 12px; box-sizing: border-box; overflow-y: auto; font-size: 16px; line-height: 1.8; 
-            font-family: sans-serif; color: #fff;
+            font-family: sans-serif; color: #fff; white-space: pre-wrap;
         }
         #letras-textarea:empty:before { content: attr(data-placeholder); color: #555; pointer-events: none; display: block; }
         #letras-textarea:focus { border-color: var(--accent-gold); outline: none; }
         
-        .lyric-word { transition: background-color 0.1s; }
+        /* KARAOKE HIGHLIGHT CSS */
+        .lyric-word { padding: 0 2px; border-radius: 3px; transition: all 0.1s; }
+        .lyric-word.highlight {
+            background-color: rgba(255, 255, 255, 0.3) !important;
+            box-shadow: 0 0 8px rgba(255,255,255,0.6);
+            color: #fff !important;
+        }
 
         /* --- INTERFACE CENTRALE --- */
         #center-panel { flex-grow: 1; display: flex; flex-direction: column; position: relative; min-width: 0; }
@@ -129,7 +147,6 @@
         button#metroBtn.metro-on { background-color: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
         .icon-btn { font-size: 20px !important; padding: 4px 10px !important; line-height: 1; }
 
-        /* Animation enregistrement */
         @keyframes pulse-red {
             0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
             70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
@@ -137,16 +154,12 @@
         }
         #recordBtn.recording { background-color: var(--accent-red) !important; animation: pulse-red 1.5s infinite; }
 
-        #rewindBtn {
-            width: 40px; height: 40px; padding: 0 !important; border-radius: 50%;
-            background-color: #8b0000; border: 2px solid #121212;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.6); margin-right: 10px;
-        }
-        #rewindBtn:hover { background-color: #600000; }
-
         .control-separator { width: 1px; height: 28px; background-color: #444; margin: 0 4px; }
         label.control-label { font-size: 13px; display: flex; align-items: center; gap: 6px; color: var(--text-main); font-weight: bold; }
         #bpm { width: 48px; background-color: var(--control-bg); color: var(--text-main); border: 1px solid #444; padding: 4px; border-radius: 6px; text-align: center; font-size: 14px; }
+
+        .master-vol-fader { -webkit-appearance: none; height: 6px; border-radius: 3px; background: #444; outline: none; width: 70px; }
+        .master-vol-fader::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent-gold); cursor: pointer; }
 
         #canvas-container { 
             flex-grow: 1; display: flex; align-items: center; justify-content: center; 
@@ -223,14 +236,6 @@
                 </svg>
             </button>
             
-            <!-- NOUVEAU BOUTON STOP (Design Pro) -->
-            <button id="rewindBtn" title="Parar e Voltar ao início / Stop & Rewind">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="#121212" stroke="#121212" stroke-width="2" stroke-linejoin="round">
-                    <polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5" stroke-width="3"></line>
-                </svg>
-            </button>
-            
-            <!-- CATALOGUE DE RYTHMES -->
             <select id="presetSelect" class="preset-select" onchange="onPresetChange(this.value)">
                 <option value="vou-vadiar" selected>Vou vadiar carnaval</option>
                 <option value="baque-de-imale">Baque de Imale</option>
@@ -243,14 +248,14 @@
             <button id="tutorialBtn" class="control-btn icon-btn" title="Tutorial / Ajuda" onclick="window.open('https://www.youtube.com/results?search_query=maracatu+tutorial', '_blank')" style="background:#e67e22;">📺</button>
             <div class="control-separator"></div>
             
-            <div style="position:relative; display:flex; align-items:center;">
-                <button id="showAddBtn" class="control-btn" style="background-color: var(--accent-green); color: #000; font-weight:bold;">+ Instrumento</button>
-                <select id="addInstrumentSelect" class="preset-select" style="display:none; position:absolute; top:35px; right:0; max-height: 300px; overflow-y: auto; z-index:100; box-shadow: 0 4px 10px rgba(0,0,0,0.8);">
-                    <option value="" disabled selected id="selectInstOpt">Escolher um instrumento...</option>
-                </select>
+            <!-- MENU ADD INSTRUMENT AVEC ICONES -->
+            <div class="custom-dropdown" id="dropdown-add" tabindex="0" onblur="closeDropdown('dropdown-add')">
+                <button class="control-btn" style="background-color: var(--accent-green); color: #000; font-weight:bold;" onclick="toggleDropdown('list-add')">+ Instrumento</button>
+                <div class="dropdown-list" id="list-add" style="right:0; left:auto; top:40px; max-height:300px;">
+                    <!-- JS fills this -->
+                </div>
             </div>
             
-            <!-- BOUTON D'ENREGISTREMENT AUDIO -->
             <button id="recordBtn" class="control-btn icon-btn" title="Gravar Áudio / Enregistrer Audio" onclick="toggleRecord()" style="background:#444;">🔴</button>
 
             <button id="clearBtn" class="control-btn icon-btn" title="Limpar a Roda">🗑️</button>
@@ -271,7 +276,7 @@
         <div id="left-panel">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
                 <span class="panel-title" id="title-mixer" style="margin: 0; border: none; padding: 0;">🎛️ Misturador</span>
-                <button class="control-btn icon-btn" title="Ocultar painel" onclick="togglePanel('left')" style="background: transparent; border: 1px solid #444; padding: 4px 8px !important; font-size: 14px !important;">◀</button>
+                <button class="control-btn icon-btn" title="Ocultar painel" onclick="togglePanel('left')" style="background: transparent; border: 1px solid #444; padding: 4px 10px !important;">◀</button>
             </div>
             <div id="mixer-section"><div id="tracks-mixer-container"></div></div>
         </div>
@@ -288,7 +293,7 @@
             <div id="legend-section" class="sidebar-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
                     <span class="panel-title" id="title-legend" style="margin: 0; border: none; padding: 0;">📖 Legenda</span>
-                    <button class="control-btn icon-btn" onclick="toggleRightPanel('legend')" style="background: transparent; border: 1px solid #444; padding: 4px 8px !important; font-size: 14px !important;">▶</button>
+                    <button class="control-btn icon-btn" onclick="toggleRightPanel('legend')" style="background: transparent; border: 1px solid #444; padding: 4px 10px !important;">▶</button>
                 </div>
                 <div class="legend-container">
                     <div class="legend-group">
@@ -299,7 +304,7 @@
 
                     <div class="legend-group">
                         <span class="legend-group-title" id="legend-voice-title">🎤 Vozes / Coro</span>
-                        <div class="legend-item" id="legend-voice-1"><span>Clique no topo da caixa (PUX/CORO) para alterar quem canta.</span></div>
+                        <div class="legend-item" id="legend-voice-1"><span>Clique no topo da caixa para alterar quem canta.</span></div>
                         <div class="legend-item" id="legend-voice-2"><span>Puxador: Laranja (Agudo). Coro: Ciano (Grave).</span></div>
                     </div>
 
@@ -337,7 +342,7 @@
             <div id="letras-section" class="sidebar-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
                     <span class="panel-title" id="letras-title" style="margin: 0; border: none; padding: 0;">📝 Letras (Paroles)</span>
-                    <button class="control-btn icon-btn" onclick="toggleRightPanel('letras')" style="background: transparent; border: 1px solid #444; padding: 4px 8px !important; font-size: 14px !important;">▶</button>
+                    <button class="control-btn icon-btn" onclick="toggleRightPanel('letras')" style="background: transparent; border: 1px solid #444; padding: 4px 10px !important;">▶</button>
                 </div>
                 <button class="control-btn" id="extractBtn" onclick="extractLyrics()" style="margin-bottom: 12px; width: 100%; background: #2c3e50;">🔄 Extrair do mixador</button>
                 <div id="letras-textarea" contenteditable="true" data-placeholder="Cole as letras completas aqui..."></div>
@@ -347,9 +352,26 @@
     </div> <!-- Fin Main Workspace -->
 
     <script>
-        // Logique auto-collapse sur mobile
+        // Logique dropdowns cliquables
+        window.toggleDropdown = function(listId) {
+            let list = document.getElementById(listId);
+            if(list.classList.contains('show')) {
+                list.classList.remove('show');
+            } else {
+                document.querySelectorAll('.dropdown-list.show').forEach(el => el.classList.remove('show'));
+                list.classList.add('show');
+            }
+        }
+        window.closeDropdown = function(containerId) {
+            setTimeout(() => { 
+                let list = document.querySelector(`#${containerId} .dropdown-list`);
+                if(list) list.classList.remove('show');
+            }, 150);
+        }
+
+        // Auto-collapse sur mobile
         document.addEventListener('DOMContentLoaded', () => {
-            if (window.innerWidth <= 900) {
+            if (window.innerWidth <= 1000) {
                 document.getElementById('left-panel').classList.add('collapsed');
                 document.getElementById('toggleLeftBtn').style.display = 'flex';
             }
@@ -385,8 +407,6 @@
             legendSec.classList.toggle('active', activeRightPanel === 'legend');
             letrasSec.classList.toggle('active', activeRightPanel === 'letras');
         }
-
-        document.getElementById('toggleLeftBtn').style.display = 'none';
 
         const i18n = {
             pt: {
@@ -428,7 +448,7 @@
                 confirmResize: "Deseja ajustar automaticamente o número de passos de todas as faixas?",
                 letrasTitle: "📝 Letras",
                 extractBtn: "🔄 Extrair do mixador",
-                letrasPlaceholder: "Cole as letras completas aqui..."
+                letrasPlaceholder: "Cole as letras completas aqui (Pressione Extrair para o Karaokê)..."
             },
             fr: {
                 loading: "Chargement des voix...",
@@ -458,7 +478,7 @@
                 save: "Sauvegarder",
                 load: "Charger",
                 stepsNum: "Pas:",
-                promptVoice: "Syllabe / Mot (Utilisez * au début pour le Puxador) :",
+                promptVoice: "Syllabe / Letras :",
                 selectInst: "Choisir un instrument...",
                 toggleBtn: "Afficher le panneau",
                 toggleLegendBtn: "Afficher / Masquer la légende",
@@ -469,7 +489,7 @@
                 confirmResize: "Voulez-vous ajuster automatiquement le nombre de pas de toutes les pistes ?",
                 letrasTitle: "📝 Paroles complètes",
                 extractBtn: "🔄 Extraire les paroles du mixeur",
-                letrasPlaceholder: "Collez vos paroles ici..."
+                letrasPlaceholder: "Collez vos paroles ici (Cliquez sur Extraire pour le karaoké)..."
             }
         };
 
@@ -509,12 +529,10 @@
             document.getElementById('clearBtn').title = t('clear');
             document.getElementById('saveBtn').title = t('save');
             document.getElementById('loadBtn').title = t('load');
-            document.getElementById('selectInstOpt').innerText = t('selectInst');
             document.getElementById('toggleLeftBtn').title = t('toggleBtn');
             document.getElementById('toggleLegendBtn').title = t('toggleLegendBtn');
             document.getElementById('toggleLetrasBtn').title = t('toggleLetrasBtn');
             document.getElementById('tutorialBtn').title = t('tutorialBtn');
-            document.getElementById('rewindBtn').title = t('rewindBtn');
             document.getElementById('letras-title').innerText = t('letrasTitle');
             document.getElementById('extractBtn').innerText = t('extractBtn');
             
@@ -524,7 +542,7 @@
         function toggleLang() {
             currentLang = currentLang === 'pt' ? 'fr' : 'pt';
             document.getElementById('langBtn').innerText = currentLang === 'pt' ? '🇫🇷' : '🇧🇷';
-            updateStaticTexts(); renderMixer();
+            updateStaticTexts(); renderMixer(); populateAddDropdown();
         }
 
         // EXTRACTION INTELLIGENTE ET IDENTIFICATION KARAOKÉ
@@ -550,23 +568,20 @@
                         } else {
                             if (!buffer) { currentSpanColor = color; startIdx = i; }
                             buffer += syl;
-                            trackHtml += `<span id="lyric-${c.id}-${startIdx}" class="lyric-word" style="color: ${currentSpanColor}; font-weight: bold; transition: background 0.1s;">${buffer}</span> `;
+                            // Ajout de la class unique lyric-ref-ID-STEP
+                            trackHtml += `<span class="lyric-word lyric-ref-${c.id}-${startIdx}" style="color: ${currentSpanColor}; font-weight: bold;">${buffer}</span> `;
                             buffer = "";
                         }
                     }
                 }
                 if (buffer.length > 0) {
-                     trackHtml += `<span id="lyric-${c.id}-${startIdx}" class="lyric-word" style="color: ${currentSpanColor}; font-weight: bold; transition: background 0.1s;">${buffer}</span> `;
+                     trackHtml += `<span class="lyric-word lyric-ref-${c.id}-${startIdx}" style="color: ${currentSpanColor}; font-weight: bold;">${buffer}</span> `;
                 }
                 if(trackHtml) htmlArr.push(trackHtml.trim());
             });
 
             let ta = document.getElementById('letras-textarea');
-            if (ta.innerHTML.trim() !== '') {
-                ta.innerHTML += '<br><br>' + htmlArr.join('<br>');
-            } else {
-                ta.innerHTML = htmlArr.join('<br>');
-            }
+            ta.innerHTML = htmlArr.join('<br>');
         }
 
         // ENREGISTREUR AUDIO TONE.JS
@@ -634,14 +649,14 @@
         const channels = {}; const meters = {}; const samplers = {}; const voiceSynths = {};
 
         const instrumentsConfig = [
-            { id: 'marcante', icon: '🥁', name: 'Alfaia Marcante', type: 'hands', path: 'Alfaia/Marcante', colors: { 'd': '#5a0000', 'D': '#8b0000', 'g': '#ff7676', 'G': '#ff4d4d', text: '#fff' } },
-            { id: 'meiao', icon: '🥁', name: 'Alfaia Meião', type: 'hands', path: 'Alfaia/Meiao', colors: { 'd': '#a04000', 'D': '#d35400', 'g': '#fbc531', 'G': '#f39c12', text: '#fff' } },
-            { id: 'repique', icon: '🥁', name: 'Alfaia Repique', type: 'hands', path: 'Alfaia/Repique', colors: { 'd': '#b59510', 'D': '#f1c40f', 'g': '#fff5cc', 'G': '#ffeaa7', text: '#121212' } },
-            { id: 'caixa', icon: '🪘', name: 'Caixa', type: 'hands', path: 'Caixa', colors: { 'd': '#320b61', 'D': '#4a148c', 'g': '#be5be0', 'G': '#9c27b0', text: '#fff' } },
-            { id: 'gongue', icon: '🔔', name: 'Gonguê', type: 'gongue', path: 'Gongue', colors: { 'grv': '#222222', 'GRV': '#000000', 'aig': '#7f8c8d', 'AIG': '#bdc3c7', text: '#fff' } },
-            { id: 'agbe', icon: '🌾', name: 'Agbê', type: 'shake', path: 'Graines/Agbe', colors: { 'g': '#113b14', 'G': '#1b5e20', 'd': '#74d478', 'D': '#4caf50', text: '#fff' } },
-            { id: 'mineiro', icon: '🎋', name: 'Mineiro', type: 'shake', path: 'Graines/Mineiro', colors: { 'p': '#113b14', 'P': '#1b5e20', 't': '#74d478', 'T': '#4caf50', text: '#fff' } },
-            { id: 'chant', icon: '🎤', name: 'Voz / Coro', type: 'voice', path: 'internal', colors: { 'C': '#00d2d3', 'P': '#ff9f43', text: '#121212' } }
+            { id: 'marcante', iconImg: 'Pictures/icon-alfaia.png', name: 'Alfaia Marcante', type: 'hands', mixerBg: '#3a1010', path: 'Alfaia/Marcante', colors: { 'd': '#5a0000', 'D': '#8b0000', 'g': '#ff7676', 'G': '#ff4d4d', text: '#fff' } },
+            { id: 'meiao', iconImg: 'Pictures/icon-alfaia.png', name: 'Alfaia Meião', type: 'hands', mixerBg: '#3a2010', path: 'Alfaia/Meiao', colors: { 'd': '#a04000', 'D': '#d35400', 'g': '#fbc531', 'G': '#f39c12', text: '#fff' } },
+            { id: 'repique', iconImg: 'Pictures/icon-alfaia.png', name: 'Alfaia Repique', type: 'hands', mixerBg: '#3a3010', path: 'Alfaia/Repique', colors: { 'd': '#b59510', 'D': '#f1c40f', 'g': '#fff5cc', 'G': '#ffeaa7', text: '#121212' } },
+            { id: 'caixa', iconImg: 'Pictures/icon-caixa.png', name: 'Caixa', type: 'hands', mixerBg: '#2a103a', path: 'Caixa', colors: { 'd': '#320b61', 'D': '#4a148c', 'g': '#be5be0', 'G': '#9c27b0', text: '#fff' } },
+            { id: 'gongue', iconImg: 'Pictures/icon-gongue.png', name: 'Gonguê', type: 'gongue', mixerBg: '#1a1a1a', path: 'Gongue', colors: { 'grv': '#222222', 'GRV': '#000000', 'aig': '#7f8c8d', 'AIG': '#bdc3c7', text: '#fff' } },
+            { id: 'agbe', iconImg: 'Pictures/icon-agbe.png', name: 'Agbê', type: 'shake', mixerBg: '#103a10', path: 'Graines/Agbe', colors: { 'g': '#113b14', 'G': '#1b5e20', 'd': '#74d478', 'D': '#4caf50', text: '#fff' } },
+            { id: 'mineiro', iconImg: 'Pictures/icon-mineiro.png', name: 'Mineiro', type: 'shake', mixerBg: '#203a10', path: 'Graines/Mineiro', colors: { 'p': '#113b14', 'P': '#1b5e20', 't': '#74d478', 'T': '#4caf50', text: '#fff' } },
+            { id: 'chant', iconImg: 'Pictures/icon-chant.png', name: 'Voz / Coro', type: 'voice', mixerBg: '#10203a', path: 'internal', colors: { 'C': '#00d2d3', 'P': '#ff9f43', text: '#121212' } }
         ];
 
         const bMetroClick = new Tone.Synth({
@@ -881,7 +896,7 @@
                     if (state !== 0) {
                         let txtColor = inst.colors.text || '#fff';
                         if (inst.id === 'gongue' && (state === 'aig' || state === 'AIG')) txtColor = '#000000';
-                        if (inst.type === 'voice') txtColor = '#121212'; // Noir pour être lisible sur l'Orange et Cyan clairs
+                        if (inst.type === 'voice') txtColor = '#121212'; 
                         ctx.fillStyle = txtColor;
                         ctx.font = (inst.type === 'shake' || inst.id === 'agbe') ? 'bold 16px sans-serif' : 'bold 14px sans-serif';
                         ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; 
@@ -920,9 +935,9 @@
                 bMetroClick.triggerAttackRelease(note, "32n", time); 
             }
 
-            // KARAOKE RESET : Efface le surlignage de tous les mots chaque tick
+            // KARAOKE RESET HIGHLIGHTS
             Tone.Draw.schedule(function(){
-                document.querySelectorAll('.lyric-word').forEach(el => el.style.backgroundColor = 'transparent');
+                document.querySelectorAll('.lyric-word.highlight').forEach(el => el.classList.remove('highlight'));
             }, time);
 
             const hasActiveSolo = circles.some(c => c.isSolo);
@@ -940,13 +955,12 @@
                         let state = circle.activeSteps[stepIdx];
                         if (state !== 0) {
                             if (inst.type === 'voice') {
-                                // KARAOKE HIGHLIGHT : Allume le mot chanté
+                                // KARAOKE HIGHLIGHT
                                 Tone.Draw.schedule(function(){
-                                    let wordEl = document.querySelector(`.lyric-${circle.id}-${stepIdx}`);
-                                    if (wordEl) {
-                                        wordEl.style.backgroundColor = 'rgba(255, 255, 255, 0.25)';
-                                        wordEl.style.borderRadius = '4px';
-                                    }
+                                    document.querySelectorAll(`.lyric-ref-${circle.id}-${stepIdx}`).forEach(el => {
+                                        el.classList.add('highlight');
+                                        setTimeout(() => { el.classList.remove('highlight'); }, 300);
+                                    });
                                 }, time);
 
                                 let note = "C5"; 
@@ -989,18 +1003,35 @@
         }
         setInterval(drawMeters, 40);
 
+        function populateAddDropdown() {
+            const list = document.getElementById('list-add');
+            list.innerHTML = '';
+            instrumentsConfig.forEach((inst, idx) => {
+                let div = document.createElement('div');
+                div.className = 'dropdown-item';
+                div.innerHTML = `<img src="${inst.iconImg}" onerror="this.style.display='none'"> <span>${inst.name}</span>`;
+                div.onmousedown = () => { addInstrumentFromIdx(idx); };
+                list.appendChild(div);
+            });
+        }
+
+        window.addInstrumentFromIdx = function(instIdx) {
+            if (circles.length >= 20) { alert(t('save') === 'Salvar' ? "Limite máxima atingida!" : "Limite atteinte !"); return; }
+            let defaultSteps = 16;
+            if (timeSignature === "3/4" || timeSignature === "6/8") defaultSteps = 12;
+            if (timeSignature === "2/4") defaultSteps = 8;
+            if (timeSignature === "12/8") defaultSteps = 24;
+
+            circles.push({ id: Date.now(), steps: defaultSteps, repeats: 1, activeSteps: Array(defaultSteps).fill(0), instrumentIdx: instIdx, lyrics: Array(defaultSteps).fill(""), notes: Array(defaultSteps).fill(""), isMute: false, isSolo: false, isHidden: false, volumeVal: 100 });
+            refreshCirclesLayout();
+            closeDropdown('dropdown-add');
+        }
+
         function renderMixer() {
             const container = document.getElementById('tracks-mixer-container'); if (!container) return;
             container.innerHTML = "";
             circles.forEach((circle, index) => {
                 const inst = instrumentsConfig[circle.instrumentIdx];
-                
-                let instSelectHtml = `<select onchange="updateInstrument(${circle.id}, this.value)">`;
-                instrumentsConfig.forEach((opt, idx) => {
-                    const isSelected = idx === circle.instrumentIdx ? 'selected' : '';
-                    instSelectHtml += `<option value="${idx}" ${isSelected}>${opt.icon} ${opt.name}</option>`;
-                });
-                instSelectHtml += `</select>`;
 
                 let inputHtml = "";
                 if (inst.type === 'voice') {
@@ -1053,7 +1084,6 @@
                         
                         if (isBeatEnd && i !== circle.steps - 1) { extraStyle = "margin-right: 10px;"; }
 
-                        // AJOUT DE LA COULEUR DE FOND !
                         let colorStyle = "";
                         if (val !== 0 && val !== '') {
                             let bgColor = inst.colors[val] || '#111';
@@ -1075,6 +1105,7 @@
                 }
 
                 const div = document.createElement('div'); div.className = "track-mixer";
+                div.style.background = `linear-gradient(145deg, var(--control-bg) 40%, ${inst.mixerBg} 150%)`;
                 div.innerHTML = `
                     <div class="track-mixer-header">
                         <div style="display:flex; align-items:center;">
@@ -1082,7 +1113,19 @@
                                 <button class="order-btn" onclick="moveCircleUp(${circle.id})" ${index === 0 ? 'disabled' : ''}>▲</button>
                                 <button class="order-btn" onclick="moveCircleDown(${circle.id})" ${index === circles.length - 1 ? 'disabled' : ''}>▼</button>
                             </div>
-                            <span class="track-name"><span style="font-size:16px;">${inst.icon}</span> ${index + 1}. ${instSelectHtml}</span>
+                            
+                            <div class="custom-dropdown" id="dropdown-inst-${circle.id}" tabindex="0" onblur="closeDropdown('dropdown-inst-${circle.id}')">
+                                <div class="dropdown-selected" onclick="toggleDropdown('list-inst-${circle.id}')">
+                                    <img src="${inst.iconImg}" onerror="this.style.display='none'"> <span>${index + 1}. ${inst.name}</span> <span style="font-size:8px;">▼</span>
+                                </div>
+                                <div class="dropdown-list" id="list-inst-${circle.id}">
+                                    ${instrumentsConfig.map((opt, idx) => `
+                                        <div class="dropdown-item" onmousedown="updateInstrument(${circle.id}, ${idx})">
+                                            <img src="${opt.iconImg}" onerror="this.style.display='none'"> <span>${opt.name}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
                         </div>
                         <div class="track-mute-solo">
                             <button class="btn-mute-solo ${circle.isMute ? 'mute-on' : ''}" onclick="toggleMute(${circle.id})">M</button>
@@ -1206,7 +1249,6 @@
                 }
                 el.value = displayVal;
 
-                // MAJ de la couleur immediatement
                 let bgColor = inst.colors[parsed] || '#111';
                 let txtColor = inst.colors.text || '#fff';
                 if (inst.id === 'gongue' && (parsed === 'AIG' || parsed === 'aig')) txtColor = '#000';
@@ -1275,7 +1317,6 @@
             }
         };
 
-        // --- EDITION DANS LA RODA (AMELIOREE AVEC PROMPT) ---
         canvas.addEventListener('click', (e) => {
             const rect = canvas.getBoundingClientRect(); 
             const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width); 
@@ -1304,7 +1345,6 @@
                             } else if (inst.type === 'gongue') {
                                 if (current === 0) circle.activeSteps[i] = 'grv'; else if (current === 'grv') circle.activeSteps[i] = 'GRV'; else if (current === 'GRV') circle.activeSteps[i] = 'aig'; else if (current === 'aig') circle.activeSteps[i] = 'AIG'; else circle.activeSteps[i] = 0;
                             } else if (inst.type === 'voice') {
-                                // Fenêtre d'édition du texte si c'est la voix !
                                 let currentText = current === 'P' ? '*' + circle.lyrics[i] : (current === 'C' ? circle.lyrics[i] : '');
                                 let lyric = prompt(t('promptVoice'), currentText);
                                 if (lyric !== null) {
@@ -1338,6 +1378,13 @@
             }
         }
 
+        document.getElementById('rewindBtn').addEventListener('click', () => {
+            mainLoop.stop(); Tone.Transport.stop(); 
+            instrumentsConfig.forEach(inst => { if (samplers[inst.id]) samplers[inst.id].stopAll(); if (voiceSynths[inst.id]) voiceSynths[inst.id].triggerRelease(); });
+            isPlaying = false;
+            currentStepIndex = -1; measureCount = 0; Tone.Transport.seconds = 0; currentAngle = -Math.PI / 2;
+        });
+
         document.getElementById('bpm').addEventListener('change', (e) => { 
             let val = Math.round(Number(e.target.value));
             if (val < 40) val = 40; if (val > 240) val = 240;
@@ -1347,29 +1394,6 @@
         document.getElementById('masterVol').addEventListener('input', (e) => { let val = parseFloat(e.target.value); Tone.Destination.volume.value = val === -40 ? -Infinity : val; });
         const metroBtn = document.getElementById('metroBtn'); metroBtn.addEventListener('click', () => { isMetroOn = !isMetroOn; metroBtn.classList.toggle('metro-on', isMetroOn); });
         document.getElementById('clearBtn').addEventListener('click', () => { circles = []; document.getElementById('letras-textarea').innerHTML = ""; refreshCirclesLayout(); });
-
-        const showAddBtn = document.getElementById('showAddBtn');
-        const addSelect = document.getElementById('addInstrumentSelect');
-
-        showAddBtn.addEventListener('click', () => { addSelect.style.display = addSelect.style.display === 'none' ? 'block' : 'none'; });
-
-        if (addSelect) {
-            instrumentsConfig.forEach((inst, idx) => { const opt = document.createElement('option'); opt.value = idx; opt.textContent = inst.name; addSelect.appendChild(opt); });
-        }
-
-        addSelect.addEventListener('change', function() {
-            if (this.value !== "") {
-                if (circles.length >= 20) { alert("Limite máxima atingida!"); this.value = ""; return; }
-                const instIdx = parseInt(this.value);
-                let defaultSteps = 16;
-                if (timeSignature === "3/4" || timeSignature === "6/8") defaultSteps = 12;
-                if (timeSignature === "2/4") defaultSteps = 8;
-                if (timeSignature === "12/8") defaultSteps = 24;
-
-                circles.push({ id: Date.now(), steps: defaultSteps, repeats: 1, activeSteps: Array(defaultSteps).fill(0), instrumentIdx: instIdx, lyrics: Array(defaultSteps).fill(""), notes: Array(defaultSteps).fill(""), isMute: false, isSolo: false, isHidden: false, volumeVal: 100 });
-                refreshCirclesLayout(); this.value = ""; this.style.display = 'none'; 
-            }
-        });
 
         document.getElementById('saveBtn').addEventListener('click', () => {
             let letrasText = document.getElementById('letras-textarea').innerHTML;
@@ -1432,8 +1456,8 @@
             } 
         });
 
-        updateStaticTexts();
-        refreshCirclesLayout(); draw();
+        // Initialize App
+        updateStaticTexts(); populateAddDropdown(); refreshCirclesLayout(); draw();
     </script>
 </body>
 </html>
