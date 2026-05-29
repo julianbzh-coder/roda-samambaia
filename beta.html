@@ -22,7 +22,7 @@
             font-family: 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
         }
 
-        /* --- BARRE GLOBALE DU HAUT (100vw) --- */
+        /* --- BARRE GLOBALE DU HAUT --- */
         #top-bar { 
             width: 100%; height: auto; min-height: 70px; background-color: var(--panel-bg); 
             border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; 
@@ -30,8 +30,7 @@
         }
         .topbar-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
         
-        /* Titre agrandi */
-        #header-title-text { font-size: 26px; font-weight: 900; letter-spacing: 2px; color: var(--accent-gold); line-height: 1; }
+        #header-title-text { font-size: 26px; font-weight: 900; letter-spacing: 2px; color: var(--accent-gold); line-height: 1; margin: 0; padding: 0; }
 
         /* --- CONTENEUR DE L'ESPACE DE TRAVAIL --- */
         #main-workspace { display: flex; flex-grow: 1; overflow: hidden; position: relative; width: 100%; }
@@ -86,14 +85,12 @@
         .steps-config { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); border-top: 1px dashed #444; padding-top: 6px; }
         .steps-config input { width: 40px; background: #111; border: 1px solid #555; color: #fff; padding: 2px; border-radius: 4px; text-align: center; }
         .steps-config-right { display: flex; align-items: center; gap: 6px; }
-
-        .pattern-row { display: flex; align-items: flex-start; gap: 8px; margin-top: 8px; border-top: 1px dashed #444; padding-top: 8px; }
-        .pattern-label { font-size: 11px; color: var(--text-muted); white-space: nowrap; cursor: help; margin-top: 5px; }
         
-        .step-boxes { display: flex; gap: 4px; flex-wrap: wrap; flex-grow: 1; align-items: center; justify-content: flex-start;}
+        .step-boxes { display: flex; gap: 4px; flex-wrap: wrap; flex-grow: 1; align-items: center; justify-content: flex-start; margin-top: 8px; border-top: 1px dashed #444; padding-top: 8px;}
         .step-box { width: 22px; height: 22px; background: #111; border: 1px solid #555; color: var(--accent-gold); font-family: monospace; font-size: 14px; font-weight: bold; text-align: center; border-radius: 4px; outline: none; padding: 0; box-sizing: border-box; }
         .step-box:focus { border-color: var(--accent-gold); background: #222; box-shadow: 0 0 4px var(--accent-gold); }
         
+        /* --- CARTES VOIX --- */
         .v-card { display: flex; flex-direction: column; width: 48px; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 4px; overflow: hidden; margin-right: 4px; margin-bottom: 4px; }
         .v-type { font-size: 9px; font-weight: bold; text-align: center; cursor: pointer; padding: 3px 0; color: #fff; user-select: none; }
         .v-type.empty { background: #444; color: #aaa; cursor: default; }
@@ -101,7 +98,7 @@
         .v-type.coro { background: #3498db; }
         .v-card.inactive .v-syl, .v-card.inactive .v-note { color: #666; }
         .v-syl { width: 100%; border: none; border-bottom: 1px solid #333; background: transparent; color: var(--accent-gold); text-align: center; font-size: 13px; padding: 6px 0; outline: none; font-weight: bold; }
-        .v-note { width: 100%; border: none; background: transparent; color: #aaa; text-align: center; font-size: 10px; padding: 4px 0; outline: none; }
+        .v-note { width: 100%; border: none; background: transparent; color: #aaa; text-align: center; font-size: 10px; padding: 4px 0; outline: none; text-transform: uppercase;}
 
         .legend-container { display: flex; flex-direction: column; gap: 6px; padding-right: 5px; flex-grow: 1; }
         .legend-group { display: flex; flex-direction: column; gap: 4px; background: #181818; padding: 8px; border-radius: 6px; border: 1px solid #2a2a2a; }
@@ -117,17 +114,20 @@
         #letras-textarea:empty:before { content: attr(data-placeholder); color: #555; pointer-events: none; display: block; }
         #letras-textarea:focus { border-color: var(--accent-gold); outline: none; }
 
+        /* --- INTERFACE CENTRALE --- */
+        #center-panel { flex-grow: 1; display: flex; flex-direction: column; position: relative; min-width: 0; }
+        
         /* -- BOUTONS ET ICONES -- */
         .preset-select { background-color: var(--control-bg); color: var(--text-main); border: 1px solid #444; padding: 6px 8px; border-radius: 6px; font-size: 13px; font-weight: bold; }
         button.control-btn { background-color: #333; color: #fff; border: 1px solid #444; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; }
         button.control-btn:hover { background-color: #444; }
         button#metroBtn.metro-on { background-color: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
-        .icon-btn { font-size: 20px !important; padding: 4px 10px !important; line-height: 1; }
+        .icon-btn { font-size: 18px !important; padding: 6px 12px !important; line-height: 1; }
 
         #rewindBtn {
             width: 40px; height: 40px; padding: 0 !important; border-radius: 50%;
             background-color: var(--accent-red); border: 2px solid #121212;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.6);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.6); margin-right: 10px;
         }
         #rewindBtn:hover { background-color: #600000; }
 
@@ -146,15 +146,28 @@
         #fileInput { display: none; }
         #loading-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(18,18,18,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; font-size: 18px; font-weight: bold; color: var(--accent-gold); }
 
-        @media (max-width: 900px) {
-            #top-bar { justify-content: center; }
-            .topbar-group { justify-content: center; }
+        /* --- RESPONSIVE MOBILE --- */
+        @media (max-width: 1000px) {
+            body { overflow-y: auto; height: auto; min-height: 100vh; }
+            #main-workspace { flex-direction: column; height: auto; overflow: visible; }
+            
+            /* L'ordre 1 permet au Mixeur de s'afficher au-dessus de la Roda ! */
+            #left-panel { order: 1; min-width: 100%; width: 100%; border: none; border-bottom: 1px solid #333; height: auto; margin-left: 0 !important; }
+            #left-panel.collapsed { display: none; } 
+            
+            #center-panel { order: 2; width: 100%; height: auto; flex-grow: 0; }
+            
+            #right-sidebar { order: 3; min-width: 100%; width: 100%; border: none; border-top: 1px solid #333; height: auto; margin-right: 0 !important; }
+            #right-sidebar.collapsed { display: none; }
+            
+            #top-bar { flex-direction: column; align-items: stretch; padding: 15px; gap: 15px; }
+            .topbar-group { display: flex; flex-wrap: wrap; justify-content: center; width: 100%; gap: 10px; }
+            
+            #header-main { width: 100%; justify-content: center; position: relative; }
+            #toggleLeftBtn { position: absolute; left: 0; top: 50%; transform: translateY(-50%); margin: 0;}
+            
             .control-separator { display: none; }
-            #main-workspace { flex-direction: column; overflow-y: auto; }
-            #left-panel, #right-sidebar { min-width: 100%; margin: 0 !important; height: auto; border: none; border-top: 1px solid #333; }
-            #left-panel.collapsed, #right-sidebar.collapsed { display: none; }
             #canvas-container { padding: 5px; min-height: 400px; }
-            #header-title-text { display: none; } /* Cache le texte sur mobile pour faire de la place */
         }
     </style>
 </head>
@@ -164,8 +177,9 @@
 
     <!-- --- BARRE GLOBALE DU HAUT (100vw) --- -->
     <div id="top-bar">
-        <!-- GROUPE GAUCHE -->
-        <div class="topbar-group">
+        <!-- GROUPE GAUCHE : Titre et Menu gauche -->
+        <div class="topbar-group" id="header-main">
+            <!-- Bouton caché si mixeur ouvert -->
             <button id="toggleLeftBtn" class="control-btn icon-btn" title="Mostrar painel" onclick="togglePanel('left')" style="background: transparent; border: 1px solid #444; display: none;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>
@@ -174,8 +188,22 @@
             <span id="header-title-text">BaqueMix</span>
         </div>
         
-        <!-- GROUPE CENTRE -->
+        <!-- GROUPE CENTRE : Contrôles de lecture -->
         <div class="topbar-group">
+            <select id="presetSelect" class="preset-select" onchange="onPresetChange(this.value)">
+                <option value="vou-vadiar" selected>Vou vadiar carnaval</option>
+                <option value="baque-de-imale">Baque de Imale</option>
+            </select>
+            
+            <div class="control-separator"></div>
+            
+            <button id="rewindBtn" title="Parar e Voltar ao início / Stop & Rewind">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#111" stroke="#111" stroke-width="2" stroke-linejoin="round">
+                    <polygon points="19 20 9 12 19 4 19 20"></polygon>
+                    <line x1="5" y1="19" x2="5" y2="5" stroke-width="3"></line>
+                </svg>
+            </button>
+            
             <label class="control-label">
                 <span id="tsLabel">Compasso:</span> 
                 <select id="timeSigSelect" class="preset-select" onchange="updateTimeSig(this.value, false)">
@@ -192,33 +220,21 @@
             <label class="control-label">Vol: <input type="range" id="masterVol" class="master-vol-fader" min="-40" max="6" value="-6"></label>
             <div class="control-separator"></div>
             <button id="metroBtn" class="control-btn icon-btn" title="Metrônomo">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polygon points="12 2 5 22 19 22"></polygon><circle cx="12" cy="16" r="2" fill="currentColor"></circle><line x1="12" y1="16" x2="7" y2="7"></line>
-                </svg>
-            </button>
-            <button id="rewindBtn" title="Parar e Voltar ao início / Stop & Rewind">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="#000" stroke="#000" stroke-width="2" stroke-linejoin="round">
-                    <polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5" stroke-width="3"></line>
                 </svg>
             </button>
         </div>
 
-        <!-- GROUPE DROITE -->
+        <!-- GROUPE DROITE : Actions et Panneau Droit -->
         <div class="topbar-group">
-            <!-- LE CATALOGUE EST MAINTENANT ICI -->
-            <select id="presetSelect" class="preset-select" onchange="onPresetChange(this.value)">
-                <option value="vou-vadiar" selected>Vou vadiar carnaval</option>
-                <option value="baque-de-imale">Baque de Imale</option>
-            </select>
-            
-            <div class="control-separator"></div>
-            <button id="langBtn" class="control-btn icon-btn" onclick="toggleLang()" style="background:#8e44ad; font-size: 22px; width: 50px; padding: 4px;" title="Changer de langue / Mudar idioma">🇫🇷</button>
+            <button id="langBtn" class="control-btn icon-btn" onclick="toggleLang()" style="background:#8e44ad;" title="Changer de langue / Mudar idioma">🇫🇷</button>
             <button id="tutorialBtn" class="control-btn icon-btn" title="Tutorial / Ajuda" onclick="window.open('https://www.youtube.com/results?search_query=maracatu+tutorial', '_blank')" style="background:#e67e22;">📺</button>
             <div class="control-separator"></div>
             
             <div style="position:relative; display:flex; align-items:center;">
                 <button id="showAddBtn" class="control-btn" style="background-color: var(--accent-green); color: #000; font-weight:bold;">+ Instrumento</button>
-                <select id="addInstrumentSelect" class="preset-select" style="display:none; position:absolute; top:35px; right:0; z-index:100; box-shadow: 0 4px 10px rgba(0,0,0,0.8);">
+                <select id="addInstrumentSelect" class="preset-select" style="display:none; position:absolute; top:35px; right:0; max-height: 300px; overflow-y: auto; z-index:100; box-shadow: 0 4px 10px rgba(0,0,0,0.8);">
                     <option value="" disabled selected id="selectInstOpt">Escolher um instrumento...</option>
                 </select>
             </div>
@@ -229,7 +245,7 @@
             <input type="file" id="fileInput" accept=".json">
 
             <div class="control-separator"></div>
-            <button id="toggleLegendBtn" class="control-btn icon-btn" title="Legenda" onclick="toggleRightPanel('legend')" style="background: transparent; border: 1px solid #444; margin-right:4px;">📖</button>
+            <button id="toggleLegendBtn" class="control-btn icon-btn" title="Legenda" onclick="toggleRightPanel('legend')" style="background: transparent; border: 1px solid #444;">📖</button>
             <button id="toggleLetrasBtn" class="control-btn icon-btn" title="Letras" onclick="toggleRightPanel('letras')" style="background: transparent; border: 1px solid #444;">📝</button>
         </div>
     </div>
@@ -241,7 +257,7 @@
         <div id="left-panel">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
                 <span class="panel-title" id="title-mixer" style="margin: 0; border: none; padding: 0;">🎛️ Misturador</span>
-                <button class="control-btn icon-btn" title="Ocultar painel" onclick="togglePanel('left')" style="background: transparent; border: 1px solid #444; padding: 4px 8px !important; font-size: 14px !important;">◀</button>
+                <button class="control-btn icon-btn" title="Ocultar painel" onclick="togglePanel('left')" style="background: transparent; border: 1px solid #444; padding: 4px 10px !important;">◀</button>
             </div>
             <div id="mixer-section"><div id="tracks-mixer-container"></div></div>
         </div>
@@ -258,7 +274,7 @@
             <div id="legend-section" class="sidebar-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
                     <span class="panel-title" id="title-legend" style="margin: 0; border: none; padding: 0;">📖 Legenda</span>
-                    <button class="control-btn icon-btn" onclick="toggleRightPanel('legend')" style="background: transparent; border: 1px solid #444; padding: 4px 8px !important; font-size: 14px !important;">▶</button>
+                    <button class="control-btn icon-btn" onclick="toggleRightPanel('legend')" style="background: transparent; border: 1px solid #444; padding: 4px 10px !important;">▶</button>
                 </div>
                 <div class="legend-container">
                     <div class="legend-group">
@@ -307,16 +323,24 @@
             <div id="letras-section" class="sidebar-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
                     <span class="panel-title" id="letras-title" style="margin: 0; border: none; padding: 0;">📝 Letras (Paroles)</span>
-                    <button class="control-btn icon-btn" onclick="toggleRightPanel('letras')" style="background: transparent; border: 1px solid #444; padding: 4px 8px !important; font-size: 14px !important;">▶</button>
+                    <button class="control-btn icon-btn" onclick="toggleRightPanel('letras')" style="background: transparent; border: 1px solid #444; padding: 4px 10px !important;">▶</button>
                 </div>
                 <button class="control-btn" id="extractBtn" onclick="extractLyrics()" style="margin-bottom: 12px; width: 100%; background: #2c3e50;">🔄 Extrair do mixador</button>
                 <div id="letras-textarea" contenteditable="true" data-placeholder="Cole as letras completas aqui..."></div>
             </div>
 
         </div>
-    </div> <!-- Fin Main Workspace -->
+    </div>
 
     <script>
+        // Logique auto-collapse sur mobile au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.innerWidth <= 900) {
+                document.getElementById('left-panel').classList.add('collapsed');
+                document.getElementById('toggleLeftBtn').style.display = 'flex';
+            }
+        });
+
         function togglePanel(side) { 
             if (side === 'left') {
                 let p = document.getElementById('left-panel');
@@ -347,9 +371,6 @@
             legendSec.classList.toggle('active', activeRightPanel === 'legend');
             letrasSec.classList.toggle('active', activeRightPanel === 'letras');
         }
-
-        // Cache initial du bouton gauche car le panneau est ouvert
-        document.getElementById('toggleLeftBtn').style.display = 'none';
 
         const i18n = {
             pt: {
@@ -455,9 +476,6 @@
             document.getElementById('legend-voice-title').innerText = t('voiceLegendTitle');
             document.getElementById('legend-voice-1').innerHTML = `<span>${t('voiceLegend1')}</span>`;
             document.getElementById('legend-voice-2').innerHTML = `<span>${t('voiceLegend2')}</span>`;
-            
-            let lv3 = document.getElementById('legend-voice-3');
-            if(lv3) lv3.innerHTML = `<span>${t('voiceLegend3') || ''}</span>`;
 
             document.getElementById('legend-gold').innerHTML = t('goldRule');
             document.getElementById('tsLabel').innerText = t('tsLabel');
@@ -497,6 +515,7 @@
             updateStaticTexts(); renderMixer();
         }
 
+        // CONTRASTE MAXIMAL POUR LETRAS
         window.extractLyrics = function() {
             let voiceCircles = circles.filter(c => instrumentsConfig[c.instrumentIdx].type === 'voice');
             let htmlArr = [];
@@ -510,7 +529,8 @@
                     if(c.activeSteps[i] !== 0 && c.lyrics[i]) {
                         let syl = c.lyrics[i].trim();
                         let isPux = c.activeSteps[i] === 'P';
-                        let color = isPux ? '#54a0ff' : '#3498db'; 
+                        // Bleu foncé (Puxador) vs Bleu clair/Cyan (Coro)
+                        let color = isPux ? '#2980b9' : '#81ecec'; 
                         
                         if (syl.endsWith('-')) {
                             if (!buffer) currentSpanColor = color;
@@ -518,13 +538,13 @@
                         } else {
                             if (!buffer) currentSpanColor = color;
                             buffer += syl;
-                            trackHtml += `<span style="color: ${currentSpanColor}; font-weight: bold;">${buffer}</span> `;
+                            trackHtml += `<span style="color: ${currentSpanColor}; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">${buffer}</span> `;
                             buffer = "";
                         }
                     }
                 }
                 if (buffer.length > 0) {
-                     trackHtml += `<span style="color: ${currentSpanColor}; font-weight: bold;">${buffer}</span> `;
+                     trackHtml += `<span style="color: ${currentSpanColor}; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">${buffer}</span> `;
                 }
                 if(trackHtml) htmlArr.push(trackHtml.trim());
             });
