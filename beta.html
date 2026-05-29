@@ -2,10 +2,10 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Baque de Maracatu - Roda Samambaia</title>
+    <title>BaqueMix - Roda de Samambaia</title>
     
-    <meta name="description" content="Application web interactive pour composer, apprendre et jouer les rythmes de Maracatu de Baque Virado. Séquenceur, métronome, et outils pédagogiques visuels.">
-    <meta name="keywords" content="Maracatu, Baque Virado, Percussion, Tambour, Alfaia, Agbê, Séquenceur, Samambaia, Musique Brésilienne">
+    <meta name="description" content="BaqueMix: Application web interactive pour composer, apprendre et jouer les rythmes de Maracatu de Baque Virado. Séquenceur, métronome, et outils pédagogiques visuels.">
+    <meta name="keywords" content="Maracatu, Baque Virado, Percussion, Tambour, Alfaia, Agbê, Séquenceur, Samambaia, Musique Brésilienne, BaqueMix">
     <meta name="author" content="JulianBZH">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -22,6 +22,7 @@
             font-family: 'Segoe UI', Roboto, sans-serif; display: flex; height: 100vh; overflow: hidden;
         }
 
+        /* --- PANNEAU GAUCHE (MIXEUR) --- */
         #left-panel {
             width: 400px; min-width: 400px; background-color: var(--panel-bg); border-right: 1px solid #333;
             display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; z-index: 10; height: 100%;
@@ -29,6 +30,7 @@
         }
         #left-panel.collapsed { margin-left: -400px; }
 
+        /* --- PANNEAU DROIT (LÉGENDE ET LETRAS) --- */
         #right-sidebar {
             width: 340px; min-width: 340px; background-color: var(--panel-bg); border-left: 1px solid #333;
             display: flex; flex-direction: column; box-sizing: border-box; z-index: 10; height: 100%;
@@ -38,7 +40,7 @@
         .sidebar-section { display: none; flex-direction: column; padding: 20px; height: 100%; overflow-y: auto; }
         .sidebar-section.active { display: flex; }
 
-        .panel-title { font-size: 13px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .panel-title { font-size: 13px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; }
 
         #mixer-section { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
 
@@ -82,7 +84,6 @@
         .v-card { display: flex; flex-direction: column; width: 48px; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 4px; overflow: hidden; margin-right: 4px; margin-bottom: 4px; }
         .v-type { font-size: 9px; font-weight: bold; text-align: center; cursor: pointer; padding: 3px 0; color: #fff; user-select: none; }
         
-        /* Etats des cartes Voix */
         .v-type.empty { background: #444; color: #aaa; cursor: default; }
         .v-type.pux { background: #0c19cf; }
         .v-type.coro { background: #3498db; }
@@ -106,14 +107,28 @@
         #letras-textarea:empty:before { content: attr(data-placeholder); color: #555; pointer-events: none; display: block; }
         #letras-textarea:focus { border-color: var(--accent-gold); outline: none; }
 
+        /* --- INTERFACE CENTRALE & RESPONSIVE TOP BAR --- */
         #center-panel { flex-grow: 1; display: flex; flex-direction: column; position: relative; min-width: 0; }
-        #top-bar { height: 60px; background-color: var(--panel-bg); border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-sizing: border-box; z-index: 10; }
+        
+        #top-bar { 
+            height: auto; 
+            min-height: 60px; 
+            background-color: var(--panel-bg); 
+            border-bottom: 1px solid #333; 
+            display: flex; 
+            flex-wrap: wrap; /* Le secret pour ne rien faire déborder ! */
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 10px 15px; 
+            box-sizing: border-box; 
+            z-index: 10; 
+            gap: 12px;
+        }
 
         #header-main { display: flex; align-items: center; gap: 12px; }
-        #header-main img { height: 44px; width: auto; border-radius: 6px; background-color: #f5f5f5; padding: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        #header-title-text { font-size: 16px; font-weight: bold; letter-spacing: 1px; }
+        #header-title-text { font-size: 20px; font-weight: 900; letter-spacing: 2px; color: var(--accent-gold); }
         
-        #global-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+        #global-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; flex-grow: 1; }
         
         .preset-select { background-color: var(--control-bg); color: var(--text-main); border: 1px solid #444; padding: 6px; border-radius: 6px; font-size: 13px; font-weight: bold; }
         button.control-btn { background-color: #333; color: #fff; border: 1px solid #444; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; }
@@ -149,10 +164,10 @@
             #right-sidebar { order: 3; min-width: 100%; width: 100%; height: auto; border-left: none; border-top: 1px solid #333; margin-right: 0 !important; }
             #right-sidebar.collapsed { display: none; }
             
-            #top-bar { height: auto; flex-direction: column; gap: 12px; padding: 15px; align-items: center; }
-            #header-main { width: 100%; justify-content: center; position: relative; }
+            #top-bar { justify-content: center; }
+            #header-main { width: 100%; justify-content: center; position: relative; margin-bottom: 10px;}
             #toggleLeftBtn { position: absolute; left: 0; }
-            #global-controls { flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; }
+            #global-controls { justify-content: center; }
             .control-separator { display: none; }
             #canvas-container { padding: 5px; min-height: 350px; }
         }
@@ -164,7 +179,11 @@
 
     <!-- PANNEAU DE GAUCHE : MIXEUR -->
     <div id="left-panel">
-        <div class="panel-title" id="title-mixer">🎛️ Misturador</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
+            <span class="panel-title" id="title-mixer" style="margin: 0; border: none; padding: 0;">🎛️ Misturador</span>
+            <!-- Bouton pour fermer placé directement dans le panneau ! -->
+            <button class="control-btn icon-btn" title="Ocultar painel" onclick="togglePanel('left')" style="background: transparent; border: 1px solid #444; padding: 4px 8px !important; font-size: 14px !important;">◀</button>
+        </div>
         <div id="mixer-section"><div id="tracks-mixer-container"></div></div>
     </div>
 
@@ -172,14 +191,13 @@
     <div id="center-panel">
         <div id="top-bar">
             <div id="header-main">
-                <button id="toggleLeftBtn" class="control-btn icon-btn" title="Ocultar / Mostrar painel" onclick="togglePanel('left')" style="background: transparent; border: 1px solid #444;">
+                <!-- Ce bouton n'apparaît que quand le panneau est fermé -->
+                <button id="toggleLeftBtn" class="control-btn icon-btn" title="Mostrar painel" onclick="togglePanel('left')" style="background: transparent; border: 1px solid #444; display: none;">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>
                     </svg>
                 </button>
-                <img src="Pictures/logo-samambaia.png" alt="Samambaia" onerror="this.style.display='none'; document.getElementById('fallback-emoji').style.display='inline';">
-                <span id="fallback-emoji" style="display:none; background:#f5f5f5; padding:6px; border-radius:6px; font-size:22px;">🌿</span>
-                <span id="header-title-text" style="display:none;">Baque de Maracatu</span>
+                <span id="header-title-text">BaqueMix</span>
             </div>
             
             <div id="global-controls">
@@ -213,7 +231,6 @@
                     </svg>
                 </button>
                 
-                <!-- BOUTON STOP / RETOUR AU DEBUT -->
                 <button id="rewindBtn" title="Parar e Voltar ao início / Stop & Rewind">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="#000" stroke="#000" stroke-width="2" stroke-linejoin="round">
                         <polygon points="19 20 9 12 19 4 19 20"></polygon>
@@ -254,11 +271,14 @@
         
         <!-- SECTION LEGENDE -->
         <div id="legend-section" class="sidebar-section">
-            <div class="panel-title" id="title-legend">📖 Legenda</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
+                <span class="panel-title" id="title-legend" style="margin: 0; border: none; padding: 0;">📖 Legenda</span>
+                <button class="control-btn icon-btn" onclick="toggleRightPanel('legend')" style="background: transparent; border: 1px solid #444; padding: 4px 8px !important; font-size: 14px !important;">▶</button>
+            </div>
             <div class="legend-container">
                 <div class="legend-group">
                     <span class="legend-group-title" id="legend-seq-title">⌨️ Dicas de digitação</span>
-                    <div class="legend-item" id="legend-seq-1"><span>Pressione <strong>Espaço</strong> no teclado para avançar e deixar um silêncio.</span></div>
+                    <div class="legend-item" id="legend-seq-1"><span>Pressione <strong>Espaço</strong> no teclado para avançar.</span></div>
                     <div class="legend-item" id="legend-seq-2"><span>Use as <strong>Setas</strong> (←/→) para navegar.</span></div>
                 </div>
 
@@ -300,7 +320,10 @@
 
         <!-- SECTION LETRAS -->
         <div id="letras-section" class="sidebar-section">
-            <div class="panel-title" id="letras-title">📝 Letras (Paroles)</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
+                <span class="panel-title" id="letras-title" style="margin: 0; border: none; padding: 0;">📝 Letras (Paroles)</span>
+                <button class="control-btn icon-btn" onclick="toggleRightPanel('letras')" style="background: transparent; border: 1px solid #444; padding: 4px 8px !important; font-size: 14px !important;">▶</button>
+            </div>
             <button class="control-btn" id="extractBtn" onclick="extractLyrics()" style="margin-bottom: 12px; width: 100%; background: #2c3e50;">🔄 Extrair do mixador</button>
             <div id="letras-textarea" contenteditable="true" data-placeholder="Cole as letras completas aqui..."></div>
         </div>
@@ -309,7 +332,12 @@
 
     <script>
         function togglePanel(side) { 
-            if (side === 'left') document.getElementById('left-panel').classList.toggle('collapsed'); 
+            if (side === 'left') {
+                let p = document.getElementById('left-panel');
+                p.classList.toggle('collapsed');
+                // Affiche ou masque le bouton "hamburger" du top bar
+                document.getElementById('toggleLeftBtn').style.display = p.classList.contains('collapsed') ? 'flex' : 'none';
+            } 
         }
 
         let activeRightPanel = null;
@@ -334,6 +362,9 @@
             legendSec.classList.toggle('active', activeRightPanel === 'legend');
             letrasSec.classList.toggle('active', activeRightPanel === 'letras');
         }
+
+        // Cache initial du bouton gauche car le panneau est ouvert
+        document.getElementById('toggleLeftBtn').style.display = 'none';
 
         const i18n = {
             pt: {
@@ -367,7 +398,7 @@
                 promptVoice: "Sílaba / Letras :",
                 selectInst: "Escolher um instrumento...",
                 patternTip: "Use o teclado! Espaço = silêncio.",
-                toggleBtn: "Ocultar / Mostrar painel",
+                toggleBtn: "Mostrar painel",
                 toggleLegendBtn: "Ocultar / Mostrar legenda",
                 toggleLetrasBtn: "Ocultar / Mostrar letras",
                 tsLabel: "Compasso:",
@@ -409,7 +440,7 @@
                 promptVoice: "Syllabe / Letras :",
                 selectInst: "Choisir un instrument...",
                 patternTip: "Utilisez le clavier ! Espace = silence.",
-                toggleBtn: "Afficher / Masquer le panneau",
+                toggleBtn: "Afficher le panneau",
                 toggleLegendBtn: "Afficher / Masquer la légende",
                 toggleLetrasBtn: "Afficher / Masquer les paroles",
                 tsLabel: "Signature:",
@@ -476,7 +507,6 @@
             updateStaticTexts(); renderMixer();
         }
 
-        // EXTRACTION INTELLIGENTE : Recollage des tirets et Couleurs
         window.extractLyrics = function() {
             let voiceCircles = circles.filter(c => instrumentsConfig[c.instrumentIdx].type === 'voice');
             let htmlArr = [];
@@ -490,7 +520,7 @@
                     if(c.activeSteps[i] !== 0 && c.lyrics[i]) {
                         let syl = c.lyrics[i].trim();
                         let isPux = c.activeSteps[i] === 'P';
-                        let color = isPux ? '#54a0ff' : '#3498db'; // Bleu pour fond sombre
+                        let color = isPux ? '#54a0ff' : '#3498db'; 
                         
                         if (syl.endsWith('-')) {
                             if (!buffer) currentSpanColor = color;
@@ -544,7 +574,7 @@
         let timeSignature = "4/4";
         let maxTicks = 96; 
         let flashAlpha = 0; 
-        let currentAngle = -Math.PI / 2; // STOCKÉ GLOBALEMENT (Garantit que la baguette se fige à la bonne place)
+        let currentAngle = -Math.PI / 2;
 
         Tone.context.lookAhead = 0.04; 
         Tone.context.latencyHint = "interactive"; 
@@ -658,7 +688,7 @@
         };
 
         function normalizeCircleData(c) {
-            if (c.repeats === undefined) c.repeats = 1; // Rétrocompatibilité
+            if (c.repeats === undefined) c.repeats = 1; 
             if (!c.notes) c.notes = Array(c.steps).fill("");
             let inst = instrumentsConfig[c.instrumentIdx];
             if (inst && inst.type === 'voice') {
@@ -673,8 +703,6 @@
             }
         }
 
-        // --- NOUVELLE LOGIQUE MULTIPLICATEUR ---
-        // Détermine quelle instance d'un instrument est active pour le tour (mesure) en cours
         function getActiveCircleIdForInstrument(instIdx) {
             let group = circles.filter(c => c.instrumentIdx === instIdx);
             if (group.length === 0) return null;
@@ -686,11 +714,9 @@
             let runningSum = 0;
             for (let c of group) {
                 runningSum += (c.repeats || 1);
-                if (currentPos < runningSum) {
-                    return c.id;
-                }
+                if (currentPos < runningSum) { return c.id; }
             }
-            return group[0].id; // Fallback
+            return group[0].id; 
         }
 
         function draw() {
@@ -736,7 +762,6 @@
                 ctx.fillText((idx + 1).toString(), centerX + Math.cos(angle)*textRad, centerY + Math.sin(angle)*textRad);
             });
 
-            // Met à jour l'angle de la baguette SEULEMENT si ça joue
             if (isPlaying && Tone.Transport.state === "started") {
                 const bpm = Tone.Transport.bpm.value;
                 const beats = maxTicks / 24; 
@@ -745,14 +770,12 @@
                 currentAngle = -Math.PI / 2 + (progress * Math.PI * 2);
             }
 
-            // --- BAGUETTE : DESSINÉE SOUS LES NOTES ---
             ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(currentAngle);
             const stickLength = circles.length > 0 ? circles[circles.length - 1].radius + 35 : 120;
             ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(stickLength - 20, -4); ctx.lineTo(stickLength - 20, 4); ctx.lineTo(0, 8);
             ctx.closePath(); ctx.fillStyle = '#e0ae6f'; ctx.fill();
             ctx.beginPath(); ctx.ellipse(stickLength - 10, 0, 10, 6, 0, 0, Math.PI * 2); ctx.fillStyle = '#c69552'; ctx.fill();
             ctx.restore();
-            // ------------------------------------------
 
             circles.forEach((circle) => {
                 if (circle.isHidden) return;
@@ -761,7 +784,6 @@
                 let hasActiveSolo = circles.some(c => c.isSolo);
                 let isTargeted = hasActiveSolo ? circle.isSolo : !circle.isMute;
                 
-                // Vérifie si ce cercle est l'instance "Active" de son instrument
                 let activeGroupId = getActiveCircleIdForInstrument(circle.instrumentIdx);
                 if (circle.id !== activeGroupId) isTargeted = false; 
                 
@@ -783,6 +805,8 @@
                         if (inst.type === 'voice') {
                             fillColor = (state === 'P') ? inst.colors['P'] : inst.colors['C']; 
                             textSymbol = (circle.lyrics && circle.lyrics[i]) ? circle.lyrics[i] : 'X';
+                            // Enlever le tiret pour l'affichage visuel sur la roda
+                            if(textSymbol.endsWith('-')) textSymbol = textSymbol.slice(0, -1);
                         } else {
                             fillColor = inst.colors[state] || '#fff'; isAccent = (state === state.toUpperCase()); radiusSize = isAccent ? 15 : 12;
                             if (inst.type === 'gongue') {
@@ -816,10 +840,8 @@
                     if (i === 0) {
                         ctx.save(); ctx.globalAlpha = 1.0; ctx.fillStyle = '#bbb'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'left';
                         let displayName = inst.name;
-                        // On ajoute le numéro de l'instance si l'instrument est multiple
                         let sameInst = circles.filter(c => c.instrumentIdx === circle.instrumentIdx);
                         if (sameInst.length > 1) displayName += ` ${sameInst.indexOf(circle) + 1}`;
-                        
                         ctx.fillText(displayName, x + 20, y + 3); ctx.restore();
                     }
                 }
@@ -854,7 +876,6 @@
                 if (canPlay) {
                     let inst = instrumentsConfig[circle.instrumentIdx];
                     
-                    // Nouvelle logique de Multiplicateur: On ne joue QUE le cercle actif pour ce groupe !
                     let activeGroupId = getActiveCircleIdForInstrument(circle.instrumentIdx);
                     if (circle.id !== activeGroupId) return;
 
@@ -920,7 +941,6 @@
 
                 let inputHtml = "";
                 if (inst.type === 'voice') {
-                    // BLOCS VOIX (4 PAR LIGNE)
                     inputHtml = `<div class="step-boxes" id="voice-boxes-${circle.id}">`;
                     for(let i=0; i<circle.steps; i++) {
                         let state = circle.activeSteps[i];
@@ -939,7 +959,6 @@
                             <input type="text" class="v-note" value="${note}" placeholder="Ex:C4" oninput="updateVoiceNote(${circle.id}, ${i}, this.value)" onblur="formatNoteBlur(${circle.id}, ${i}, this)" onkeydown="navVoiceBox(this, event, 'note')">
                         </div>`;
 
-                        // Couper la ligne tous les 4 pas !
                         if ((i + 1) % 4 === 0 && i !== circle.steps - 1) {
                              inputHtml += `<div style="flex-basis: 100%; height: 2px;"></div>`;
                         }
@@ -1027,10 +1046,9 @@
             if (c) { c.repeats = parseInt(val) || 1; renderMixer(); }
         }
 
-        // --- FONCTIONS DE CARTES VOIX ---
         window.toggleVoiceType = function(id, sIdx) {
             let c = circles.find(x => x.id === id);
-            if(c.activeSteps[sIdx] === 0) return; // Si vide, on ne fait rien !
+            if(c.activeSteps[sIdx] === 0) return; 
             c.activeSteps[sIdx] = c.activeSteps[sIdx] === 'P' ? 'C' : 'P';
             renderMixer(); 
         }
@@ -1062,7 +1080,6 @@
             c.notes[sIdx] = val;
         }
 
-        // AUTO-OCTAVE 4
         window.formatNoteBlur = function(id, sIdx, el) {
             let val = el.value.trim();
             if (val.length === 1 || (val.length === 2 && (val.includes('#') || val.includes('b')))) {
@@ -1088,7 +1105,6 @@
                 e.preventDefault();
             }
         }
-        // -------------------------------------------
 
         window.onStepBoxInput = function(el, e) {
             let char = el.value.slice(-1);
@@ -1206,7 +1222,6 @@
                             } else if (inst.type === 'gongue') {
                                 if (current === 0) circle.activeSteps[i] = 'grv'; else if (current === 'grv') circle.activeSteps[i] = 'GRV'; else if (current === 'GRV') circle.activeSteps[i] = 'aig'; else if (current === 'aig') circle.activeSteps[i] = 'AIG'; else circle.activeSteps[i] = 0;
                             } else if (inst.type === 'voice') {
-                                // Sur le canevas, le clic inverse entre PUX, CORO et VIDE.
                                 if (current === 0) {
                                     circle.activeSteps[i] = 'C'; 
                                     if(!circle.lyrics[i]) circle.lyrics[i] = "La";
@@ -1241,7 +1256,7 @@
             mainLoop.stop(); Tone.Transport.stop(); 
             instrumentsConfig.forEach(inst => { if (samplers[inst.id]) samplers[inst.id].stopAll(); if (voiceSynths[inst.id]) voiceSynths[inst.id].triggerRelease(); });
             isPlaying = false;
-            currentStepIndex = -1; measureCount = 0; Tone.Transport.seconds = 0; currentAngle = -Math.PI / 2; // Réinitialise au début !
+            currentStepIndex = -1; measureCount = 0; Tone.Transport.seconds = 0; currentAngle = -Math.PI / 2;
         });
 
         document.getElementById('bpm').addEventListener('change', (e) => { 
@@ -1265,7 +1280,7 @@
 
         addSelect.addEventListener('change', function() {
             if (this.value !== "") {
-                if (circles.length >= 20) { alert("Limite maximale atteinte !"); this.value = ""; return; }
+                if (circles.length >= 20) { alert("Limite máxima atingida!"); this.value = ""; return; }
                 const instIdx = parseInt(this.value);
                 let defaultSteps = 16;
                 if (timeSignature === "3/4" || timeSignature === "6/8") defaultSteps = 12;
