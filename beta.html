@@ -46,6 +46,13 @@
 
         .track-mixer { background-color: var(--control-bg); border: 1px solid #3a3a3a; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
         .track-mixer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        
+        /* Boutons de réorganisation des pistes */
+        .track-order-btns { display: flex; flex-direction: column; gap: 2px; margin-right: 8px; }
+        .order-btn { background: #333; color: #fff; border: 1px solid #555; cursor: pointer; font-size: 8px; padding: 2px 6px; border-radius: 3px; }
+        .order-btn:hover:not(:disabled) { background: var(--accent-gold); color: #000; }
+        .order-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
         .track-name { font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
         .track-name select { background-color: #111; color: #fff; border: 1px solid #555; font-size: 11px; padding: 2px 4px; border-radius: 4px; max-width: 110px; }
 
@@ -69,7 +76,6 @@
         .pattern-row { display: flex; align-items: flex-start; gap: 8px; margin-top: 8px; border-top: 1px dashed #444; padding-top: 8px; }
         .pattern-label { font-size: 11px; color: var(--text-muted); white-space: nowrap; cursor: help; margin-top: 5px; }
         
-        /* NOIX CARRES POUR LES PAS (Séquenceur) */
         .step-boxes { display: flex; gap: 4px; flex-wrap: wrap; flex-grow: 1; align-items: center; }
         .step-box { 
             width: 22px; height: 22px; background: #111; border: 1px solid #555; 
@@ -85,7 +91,6 @@
         .pattern-input::placeholder { color: #555; letter-spacing: normal; font-family: sans-serif; font-size: 11px; }
         .pattern-input:focus { border-color: var(--accent-gold); outline: none; }
 
-        /* LÉGENDE SCROLLABLE */
         .legend-container { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; padding-right: 5px; flex-grow: 1; }
         .legend-group { display: flex; flex-direction: column; gap: 4px; background: #181818; padding: 8px; border-radius: 6px; border: 1px solid #2a2a2a; }
         .legend-group-title { font-weight: bold; color: var(--accent-gold); margin-bottom: 2px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -102,7 +107,6 @@
         
         #global-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
         
-        /* -- BOUTONS ET ICONES (Agrandis et harmonisés) -- */
         .preset-select { background-color: var(--control-bg); color: var(--text-main); border: 1px solid #444; padding: 6px; border-radius: 6px; font-size: 13px; font-weight: bold; }
         button.control-btn { background-color: #333; color: #fff; border: 1px solid #444; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; }
         button.control-btn:hover { background-color: #444; }
@@ -231,14 +235,12 @@
         <div class="panel-title" id="title-legend">📖 Legenda</div>
         <div class="legend-container">
             
-            <!-- EXPLICATIONS GENERALES -->
             <div class="legend-group">
                 <span class="legend-group-title" id="legend-seq-title">⌨️ Dicas de digitação</span>
                 <div class="legend-item" id="legend-seq-1"><span>Pressione <strong>Espaço</strong> no teclado para avançar e deixar um silêncio.</span></div>
                 <div class="legend-item" id="legend-seq-2"><span>Use as <strong>Setas</strong> (←/→) para navegar entre os quadrados.</span></div>
             </div>
 
-            <!-- CHANT & NOTES -->
             <div class="legend-group">
                 <span class="legend-group-title" id="legend-voice-title">🎤 Vozes / Canto</span>
                 <div class="legend-item" id="legend-voice-1"><span>Para compor a melodia, você pode adicionar a Nota Musical + dois pontos (:) + a sílaba.</span></div>
@@ -246,7 +248,6 @@
                 <div class="legend-item" id="legend-voice-3"><span>(Sem nota definida, usa C5 por padrão).</span></div>
             </div>
 
-            <!-- REGLES OR -->
             <div style="font-size: 11px; margin-top: 8px; margin-bottom: 4px; color: var(--accent-gold); line-height: 1.35;" id="legend-gold">
                 💡 <strong>Regra de ouro:</strong><br>• <strong>Maiúscula</strong> = Golpe Forte (Acentuado)<br>• <strong>Minúscula</strong> = Golpe Fraco (Fantasma)
             </div>
@@ -290,12 +291,12 @@
                 legend: "📖 Legenda",
                 seqLegendTitle: "⌨️ Dicas de digitação",
                 seqLegend1: "Pressione <strong>Espaço</strong> no teclado para avançar e deixar um silêncio.",
-                seqLegend2: "Use as <strong>Setas</strong> (←/→) para navegar entre os quadrados.",
+                seqLegend2: "Use as <strong>Setas</strong> (←/→) para navegar.",
                 voiceLegendTitle: "🎤 Vozes / Canto",
-                voiceLegend1: "Para compor a melodia, você pode adicionar a Nota Musical + dois pontos (:) + a sílaba.",
+                voiceLegend1: "Para compor a melodia, use: Nota Musical + dois pontos (:) + sílaba.",
                 voiceLegend2: "Ex: <strong>C5:Vou, D5:va</strong>",
-                voiceLegend3: "(Sem nota definida, usa C5 por padrão).",
-                goldRule: "💡 <strong>Regra de ouro:</strong><br>• <strong>Maiúscula</strong> = Golpe Forte (Acentuado)<br>• <strong>Minúscula</strong> = Golpe Fraco (Fantasma)",
+                voiceLegend3: "(Sem nota, usa C5 por padrão).",
+                goldRule: "💡 <strong>Regra de ouro:</strong><br>• <strong>Maiúscula</strong> = Golpe Forte<br>• <strong>Minúscula</strong> = Golpe Fraco",
                 alfaiaCaixa: "🥁 Alfaia & Caixa",
                 mainDroite: "Mão Direita",
                 mainGauche: "Mão Esquerda",
@@ -315,14 +316,14 @@
                 stepsNum: "Número de passos :",
                 pattern: "⌨️ Padrão :",
                 patternPhText: "Ex: D g  d G",
-                patternPhVoice: "Letras, com vírgulas (Ex: C5:Vou, D5:va)",
+                patternPhVoice: "Letras (Ex: C5:Vou, D5:va)",
                 selectInst: "Escolher um instrumento...",
                 patternTip: "Use o teclado! Espaço = silêncio.",
                 toggleBtn: "Ocultar / Mostrar painel",
                 toggleLegendBtn: "Ocultar / Mostrar legenda",
                 tsLabel: "Compasso:",
                 tutorialBtn: "Tutorial em vídeo",
-                confirmResize: "Deseja ajustar automaticamente o número de passos de todas as faixas para caber neste novo compasso?"
+                confirmResize: "Deseja ajustar automaticamente o número de passos de todas as faixas?"
             },
             fr: {
                 loading: "Chargement des voix...",
@@ -330,12 +331,12 @@
                 legend: "📖 Légende",
                 seqLegendTitle: "⌨️ Astuces Séquenceur",
                 seqLegend1: "Appuyez sur <strong>Espace</strong> pour avancer et laisser un silence.",
-                seqLegend2: "Utilisez les <strong>Flèches</strong> (←/→) pour naviguer entre les cases.",
+                seqLegend2: "Utilisez les <strong>Flèches</strong> (←/→) pour naviguer.",
                 voiceLegendTitle: "🎤 Voix / Chant",
-                voiceLegend1: "Pour composer la mélodie, ajoutez la Note de musique + deux points (:) + la syllabe.",
+                voiceLegend1: "Pour composer la mélodie : Note de musique + deux points (:) + syllabe.",
                 voiceLegend2: "Ex: <strong>C5:Vou, D5:va</strong>",
-                voiceLegend3: "(Sans note définie, utilise C5 par défaut).",
-                goldRule: "💡 <strong>Règle d'or :</strong><br>• <strong>Majuscule</strong> = Coup Fort (Accentué)<br>• <strong>Minuscule</strong> = Coup Faible (Fantôme)",
+                voiceLegend3: "(Sans note, utilise C5 par défaut).",
+                goldRule: "💡 <strong>Règle d'or :</strong><br>• <strong>Majuscule</strong> = Coup Fort<br>• <strong>Minuscule</strong> = Coup Faible",
                 alfaiaCaixa: "🥁 Alfaia & Caixa",
                 mainDroite: "Main Droite",
                 mainGauche: "Main Gauche",
@@ -355,14 +356,14 @@
                 stepsNum: "Nombre de pas :",
                 pattern: "⌨️ Motif :",
                 patternPhText: "Ex: D g  d G",
-                patternPhVoice: "Paroles, avec virgules (Ex: C5:Vou, D5:va)",
+                patternPhVoice: "Paroles (Ex: C5:Vou, D5:va)",
                 selectInst: "Choisir un instrument...",
                 patternTip: "Utilisez le clavier ! Espace = silence.",
                 toggleBtn: "Afficher / Masquer le panneau",
                 toggleLegendBtn: "Afficher / Masquer la légende",
                 tsLabel: "Signature:",
                 tutorialBtn: "Tutoriel vidéo",
-                confirmResize: "Voulez-vous ajuster automatiquement le nombre de pas de toutes les pistes pour s'adapter à cette nouvelle signature ?"
+                confirmResize: "Voulez-vous ajuster automatiquement le nombre de pas de toutes les pistes ?"
             }
         };
 
@@ -538,6 +539,22 @@
         }
         
         function refreshCirclesLayout() { updateRadii(); renderMixer(); }
+
+        window.moveCircleUp = function(id) {
+            let idx = circles.findIndex(c => c.id === id);
+            if (idx > 0) {
+                let temp = circles[idx]; circles[idx] = circles[idx - 1]; circles[idx - 1] = temp;
+                refreshCirclesLayout();
+            }
+        };
+
+        window.moveCircleDown = function(id) {
+            let idx = circles.findIndex(c => c.id === id);
+            if (idx > -1 && idx < circles.length - 1) {
+                let temp = circles[idx]; circles[idx] = circles[idx + 1]; circles[idx + 1] = temp;
+                refreshCirclesLayout();
+            }
+        };
 
         window.generatePatternString = function(circle) {
             let inst = instrumentsConfig[circle.instrumentIdx];
@@ -723,12 +740,10 @@
                         let state = circle.activeSteps[stepIdx];
                         if (state !== 0) {
                             if (inst.type === 'voice') {
-                                // LECTURE DE LA NOTE MELODIQUE
                                 let note = (state !== 'X') ? state : (inst.id === 'puxador' ? "E5" : "C5");
                                 try {
                                     if (voiceSynths[inst.id]) voiceSynths[inst.id].triggerAttackRelease(note, "8n", time);
                                 } catch(err) {
-                                    // Si la note écrite est invalide, on joue un Do
                                     if (voiceSynths[inst.id]) voiceSynths[inst.id].triggerAttackRelease("C5", "8n", time);
                                 }
                             } else if (samplers[inst.id]) {
@@ -816,7 +831,13 @@
                 const div = document.createElement('div'); div.className = "track-mixer";
                 div.innerHTML = `
                     <div class="track-mixer-header">
-                        <span class="track-name">${index + 1}. ${instSelectHtml}</span>
+                        <div style="display:flex; align-items:center;">
+                            <div class="track-order-btns">
+                                <button class="order-btn" onclick="moveCircleUp(${circle.id})" ${index === 0 ? 'disabled' : ''}>▲</button>
+                                <button class="order-btn" onclick="moveCircleDown(${circle.id})" ${index === circles.length - 1 ? 'disabled' : ''}>▼</button>
+                            </div>
+                            <span class="track-name">${index + 1}. ${instSelectHtml}</span>
+                        </div>
                         <div class="track-mute-solo">
                             <button class="btn-mute-solo ${circle.isMute ? 'mute-on' : ''}" onclick="toggleMute(${circle.id})">M</button>
                             <button class="btn-mute-solo ${circle.isSolo ? 'solo-on' : ''}" onclick="toggleSolo(${circle.id})">S</button>
@@ -888,20 +909,33 @@
                     else if(parsed === 'AIG') displayVal = 'A'; else if(parsed === 'aig') displayVal = 'a';
                 }
                 el.value = displayVal;
-                let next = el.nextElementSibling; if (next && next.tagName === 'INPUT') { next.focus(); next.select(); }
+                
+                let next = el.nextElementSibling;
+                while (next && next.tagName !== 'INPUT') next = next.nextElementSibling;
+                if (next && next.tagName === 'INPUT') { next.focus(); next.select(); }
             } else {
                 c.activeSteps[sIdx] = 0; el.value = '';
-                if (char === ' ') { let next = el.nextElementSibling; if (next && next.tagName === 'INPUT') { next.focus(); next.select(); } }
+                if (char === ' ') { 
+                    let next = el.nextElementSibling; 
+                    while (next && next.tagName !== 'INPUT') next = next.nextElementSibling;
+                    if (next && next.tagName === 'INPUT') { next.focus(); next.select(); } 
+                }
             }
         };
 
         window.onStepBoxKey = function(el, e) {
             if (e.key === 'Backspace' && el.value === '') {
-                let prev = el.previousElementSibling; if(prev && prev.tagName === 'INPUT') { prev.focus(); prev.select(); } e.preventDefault();
+                let prev = el.previousElementSibling; 
+                while (prev && prev.tagName !== 'INPUT') prev = prev.previousElementSibling;
+                if(prev && prev.tagName === 'INPUT') { prev.focus(); prev.select(); } e.preventDefault();
             } else if (e.key === 'ArrowRight') {
-                let next = el.nextElementSibling; if(next && next.tagName === 'INPUT') { next.focus(); next.select(); } e.preventDefault();
+                let next = el.nextElementSibling; 
+                while (next && next.tagName !== 'INPUT') next = next.nextElementSibling;
+                if(next && next.tagName === 'INPUT') { next.focus(); next.select(); } e.preventDefault();
             } else if (e.key === 'ArrowLeft') {
-                let prev = el.previousElementSibling; if(prev && prev.tagName === 'INPUT') { prev.focus(); prev.select(); } e.preventDefault();
+                let prev = el.previousElementSibling; 
+                while (prev && prev.tagName !== 'INPUT') prev = prev.previousElementSibling;
+                if(prev && prev.tagName === 'INPUT') { prev.focus(); prev.select(); } e.preventDefault();
             }
         };
 
@@ -1013,12 +1047,10 @@
             }
         }
 
-        // CORRECTION BPM (Garantit toujours un nombre entier !)
         document.getElementById('bpm').addEventListener('change', (e) => { 
             let val = Math.round(Number(e.target.value));
             if (val < 40) val = 40; if (val > 240) val = 240;
-            e.target.value = val;
-            Tone.Transport.bpm.value = val;
+            e.target.value = val; Tone.Transport.bpm.value = val;
         });
         
         document.getElementById('masterVol').addEventListener('input', (e) => { let val = parseFloat(e.target.value); Tone.Destination.volume.value = val === -40 ? -Infinity : val; });
