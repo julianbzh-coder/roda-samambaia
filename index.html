@@ -2,18 +2,19 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Baque de maracatu - Samambaia</title>
+    <title>Baque de Maracatu - Roda Samambaia</title>
+    
+    <meta name="description" content="Application web interactive pour composer, apprendre et jouer les rythmes de Maracatu de Baque Virado. Séquenceur, métronome, et outils pédagogiques visuels.">
+    <meta name="keywords" content="Maracatu, Baque Virado, Percussion, Tambour, Alfaia, Agbê, Séquenceur, Samambaia, Musique Brésilienne">
+    <meta name="author" content="JulianBZH">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         :root {
-            --bg-dark: #121212; 
-            --panel-bg: #1e1e1e; 
-            --control-bg: #252525;
-            --text-main: #f5f5f5; 
-            --text-muted: #888;
-            --accent-gold: #f1c40f; 
-            --accent-green: #2ecc71; 
-            --accent-red: #e74c3c;
+            --bg-dark: #121212; --panel-bg: #1e1e1e; --control-bg: #252525;
+            --text-main: #f5f5f5; --text-muted: #888;
+            --accent-gold: #f1c40f; --accent-green: #2ecc71; --accent-red: #8b0000;
         }
 
         body {
@@ -29,23 +30,28 @@
         }
         #left-panel.collapsed { margin-left: -400px; }
 
-        /* --- PANNEAU DROIT (LÉGENDE) --- */
-        #legend-panel {
-            width: 320px; min-width: 320px; background-color: var(--panel-bg); border-left: 1px solid #333;
-            display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; z-index: 10; height: 100%;
+        /* --- PANNEAU DROIT (LÉGENDE ET LETRAS) --- */
+        #right-sidebar {
+            width: 340px; min-width: 340px; background-color: var(--panel-bg); border-left: 1px solid #333;
+            display: flex; flex-direction: column; box-sizing: border-box; z-index: 10; height: 100%;
             transition: margin-right 0.35s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
-        #legend-panel.collapsed { margin-right: -320px; }
+        #right-sidebar.collapsed { margin-right: -340px; }
+        .sidebar-section { display: none; flex-direction: column; padding: 20px; height: 100%; overflow-y: auto; }
+        .sidebar-section.active { display: flex; }
 
-        .panel-title {
-            font-size: 13px; font-weight: bold; color: var(--text-muted); text-transform: uppercase;
-            letter-spacing: 1.5px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;
-        }
+        .panel-title { font-size: 13px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; }
 
         #mixer-section { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
 
         .track-mixer { background-color: var(--control-bg); border: 1px solid #3a3a3a; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
         .track-mixer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        
+        .track-order-btns { display: flex; flex-direction: column; gap: 2px; margin-right: 8px; }
+        .order-btn { background: #333; color: #fff; border: 1px solid #555; cursor: pointer; font-size: 8px; padding: 2px 6px; border-radius: 3px; }
+        .order-btn:hover:not(:disabled) { background: var(--accent-gold); color: #000; }
+        .order-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
         .track-name { font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
         .track-name select { background-color: #111; color: #fff; border: 1px solid #555; font-size: 11px; padding: 2px 4px; border-radius: 4px; max-width: 110px; }
 
@@ -69,28 +75,35 @@
         .pattern-row { display: flex; align-items: flex-start; gap: 8px; margin-top: 8px; border-top: 1px dashed #444; padding-top: 8px; }
         .pattern-label { font-size: 11px; color: var(--text-muted); white-space: nowrap; cursor: help; margin-top: 5px; }
         
-        /* NOIX CARRES POUR LES PAS (Séquenceur) */
+        /* NOIX CARRES POUR LES INSTRUMENTS */
         .step-boxes { display: flex; gap: 4px; flex-wrap: wrap; flex-grow: 1; align-items: center; }
-        .step-box { 
-            width: 22px; height: 22px; background: #111; border: 1px solid #555; 
-            color: var(--accent-gold); font-family: monospace; font-size: 14px; font-weight: bold;
-            text-align: center; border-radius: 4px; outline: none; padding: 0; box-sizing: border-box;
-        }
+        .step-box { width: 22px; height: 22px; background: #111; border: 1px solid #555; color: var(--accent-gold); font-family: monospace; font-size: 14px; font-weight: bold; text-align: center; border-radius: 4px; outline: none; padding: 0; box-sizing: border-box; }
         .step-box:focus { border-color: var(--accent-gold); background: #222; box-shadow: 0 0 4px var(--accent-gold); }
         
-        .pattern-input { 
-            flex-grow: 1; background: #111; border: 1px solid #555; color: var(--accent-gold); 
-            padding: 4px 6px; border-radius: 4px; font-family: monospace; font-size: 13px; letter-spacing: 2px; width: 100%; box-sizing: border-box;
-        }
-        .pattern-input::placeholder { color: #555; letter-spacing: normal; font-family: sans-serif; font-size: 11px; }
-        .pattern-input:focus { border-color: var(--accent-gold); outline: none; }
+        /* --- CARTES VOIX --- */
+        .v-card { display: flex; flex-direction: column; width: 48px; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 4px; overflow: hidden; }
+        .v-card.inactive .v-syl, .v-card.inactive .v-note { opacity: 0.4; }
+        .v-type { font-size: 9px; font-weight: bold; text-align: center; cursor: pointer; padding: 3px 0; color: #fff; user-select: none; }
+        .v-type.pux { background: #0c19cf; }
+        .v-type.coro { background: #3498db; }
+        .v-syl { width: 100%; border: none; border-bottom: 1px solid #333; background: transparent; color: var(--accent-gold); text-align: center; font-size: 13px; padding: 6px 0; outline: none; font-weight: bold; }
+        .v-note { width: 100%; border: none; background: transparent; color: #888; text-align: center; font-size: 10px; padding: 4px 0; outline: none; }
 
         /* LÉGENDE SCROLLABLE */
-        .legend-container { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; padding-right: 5px; flex-grow: 1; }
+        .legend-container { display: flex; flex-direction: column; gap: 6px; padding-right: 5px; flex-grow: 1; }
         .legend-group { display: flex; flex-direction: column; gap: 4px; background: #181818; padding: 8px; border-radius: 6px; border: 1px solid #2a2a2a; }
         .legend-group-title { font-weight: bold; color: var(--accent-gold); margin-bottom: 2px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
         .legend-item { display: flex; align-items: center; gap: 8px; color: var(--text-main); font-size: 11px; line-height: 1.3; }
         .legend-badge { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 18px; font-size: 9px; font-weight: bold; border-radius: 4px; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; flex-shrink: 0; }
+
+        /* ZONE DE TEXTE RICHE (LETRAS) */
+        #letras-textarea {
+            width: 100%; flex-grow: 1; background: #111; border: 1px solid #555; border-radius: 4px; 
+            padding: 12px; box-sizing: border-box; overflow-y: auto; font-size: 15px; line-height: 1.6; 
+            font-family: sans-serif; color: #fff;
+        }
+        #letras-textarea:empty:before { content: attr(data-placeholder); color: #555; pointer-events: none; display: block; }
+        #letras-textarea:focus { border-color: var(--accent-gold); outline: none; }
 
         /* --- INTERFACE CENTRALE --- */
         #center-panel { flex-grow: 1; display: flex; flex-direction: column; position: relative; min-width: 0; }
@@ -102,12 +115,19 @@
         
         #global-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
         
-        /* -- BOUTONS ET ICONES (Agrandis et harmonisés) -- */
         .preset-select { background-color: var(--control-bg); color: var(--text-main); border: 1px solid #444; padding: 6px; border-radius: 6px; font-size: 13px; font-weight: bold; }
         button.control-btn { background-color: #333; color: #fff; border: 1px solid #444; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; }
         button.control-btn:hover { background-color: #444; }
         button#metroBtn.metro-on { background-color: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
-        .icon-btn { font-size: 22px !important; padding: 4px 10px !important; line-height: 1; }
+        .icon-btn { font-size: 20px !important; padding: 4px 10px !important; line-height: 1; }
+
+        /* BOUTON REWIND (DESIGN RODA) */
+        #rewindBtn {
+            width: 40px; height: 40px; padding: 0 !important; border-radius: 50%;
+            background-color: var(--accent-red); border: 2px solid #121212;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.6);
+        }
+        #rewindBtn:hover { background-color: #a00000; }
 
         .control-separator { width: 1px; height: 28px; background-color: #444; margin: 0 4px; }
         label.control-label { font-size: 13px; display: flex; align-items: center; gap: 6px; color: var(--text-main); font-weight: bold; }
@@ -116,12 +136,7 @@
         .master-vol-fader { -webkit-appearance: none; height: 6px; border-radius: 3px; background: #444; outline: none; width: 70px; }
         .master-vol-fader::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent-gold); cursor: pointer; }
 
-        #canvas-container { 
-            flex-grow: 1; display: flex; align-items: center; justify-content: center; 
-            background-color: var(--bg-dark); background-image: url('atelier.png'); 
-            background-size: cover; background-position: center; background-repeat: no-repeat; 
-            padding: 10px; box-sizing: border-box; overflow: hidden;
-        }
+        #canvas-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; background-color: var(--bg-dark); background-image: url('Pictures/atelier.png'); background-size: cover; background-position: center; background-repeat: no-repeat; padding: 10px; box-sizing: border-box; overflow: hidden; }
         canvas { max-width: 100%; max-height: 100%; aspect-ratio: 1 / 1; cursor: pointer; }
         
         #fileInput { display: none; }
@@ -132,8 +147,8 @@
             #center-panel { order: 1; width: 100%; height: auto; flex-grow: 0; }
             #left-panel { order: 2; min-width: 100%; width: 100%; height: auto; border-right: none; border-top: 1px solid #333; margin-left: 0 !important; }
             #left-panel.collapsed { display: none; } 
-            #legend-panel { order: 3; min-width: 100%; width: 100%; height: auto; border-left: none; border-top: 1px solid #333; margin-right: 0 !important; }
-            #legend-panel.collapsed { display: none; }
+            #right-sidebar { order: 3; min-width: 100%; width: 100%; height: auto; border-left: none; border-top: 1px solid #333; margin-right: 0 !important; }
+            #right-sidebar.collapsed { display: none; }
             
             #top-bar { height: auto; flex-direction: column; gap: 12px; padding: 15px; align-items: center; }
             #header-main { width: 100%; justify-content: center; position: relative; }
@@ -163,7 +178,7 @@
                         <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>
                     </svg>
                 </button>
-                <img src="logo-samambaia.png" alt="Samambaia" onerror="this.style.display='none'; document.getElementById('fallback-emoji').style.display='inline';">
+                <img src="Pictures/logo-samambaia.png" alt="Samambaia" onerror="this.style.display='none'; document.getElementById('fallback-emoji').style.display='inline';">
                 <span id="fallback-emoji" style="display:none; background:#f5f5f5; padding:6px; border-radius:6px; font-size:22px;">🌿</span>
                 <span id="header-title-text" style="display:none;">Baque de Maracatu</span>
             </div>
@@ -199,8 +214,16 @@
                     </svg>
                 </button>
                 
-                <button id="langBtn" class="control-btn icon-btn" onclick="toggleLang()" style="background:#8e44ad;" title="Changer de langue / Mudar idioma">🇫🇷</button>
-                <button id="tutorialBtn" class="control-btn icon-btn" title="Tutorial / Ajuda" onclick="window.open('https://www.youtube.com/playlist?list=PLBaYhFEJG6PwhFTn0mbfkdejwOrphZRu1', '_blank')" style="background:#e67e22;">📺</button>
+                <!-- NOUVEAU BOUTON STOP (DESIGN RODA) -->
+                <button id="rewindBtn" title="Parar e Voltar ao início / Stop & Rewind">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#000" stroke="#000" stroke-width="2" stroke-linejoin="round">
+                        <polygon points="19 20 9 12 19 4 19 20"></polygon>
+                        <line x1="5" y1="19" x2="5" y2="5" stroke-width="3"></line>
+                    </svg>
+                </button>
+                
+                <button id="langBtn" class="control-btn icon-btn" onclick="toggleLang()" style="background:#8e44ad; font-size: 22px; width: 50px; padding: 4px;" title="Changer de langue / Mudar idioma">🇫🇷</button>
+                <button id="tutorialBtn" class="control-btn icon-btn" title="Tutorial / Ajuda" onclick="window.open('https://www.youtube.com/results?search_query=maracatu+tutorial', '_blank')" style="background:#e67e22;">📺</button>
                 
                 <div class="control-separator"></div>
                 
@@ -217,7 +240,9 @@
                 <input type="file" id="fileInput" accept=".json">
 
                 <div class="control-separator"></div>
-                <button id="toggleLegendBtn" class="control-btn icon-btn" title="Ocultar / Mostrar legenda" onclick="togglePanel('right')" style="background: transparent; border: 1px solid #444;">📖</button>
+                <!-- BOUTONS POUR LE PANNEAU DROIT -->
+                <button id="toggleLegendBtn" class="control-btn icon-btn" title="Legenda" onclick="toggleRightPanel('legend')" style="background: transparent; border: 1px solid #444; margin-right:4px;">📖</button>
+                <button id="toggleLetrasBtn" class="control-btn icon-btn" title="Letras" onclick="toggleRightPanel('letras')" style="background: transparent; border: 1px solid #444;">📝</button>
             </div>
         </div>
 
@@ -226,61 +251,90 @@
         </div>
     </div>
 
-    <!-- PANNEAU DE DROITE : LEGENDE -->
-    <div id="legend-panel" class="collapsed">
-        <div class="panel-title" id="title-legend">📖 Legenda</div>
-        <div class="legend-container">
-            
-            <!-- EXPLICATIONS GENERALES -->
-            <div class="legend-group">
-                <span class="legend-group-title" id="legend-seq-title">⌨️ Dicas de digitação</span>
-                <div class="legend-item" id="legend-seq-1"><span>Pressione <strong>Espaço</strong> no teclado para avançar e deixar um silêncio.</span></div>
-                <div class="legend-item" id="legend-seq-2"><span>Use as <strong>Setas</strong> (←/→) para navegar entre os quadrados.</span></div>
-            </div>
+    <!-- PANNEAU DE DROITE : LEGENDE ET LETRAS -->
+    <div id="right-sidebar" class="collapsed">
+        
+        <!-- SECTION LEGENDE -->
+        <div id="legend-section" class="sidebar-section">
+            <div class="panel-title" id="title-legend">📖 Legenda</div>
+            <div class="legend-container">
+                <div class="legend-group">
+                    <span class="legend-group-title" id="legend-seq-title">⌨️ Dicas de digitação</span>
+                    <div class="legend-item" id="legend-seq-1"><span>Pressione <strong>Espaço</strong> no teclado para avançar e deixar um silêncio.</span></div>
+                    <div class="legend-item" id="legend-seq-2"><span>Use as <strong>Setas</strong> (←/→) para navegar.</span></div>
+                </div>
 
-            <!-- CHANT & NOTES -->
-            <div class="legend-group">
-                <span class="legend-group-title" id="legend-voice-title">🎤 Vozes / Canto</span>
-                <div class="legend-item" id="legend-voice-1"><span>Para compor a melodia, você pode adicionar a Nota Musical + dois pontos (:) + a sílaba.</span></div>
-                <div class="legend-item" id="legend-voice-2"><span>Ex: <strong>C5:Vou, D5:va</strong></span></div>
-                <div class="legend-item" id="legend-voice-3"><span>(Sem nota definida, usa C5 por padrão).</span></div>
-            </div>
+                <div class="legend-group">
+                    <span class="legend-group-title" id="legend-voice-title">🎤 Vozes / Coro</span>
+                    <div class="legend-item" id="legend-voice-1"><span>Clique no topo da caixa (PUX/CORO) para alterar quem canta.</span></div>
+                    <div class="legend-item" id="legend-voice-2"><span>Puxador: Azul Escuro (Agudo). Coro: Azul Claro (Grave).</span></div>
+                </div>
 
-            <!-- REGLES OR -->
-            <div style="font-size: 11px; margin-top: 8px; margin-bottom: 4px; color: var(--accent-gold); line-height: 1.35;" id="legend-gold">
-                💡 <strong>Regra de ouro:</strong><br>• <strong>Maiúscula</strong> = Golpe Forte (Acentuado)<br>• <strong>Minúscula</strong> = Golpe Fraco (Fantasma)
-            </div>
-            
-            <div class="legend-group">
-                <span class="legend-group-title" id="legend-ac-title">🥁 Alfaia & Caixa</span>
-                <div class="legend-item" id="legend-ac-1"><span class="legend-badge" style="background:#8b0000; color:#fff;">D / d</span> <span>Mão Direita</span></div>
-                <div class="legend-item" id="legend-ac-2"><span class="legend-badge" style="background:#f39c12; color:#121212;">G / g</span> <span>Mão Esquerda</span></div>
-            </div>
+                <div style="font-size: 11px; margin-top: 8px; margin-bottom: 4px; color: var(--accent-gold); line-height: 1.35;" id="legend-gold">
+                    💡 <strong>Regra de ouro:</strong><br>• <strong>Maiúscula</strong> = Golpe Forte (Acentuado)<br>• <strong>Minúscula</strong> = Golpe Fraco (Fantasma)
+                </div>
+                
+                <div class="legend-group">
+                    <span class="legend-group-title" id="legend-ac-title">🥁 Alfaia & Caixa</span>
+                    <div class="legend-item" id="legend-ac-1"><span class="legend-badge" style="background:#8b0000; color:#fff;">D / d</span> <span>Mão Direita</span></div>
+                    <div class="legend-item" id="legend-ac-2"><span class="legend-badge" style="background:#f39c12; color:#121212;">G / g</span> <span>Mão Esquerda</span></div>
+                </div>
 
-            <div class="legend-group">
-                <span class="legend-group-title" id="legend-go-title">🔔 Gonguê</span>
-                <div class="legend-item" id="legend-go-1"><span class="legend-badge" style="background:#222; color:#fff;">G / g</span> <span>Grave Forte / Fraco</span></div>
-                <div class="legend-item" id="legend-go-2"><span class="legend-badge" style="background:#bdc3c7; color:#000;">A / a</span> <span>Agudo Forte / Fraco</span></div>
-            </div>
+                <div class="legend-group">
+                    <span class="legend-group-title" id="legend-go-title">🔔 Gonguê</span>
+                    <div class="legend-item" id="legend-go-1"><span class="legend-badge" style="background:#222; color:#fff;">G / g</span> <span>Grave Forte / Fraco</span></div>
+                    <div class="legend-item" id="legend-go-2"><span class="legend-badge" style="background:#bdc3c7; color:#000;">A / a</span> <span>Agudo Forte / Fraco</span></div>
+                </div>
 
-            <div class="legend-group">
-                <span class="legend-group-title" id="legend-ag-title">🌾 Agbê</span>
-                <div class="legend-item" id="legend-ag-1"><span class="legend-badge" style="background:#1b5e20; color:#fff;">G / g</span> <span>Esquerda (Forte / Fraco)</span></div>
-                <div class="legend-item" id="legend-ag-2"><span class="legend-badge" style="background:#4caf50; color:#121212;">D / d</span> <span>Direita (Forte / Fraco)</span></div>
-            </div>
+                <div class="legend-group">
+                    <span class="legend-group-title" id="legend-ag-title">🌾 Agbê</span>
+                    <div class="legend-item" id="legend-ag-1"><span class="legend-badge" style="background:#1b5e20; color:#fff;">G / g</span> <span>Esquerda (Forte / Fraco)</span></div>
+                    <div class="legend-item" id="legend-ag-2"><span class="legend-badge" style="background:#4caf50; color:#121212;">D / d</span> <span>Direita (Forte / Fraco)</span></div>
+                </div>
 
-            <div class="legend-group">
-                <span class="legend-group-title" id="legend-mi-title">🌾 Mineiro</span>
-                <div class="legend-item" id="legend-mi-1"><span class="legend-badge" style="background:#1b5e20; color:#fff;">P / p</span> <span>Cima (Forte / Fraco)</span></div>
-                <div class="legend-item" id="legend-mi-2"><span class="legend-badge" style="background:#4caf50; color:#121212;">T / t</span> <span>Baixo (Forte / Fraco)</span></div>
+                <div class="legend-group">
+                    <span class="legend-group-title" id="legend-mi-title">🌾 Mineiro</span>
+                    <div class="legend-item" id="legend-mi-1"><span class="legend-badge" style="background:#1b5e20; color:#fff;">P / p</span> <span>Cima (Forte / Fraco)</span></div>
+                    <div class="legend-item" id="legend-mi-2"><span class="legend-badge" style="background:#4caf50; color:#121212;">T / t</span> <span>Baixo (Forte / Fraco)</span></div>
+                </div>
             </div>
         </div>
+
+        <!-- SECTION LETRAS -->
+        <div id="letras-section" class="sidebar-section">
+            <div class="panel-title" id="letras-title">📝 Letras (Paroles)</div>
+            <button class="control-btn" id="extractBtn" onclick="extractLyrics()" style="margin-bottom: 12px; width: 100%; background: #2c3e50;">🔄 Extrair do mixador</button>
+            <div id="letras-textarea" contenteditable="true" data-placeholder="Cole as letras completas aqui..."></div>
+        </div>
+
     </div>
 
     <script>
         function togglePanel(side) { 
             if (side === 'left') document.getElementById('left-panel').classList.toggle('collapsed'); 
-            if (side === 'right') document.getElementById('legend-panel').classList.toggle('collapsed');
+        }
+
+        let activeRightPanel = null;
+        function toggleRightPanel(panelName) {
+            const sidebar = document.getElementById('right-sidebar');
+            const legendSec = document.getElementById('legend-section');
+            const letrasSec = document.getElementById('letras-section');
+
+            if (sidebar.classList.contains('collapsed')) {
+                sidebar.classList.remove('collapsed');
+                activeRightPanel = panelName;
+            } else {
+                if (activeRightPanel === panelName) {
+                    sidebar.classList.add('collapsed');
+                    activeRightPanel = null;
+                    return;
+                } else {
+                    activeRightPanel = panelName;
+                }
+            }
+            
+            legendSec.classList.toggle('active', activeRightPanel === 'legend');
+            letrasSec.classList.toggle('active', activeRightPanel === 'letras');
         }
 
         const i18n = {
@@ -290,12 +344,11 @@
                 legend: "📖 Legenda",
                 seqLegendTitle: "⌨️ Dicas de digitação",
                 seqLegend1: "Pressione <strong>Espaço</strong> no teclado para avançar e deixar um silêncio.",
-                seqLegend2: "Use as <strong>Setas</strong> (←/→) para navegar entre os quadrados.",
-                voiceLegendTitle: "🎤 Vozes / Canto",
-                voiceLegend1: "Para compor a melodia, você pode adicionar a Nota Musical + dois pontos (:) + a sílaba.",
-                voiceLegend2: "Ex: <strong>C5:Vou, D5:va</strong>",
-                voiceLegend3: "(Sem nota definida, usa C5 por padrão).",
-                goldRule: "💡 <strong>Regra de ouro:</strong><br>• <strong>Maiúscula</strong> = Golpe Forte (Acentuado)<br>• <strong>Minúscula</strong> = Golpe Fraco (Fantasma)",
+                seqLegend2: "Use as <strong>Setas</strong> (←/→) para navegar.",
+                voiceLegendTitle: "🎤 Vozes / Coro",
+                voiceLegend1: "Clique no topo da caixa (PUX/CORO) para alterar quem canta.",
+                voiceLegend2: "Puxador: Azul Escuro (Agudo). Coro: Azul Claro (Grave).",
+                goldRule: "💡 <strong>Regra de ouro:</strong><br>• <strong>Maiúscula</strong> = Golpe Forte<br>• <strong>Minúscula</strong> = Golpe Fraco",
                 alfaiaCaixa: "🥁 Alfaia & Caixa",
                 mainDroite: "Mão Direita",
                 mainGauche: "Mão Esquerda",
@@ -313,16 +366,18 @@
                 save: "Salvar",
                 load: "Carregar",
                 stepsNum: "Número de passos :",
-                pattern: "⌨️ Padrão :",
-                patternPhText: "Ex: D g  d G",
-                patternPhVoice: "Letras, com vírgulas (Ex: C5:Vou, D5:va)",
+                promptVoice: "Sílaba / Letras :",
                 selectInst: "Escolher um instrumento...",
-                patternTip: "Use o teclado! Espaço = silêncio.",
                 toggleBtn: "Ocultar / Mostrar painel",
                 toggleLegendBtn: "Ocultar / Mostrar legenda",
+                toggleLetrasBtn: "Ocultar / Mostrar letras",
                 tsLabel: "Compasso:",
                 tutorialBtn: "Tutorial em vídeo",
-                confirmResize: "Deseja ajustar automaticamente o número de passos de todas as faixas para caber neste novo compasso?"
+                rewindBtn: "Parar e Voltar ao início",
+                confirmResize: "Deseja ajustar automaticamente o número de passos de todas as faixas?",
+                letrasTitle: "📝 Letras (Paroles)",
+                extractBtn: "🔄 Extrair do mixador",
+                letrasPlaceholder: "Cole as letras completas aqui..."
             },
             fr: {
                 loading: "Chargement des voix...",
@@ -330,12 +385,11 @@
                 legend: "📖 Légende",
                 seqLegendTitle: "⌨️ Astuces Séquenceur",
                 seqLegend1: "Appuyez sur <strong>Espace</strong> pour avancer et laisser un silence.",
-                seqLegend2: "Utilisez les <strong>Flèches</strong> (←/→) pour naviguer entre les cases.",
-                voiceLegendTitle: "🎤 Voix / Chant",
-                voiceLegend1: "Pour composer la mélodie, ajoutez la Note de musique + deux points (:) + la syllabe.",
-                voiceLegend2: "Ex: <strong>C5:Vou, D5:va</strong>",
-                voiceLegend3: "(Sans note définie, utilise C5 par défaut).",
-                goldRule: "💡 <strong>Règle d'or :</strong><br>• <strong>Majuscule</strong> = Coup Fort (Accentué)<br>• <strong>Minuscule</strong> = Coup Faible (Fantôme)",
+                seqLegend2: "Utilisez les <strong>Flèches</strong> (←/→) pour naviguer.",
+                voiceLegendTitle: "🎤 Voix / Chœur",
+                voiceLegend1: "Cliquez en haut de la case (PUX/CORO) pour changer qui chante.",
+                voiceLegend2: "Puxador: Bleu Foncé (Aigu). Chœur: Bleu Clair (Grave).",
+                goldRule: "💡 <strong>Règle d'or :</strong><br>• <strong>Majuscule</strong> = Coup Fort<br>• <strong>Minuscule</strong> = Coup Faible",
                 alfaiaCaixa: "🥁 Alfaia & Caixa",
                 mainDroite: "Main Droite",
                 mainGauche: "Main Gauche",
@@ -353,16 +407,18 @@
                 save: "Sauvegarder",
                 load: "Charger",
                 stepsNum: "Nombre de pas :",
-                pattern: "⌨️ Motif :",
-                patternPhText: "Ex: D g  d G",
-                patternPhVoice: "Paroles, avec virgules (Ex: C5:Vou, D5:va)",
+                promptVoice: "Syllabe / Letras :",
                 selectInst: "Choisir un instrument...",
-                patternTip: "Utilisez le clavier ! Espace = silence.",
                 toggleBtn: "Afficher / Masquer le panneau",
                 toggleLegendBtn: "Afficher / Masquer la légende",
+                toggleLetrasBtn: "Afficher / Masquer les paroles",
                 tsLabel: "Signature:",
                 tutorialBtn: "Tutoriel vidéo",
-                confirmResize: "Voulez-vous ajuster automatiquement le nombre de pas de toutes les pistes pour s'adapter à cette nouvelle signature ?"
+                rewindBtn: "Stop et Revenir au début",
+                confirmResize: "Voulez-vous ajuster automatiquement le nombre de pas de toutes les pistes ?",
+                letrasTitle: "📝 Paroles complètes",
+                extractBtn: "🔄 Extraire les paroles du mixeur",
+                letrasPlaceholder: "Collez vos paroles ici..."
             }
         };
 
@@ -381,7 +437,6 @@
             document.getElementById('legend-voice-title').innerText = t('voiceLegendTitle');
             document.getElementById('legend-voice-1').innerHTML = `<span>${t('voiceLegend1')}</span>`;
             document.getElementById('legend-voice-2').innerHTML = `<span>${t('voiceLegend2')}</span>`;
-            document.getElementById('legend-voice-3').innerHTML = `<span>${t('voiceLegend3')}</span>`;
 
             document.getElementById('legend-gold').innerHTML = t('goldRule');
             document.getElementById('tsLabel').innerText = t('tsLabel');
@@ -406,7 +461,13 @@
             document.getElementById('selectInstOpt').innerText = t('selectInst');
             document.getElementById('toggleLeftBtn').title = t('toggleBtn');
             document.getElementById('toggleLegendBtn').title = t('toggleLegendBtn');
+            document.getElementById('toggleLetrasBtn').title = t('toggleLetrasBtn');
             document.getElementById('tutorialBtn').title = t('tutorialBtn');
+            document.getElementById('rewindBtn').title = t('rewindBtn');
+            document.getElementById('letras-title').innerText = t('letrasTitle');
+            document.getElementById('extractBtn').innerText = t('extractBtn');
+            
+            document.getElementById('letras-textarea').setAttribute('data-placeholder', t('letrasPlaceholder'));
         }
 
         function toggleLang() {
@@ -415,26 +476,68 @@
             updateStaticTexts(); renderMixer();
         }
 
+        // EXTRACTION INTELLIGENTE (Couleurs + Recollage des tirets)
+        window.extractLyrics = function() {
+            let voiceCircles = circles.filter(c => instrumentsConfig[c.instrumentIdx].type === 'voice');
+            let htmlArr = [];
+            
+            voiceCircles.forEach(c => {
+                let trackHtml = "";
+                let buffer = "";
+                let currentSpanColor = "";
+                
+                for(let i=0; i<c.steps; i++) {
+                    if(c.activeSteps[i] !== 0 && c.lyrics[i]) {
+                        let syl = c.lyrics[i].trim();
+                        let isPux = c.activeSteps[i] === 'P';
+                        let color = isPux ? '#54a0ff' : '#3498db'; // Bleu un peu plus clair pour affichage noir
+                        if (isPux) color = '#82ccdd'; // Puxador
+                        
+                        if (syl.endsWith('-')) {
+                            if (!buffer) currentSpanColor = color;
+                            buffer += syl.slice(0, -1);
+                        } else {
+                            if (!buffer) currentSpanColor = color;
+                            buffer += syl;
+                            trackHtml += `<span style="color: ${currentSpanColor}; font-weight: bold;">${buffer}</span> `;
+                            buffer = "";
+                        }
+                    }
+                }
+                if (buffer.length > 0) {
+                     trackHtml += `<span style="color: ${currentSpanColor}; font-weight: bold;">${buffer}</span> `;
+                }
+                if(trackHtml) htmlArr.push(trackHtml.trim());
+            });
+
+            let ta = document.getElementById('letras-textarea');
+            if (ta.innerHTML.trim() !== '') {
+                ta.innerHTML += '<br><br>' + htmlArr.join('<br>');
+            } else {
+                ta.innerHTML = htmlArr.join('<br>');
+            }
+        }
+
         const vouVadiarPreset = {
             bpm: 83, timeSig: "4/4",
             circles: [
-                {"id":1,"steps":16,"activeSteps":["g","D",0,"d","G",0,"D",0,"g","D",0,"d","G",0,0,0],"instrumentIdx":0,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":4,"steps":16,"activeSteps":["D","D","g","D","D","g","D","g","D","D","g","D","D","g","D","g"],"instrumentIdx":3,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":90},
-                {"id":5,"steps":16,"activeSteps":[0,"GRV",0,0,"GRV",0,"GRV",0,0,"GRV",0,0,"GRV",0,"GRV",0],"instrumentIdx":4,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":62},
-                {"id":6,"steps":16,"activeSteps":["G",0,"d","g","D",0,"g","d","G",0,"d","g","D",0,"g","d"],"instrumentIdx":5,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":8,"steps":16,"activeSteps":["C5",0,"C5",0,"D5",0,"D5",0,0,"E5",0,"E5","C5",0,0,0],"instrumentIdx":7,"lyrics":["Vou","","va","","di","","ar","","Car","Car","na","na","val","","!",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":1779,"steps":16,"activeSteps":["X",0,"X",0,"X",0,"X",0,0,"X",0,"X","X",0,"X",0],"instrumentIdx":8,"lyrics":["Vou","","Pra","","Ba","","hi","","","a","","Brin","car","","Eu",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100}
+                {"id":1,"steps":16,"activeSteps":["g","D",0,"d","G",0,"D",0,"g","D",0,"d","G",0,0,0],"instrumentIdx":0,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":4,"steps":16,"activeSteps":["D","D","g","D","D","g","D","g","D","D","g","D","D","g","D","g"],"instrumentIdx":3,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":90},
+                {"id":5,"steps":16,"activeSteps":[0,"GRV",0,0,"GRV",0,"GRV",0,0,"GRV",0,0,"GRV",0,"GRV",0],"instrumentIdx":4,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":62},
+                {"id":6,"steps":16,"activeSteps":["G",0,"d","g","D",0,"g","d","G",0,"d","g","D",0,"g","d"],"instrumentIdx":5,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":8,"steps":16,"activeSteps":["P",0,"P",0,"P",0,"P",0,0,"C",0,"C","C",0,0,0],"instrumentIdx":7,"lyrics":["Vou","","va-","","di-","","ar","","Car-","Car-","na-","na-","val","","!",""],"notes":["C4","","C4","","D4","","D4","","","E4","","E4","F4","","",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":1779,"steps":16,"activeSteps":["P",0,"P",0,"P",0,"P",0,0,"C",0,"C","C",0,"C",0],"instrumentIdx":7,"lyrics":["Vou","","Pra","","Ba-","","hi-","","","a","","Brin-","car","","Eu",""],"notes":["","","","","","","","","","","","","","","",""],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100}
             ]
         };
 
         const baqueDeImalePreset = {
             bpm: 77, timeSig: "4/4",
             circles: [
-                {"id":1,"steps":16,"activeSteps":["D",0,0,0,"g",0,"D",0,"g","D",0,0,"g","D",0,0],"instrumentIdx":0,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":2,"steps":16,"activeSteps":["G",0,0,"d","g",0,"D",0,"g","D",0,"d","g","D",0,"d"],"instrumentIdx":1,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":4,"steps":16,"activeSteps":["D","D","g","D","D","g","D","g","D","D","g","D","D","g","D","g"],"instrumentIdx":3,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":5,"steps":16,"activeSteps":["GRV",0,"AIG",0,"GRV",0,"AIG",0,"GRV","AIG",0,"aig","GRV",0,"AIG",0],"instrumentIdx":4,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
-                {"id":6,"steps":16,"activeSteps":["G",0,"d","g","D",0,"g","d","G",0,"d","g","D",0,"g","d"],"instrumentIdx":5,"lyrics":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100}
+                {"id":1,"steps":16,"activeSteps":["D",0,0,0,"g",0,"D",0,"g","D",0,0,"g","D",0,0],"instrumentIdx":0,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":2,"steps":16,"activeSteps":["G",0,0,"d","g",0,"D",0,"g","D",0,"d","g","D",0,"d"],"instrumentIdx":1,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":4,"steps":16,"activeSteps":["D","D","g","D","D","g","D","g","D","D","g","D","D","g","D","g"],"instrumentIdx":3,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":5,"steps":16,"activeSteps":["GRV",0,"AIG",0,"GRV",0,"AIG",0,"GRV","AIG",0,"aig","GRV",0,"AIG",0],"instrumentIdx":4,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100},
+                {"id":6,"steps":16,"activeSteps":["G",0,"d","g","D",0,"g","d","G",0,"d","g","D",0,"g","d"],"instrumentIdx":5,"lyrics":[],"notes":[],"isMute":false,"isSolo":false,"isHidden":false,"volumeVal":100}
             ]
         };
 
@@ -442,6 +545,7 @@
         let timeSignature = "4/4";
         let maxTicks = 96; 
         let flashAlpha = 0; 
+        let currentAngle = -Math.PI / 2; // STOCKÉ GLOBALEMENT (Garantit que la baguette se fige à la bonne place)
 
         Tone.context.lookAhead = 0.04; 
         Tone.context.latencyHint = "interactive"; 
@@ -458,8 +562,7 @@
             { id: 'gongue', name: 'Gonguê', type: 'gongue', path: 'Gongue', colors: { 'grv': '#222222', 'GRV': '#000000', 'aig': '#7f8c8d', 'AIG': '#bdc3c7', text: '#fff' } },
             { id: 'agbe', name: 'Agbê', type: 'shake', path: 'Graines/Agbe', colors: { 'g': '#113b14', 'G': '#1b5e20', 'd': '#74d478', 'D': '#4caf50', text: '#fff' } },
             { id: 'mineiro', name: 'Mineiro', type: 'shake', path: 'Graines/Mineiro', colors: { 'p': '#113b14', 'P': '#1b5e20', 't': '#74d478', 'T': '#4caf50', text: '#fff' } },
-            { id: 'chant', name: 'Chant', type: 'voice', path: 'internal', colors: { active: '#2980b9', text: '#fff' } },
-            { id: 'puxador', name: 'Puxador', type: 'voice', path: 'internal', colors: { active: '#0c19cf', text: '#fff' } }
+            { id: 'chant', name: 'Voz / Coro', type: 'voice', path: 'internal', colors: { 'C': '#2980b9', 'P': '#0c19cf', text: '#fff' } }
         ];
 
         const bMetroClick = new Tone.Synth({
@@ -474,7 +577,7 @@
             channels[inst.id].connect(meters[inst.id]);
 
             if (inst.type === 'voice') {
-                voiceSynths[inst.id] = new Tone.Synth({ oscillator: { type: inst.id === 'puxador' ? 'triangle' : 'sine' }, envelope: { attack: 0.05, decay: 0.2 }, volume: -10 }).connect(channels[inst.id]);
+                voiceSynths[inst.id] = new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.05, decay: 0.2 }, volume: -10 }).connect(channels[inst.id]);
             } else {
                 let urls = inst.type === 'gongue' ? { "faible-grave": "faible-grave.wav", "fort-grave": "fort-grave.wav", "faible-aigue": "faible-aigue.wav", "fort-aigue": "fort-aigue.wav" } : { "faible": "faible.wav", "fort": "fort.wav" };
                 samplers[inst.id] = new Tone.Players({ urls: urls, baseUrl: `sons-maracatu/${inst.path}/`, onload: () => checkAllLoaded() }).connect(channels[inst.id]);
@@ -488,7 +591,7 @@
         }
         setTimeout(() => { const o = document.getElementById('loading-overlay'); if (o) o.style.display = 'none'; }, 1500);
 
-        const bgImg = new Image(); bgImg.src = 'tambour.png'; let bgLoaded = false; bgImg.onload = () => { bgLoaded = true; };
+        const bgImg = new Image(); bgImg.src = 'Pictures/tambour.png'; let bgLoaded = false; bgImg.onload = () => { bgLoaded = true; };
         const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
         const centerX = canvas.width / 2; const centerY = canvas.height / 2;
         let isPlaying = false; let isMetroOn = false; let measureCount = 0; 
@@ -539,22 +642,35 @@
         
         function refreshCirclesLayout() { updateRadii(); renderMixer(); }
 
-        window.generatePatternString = function(circle) {
-            let inst = instrumentsConfig[circle.instrumentIdx];
-            if (inst.type === 'voice') {
-                let arr = [];
-                for(let i=0; i<circle.steps; i++) {
-                    if (circle.activeSteps[i] !== 0 && circle.activeSteps[i] !== 'X') {
-                        arr.push(circle.activeSteps[i] + ':' + (circle.lyrics[i] || ''));
-                    } else if (circle.activeSteps[i] === 'X') {
-                        arr.push(circle.lyrics[i]);
-                    } else {
-                        arr.push('');
+        window.moveCircleUp = function(id) {
+            let idx = circles.findIndex(c => c.id === id);
+            if (idx > 0) {
+                let temp = circles[idx]; circles[idx] = circles[idx - 1]; circles[idx - 1] = temp;
+                refreshCirclesLayout();
+            }
+        };
+
+        window.moveCircleDown = function(id) {
+            let idx = circles.findIndex(c => c.id === id);
+            if (idx > -1 && idx < circles.length - 1) {
+                let temp = circles[idx]; circles[idx] = circles[idx + 1]; circles[idx + 1] = temp;
+                refreshCirclesLayout();
+            }
+        };
+
+        function normalizeCircleData(c) {
+            if (!c.notes) c.notes = Array(c.steps).fill("");
+            let inst = instrumentsConfig[c.instrumentIdx];
+            if (inst && inst.type === 'voice') {
+                for (let i = 0; i < c.steps; i++) {
+                    let st = c.activeSteps[i];
+                    if (st !== 0 && st !== 'P' && st !== 'C' && st !== 'X') {
+                        c.notes[i] = st; c.activeSteps[i] = 'C'; 
+                    } else if (st === 'X') {
+                        c.activeSteps[i] = 'C';
                     }
                 }
-                return arr.join(',');
             }
-            return ''; 
         }
 
         function draw() {
@@ -600,10 +716,7 @@
                 ctx.fillText((idx + 1).toString(), centerX + Math.cos(angle)*textRad, centerY + Math.sin(angle)*textRad);
             });
 
-            let voiceCircles = circles.filter(c => instrumentsConfig[c.instrumentIdx].type === 'voice');
-            let activeVoiceCircleId = voiceCircles.length > 0 ? voiceCircles[measureCount % voiceCircles.length].id : null;
-
-            let currentAngle = -Math.PI / 2;
+            // Met à jour l'angle de la baguette SEULEMENT si ça joue
             if (isPlaying && Tone.Transport.state === "started") {
                 const bpm = Tone.Transport.bpm.value;
                 const beats = maxTicks / 24; 
@@ -611,6 +724,18 @@
                 const progress = (Tone.Transport.seconds % measureDuration) / measureDuration;
                 currentAngle = -Math.PI / 2 + (progress * Math.PI * 2);
             }
+
+            // --- BAGUETTE : DESSINÉE SOUS LES NOTES ---
+            ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(currentAngle);
+            const stickLength = circles.length > 0 ? circles[circles.length - 1].radius + 35 : 120;
+            ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(stickLength - 20, -4); ctx.lineTo(stickLength - 20, 4); ctx.lineTo(0, 8);
+            ctx.closePath(); ctx.fillStyle = '#e0ae6f'; ctx.fill();
+            ctx.beginPath(); ctx.ellipse(stickLength - 10, 0, 10, 6, 0, 0, Math.PI * 2); ctx.fillStyle = '#c69552'; ctx.fill();
+            ctx.restore();
+            // ------------------------------------------
+
+            let voiceCircles = circles.filter(c => instrumentsConfig[c.instrumentIdx].type === 'voice');
+            let activeVoiceCircleId = voiceCircles.length > 0 ? voiceCircles[measureCount % voiceCircles.length].id : null;
 
             circles.forEach((circle) => {
                 if (circle.isHidden) return;
@@ -636,7 +761,8 @@
                     if (state !== 0) {
                         radiusSize = 13;
                         if (inst.type === 'voice') {
-                            fillColor = inst.colors.active; textSymbol = (circle.lyrics && circle.lyrics[i]) ? circle.lyrics[i] : 'X';
+                            fillColor = (state === 'P') ? inst.colors['P'] : inst.colors['C']; 
+                            textSymbol = (circle.lyrics && circle.lyrics[i]) ? circle.lyrics[i] : 'X';
                         } else {
                             fillColor = inst.colors[state] || '#fff'; isAccent = (state === state.toUpperCase()); radiusSize = isAccent ? 15 : 12;
                             if (inst.type === 'gongue') {
@@ -677,18 +803,11 @@
                 ctx.restore();
             });
 
-            ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(currentAngle);
-            const stickLength = circles.length > 0 ? circles[circles.length - 1].radius + 35 : 120;
-            ctx.beginPath(); ctx.moveTo(0, -2); ctx.lineTo(stickLength - 15, -1); ctx.lineTo(stickLength - 15, 1); ctx.lineTo(0, 2);
-            ctx.closePath(); ctx.fillStyle = '#e0ae6f'; ctx.fill();
-            ctx.beginPath(); ctx.ellipse(stickLength - 10, 0, 7, 3.5, 0, 0, Math.PI * 2); ctx.fillStyle = '#c69552'; ctx.fill();
-            ctx.restore();
-
             ctx.beginPath(); ctx.arc(centerX, centerY, 55, 0, Math.PI * 2);
             ctx.fillStyle = isPlaying ? 'rgba(231, 76, 60, 0.9)' : 'rgba(46, 204, 113, 0.9)';
             ctx.fill(); ctx.strokeStyle = '#121212'; ctx.lineWidth = 4; ctx.stroke();
             ctx.fillStyle = '#000'; ctx.font = 'bold 34px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText(isPlaying ? "⏹" : "▶", isPlaying ? centerX : centerX + 5, centerY + 2);
+            ctx.fillText(isPlaying ? "⏸" : "▶", isPlaying ? centerX : centerX + 5, centerY + 2);
 
             requestAnimationFrame(draw);
         }
@@ -723,12 +842,16 @@
                         let state = circle.activeSteps[stepIdx];
                         if (state !== 0) {
                             if (inst.type === 'voice') {
-                                // LECTURE DE LA NOTE MELODIQUE
-                                let note = (state !== 'X') ? state : (inst.id === 'puxador' ? "E5" : "C5");
+                                let note = "C5"; // Par défaut
+                                if (circle.notes && circle.notes[stepIdx] && circle.notes[stepIdx].trim() !== '') {
+                                    note = circle.notes[stepIdx];
+                                } else if (state === 'P') {
+                                    note = "E5"; // Puxador par défaut
+                                }
+                                
                                 try {
                                     if (voiceSynths[inst.id]) voiceSynths[inst.id].triggerAttackRelease(note, "8n", time);
                                 } catch(err) {
-                                    // Si la note écrite est invalide, on joue un Do
                                     if (voiceSynths[inst.id]) voiceSynths[inst.id].triggerAttackRelease("C5", "8n", time);
                                 }
                             } else if (samplers[inst.id]) {
@@ -775,7 +898,45 @@
 
                 let inputHtml = "";
                 if (inst.type === 'voice') {
-                    inputHtml = `<input type="text" id="pattern-input-${circle.id}" class="pattern-input" value="${generatePatternString(circle)}" oninput="onVoicePatternInput(${circle.id}, this.value)" placeholder="${t('patternPhVoice')}">`;
+                    inputHtml = `<div class="step-boxes" id="voice-boxes-${circle.id}">`;
+                    for(let i=0; i<circle.steps; i++) {
+                        let state = circle.activeSteps[i];
+                        let isActive = state !== 0;
+                        let isPux = state === 'P';
+                        let syl = circle.lyrics[i] || '';
+                        let note = (circle.notes && circle.notes[i]) ? circle.notes[i] : '';
+                        
+                        let extraStyle = "";
+                        let isBeatEnd = false;
+                        if (timeSignature === "6/8" || timeSignature === "12/8") {
+                            if ((i + 1) % 3 === 0) isBeatEnd = true;
+                        } else if (timeSignature === "3/4") {
+                            let div = circle.steps === 12 ? 4 : Math.floor(circle.steps / 3);
+                            if ((i + 1) % div === 0) isBeatEnd = true;
+                        } else { 
+                            let div = Math.floor(circle.steps / (timeSignature === "4/4" ? 4 : 2));
+                            if (div === 0) div = 4;
+                            if ((i + 1) % div === 0) isBeatEnd = true;
+                        }
+                        
+                        if (isBeatEnd && i !== circle.steps - 1) { extraStyle = "margin-right: 12px;"; }
+
+                        inputHtml += `
+                        <div class="v-card ${isActive ? '' : 'inactive'}" style="${extraStyle}">
+                            <div class="v-type ${isPux ? 'pux' : 'coro'}" onclick="toggleVoiceType(${circle.id}, ${i})">${isPux ? 'PUX' : 'CORO'}</div>
+                            <input type="text" class="v-syl" value="${syl}" placeholder="-" oninput="updateVoiceSyl(${circle.id}, ${i}, this.value, this)" onkeydown="navVoiceBox(this, event, 'syl')">
+                            <input type="text" class="v-note" value="${note}" placeholder="Ex:C4" oninput="updateVoiceNote(${circle.id}, ${i}, this.value)" onblur="formatNoteBlur(${circle.id}, ${i}, this)" onkeydown="navVoiceBox(this, event, 'note')">
+                        </div>`;
+
+                        let breakAt = circle.steps;
+                        if (circle.steps === 16) breakAt = 8;
+                        if (circle.steps === 24) breakAt = 12;
+                        if ((i + 1) % breakAt === 0 && i !== circle.steps - 1) {
+                             inputHtml += `<div style="flex-basis: 100%; height: 2px;"></div>`;
+                        }
+                    }
+                    inputHtml += `</div>`;
+
                 } else {
                     inputHtml = `<div class="step-boxes" id="step-boxes-${circle.id}">`;
                     for(let i=0; i<circle.steps; i++) {
@@ -816,7 +977,13 @@
                 const div = document.createElement('div'); div.className = "track-mixer";
                 div.innerHTML = `
                     <div class="track-mixer-header">
-                        <span class="track-name">${index + 1}. ${instSelectHtml}</span>
+                        <div style="display:flex; align-items:center;">
+                            <div class="track-order-btns">
+                                <button class="order-btn" onclick="moveCircleUp(${circle.id})" ${index === 0 ? 'disabled' : ''}>▲</button>
+                                <button class="order-btn" onclick="moveCircleDown(${circle.id})" ${index === circles.length - 1 ? 'disabled' : ''}>▼</button>
+                            </div>
+                            <span class="track-name">${index + 1}. ${instSelectHtml}</span>
+                        </div>
                         <div class="track-mute-solo">
                             <button class="btn-mute-solo ${circle.isMute ? 'mute-on' : ''}" onclick="toggleMute(${circle.id})">M</button>
                             <button class="btn-mute-solo ${circle.isSolo ? 'solo-on' : ''}" onclick="toggleSolo(${circle.id})">S</button>
@@ -833,7 +1000,6 @@
                         <input type="number" value="${circle.steps}" min="2" max="32" onchange="updateSteps(${circle.id}, this.value)">
                     </div>
                     <div class="pattern-row">
-                        <span class="pattern-label" title="${t('patternTip')}">${t('pattern')}</span>
                         ${inputHtml}
                     </div>
                 `;
@@ -841,25 +1007,62 @@
             });
         }
 
-        window.onVoicePatternInput = function(id, value) {
-            let c = circles.find(x => x.id === id); if (!c) return;
-            let parts = value.split(',');
-            for (let i = 0; i < c.steps; i++) {
-                let segment = parts[i] !== undefined ? parts[i].trim() : "";
-                if (segment) {
-                    if (segment.includes(':')) {
-                        let s = segment.split(':');
-                        c.activeSteps[i] = s[0].trim();
-                        c.lyrics[i] = s[1].substring(0, 15);
-                    } else {
-                        c.activeSteps[i] = 'X';
-                        c.lyrics[i] = segment.substring(0, 15);
-                    }
-                } else {
-                    c.activeSteps[i] = 0; c.lyrics[i] = "";
+        // --- NOUVELLES FONCTIONS DE CARTES VOIX ---
+        window.toggleVoiceType = function(id, sIdx) {
+            let c = circles.find(x => x.id === id);
+            if(c.activeSteps[sIdx] === 0) { c.activeSteps[sIdx] = 'P'; } 
+            else if (c.activeSteps[sIdx] === 'P') { c.activeSteps[sIdx] = 'C'; }
+            else { c.activeSteps[sIdx] = 'P'; }
+            renderMixer(); 
+        }
+
+        window.updateVoiceSyl = function(id, sIdx, val, el) {
+            let c = circles.find(x => x.id === id);
+            c.lyrics[sIdx] = val;
+            if (val.trim() !== '' && c.activeSteps[sIdx] === 0) {
+                c.activeSteps[sIdx] = 'C'; 
+                el.closest('.v-card').classList.remove('inactive');
+                // Rafraîchir l'affichage du type
+                el.closest('.v-card').querySelector('.v-type').innerText = 'CORO';
+            } else if (val.trim() === '') {
+                c.activeSteps[sIdx] = 0;
+                el.closest('.v-card').classList.add('inactive');
+            }
+        }
+
+        window.updateVoiceNote = function(id, sIdx, val) {
+            let c = circles.find(x => x.id === id);
+            c.notes[sIdx] = val;
+        }
+
+        // AUTO-OCTAVE SUR LE CHAMP "NOTE" 
+        window.formatNoteBlur = function(id, sIdx, el) {
+            let val = el.value.trim();
+            // Si l'utilisateur tape "C", "D#", "Gb"
+            if (val.length === 1 || (val.length === 2 && (val.includes('#') || val.includes('b')))) {
+                if (/^[a-gA-G][#b]?$/.test(val)) {
+                    val = val.toUpperCase() + "4"; // Par défaut octave 4
+                    el.value = val;
+                    let c = circles.find(x => x.id === id);
+                    c.notes[sIdx] = val;
                 }
             }
-        };
+        }
+
+        window.navVoiceBox = function(el, e, type) {
+            if (e.key === 'ArrowRight') {
+                let cards = Array.from(el.closest('.step-boxes').querySelectorAll('.v-card'));
+                let idx = cards.indexOf(el.closest('.v-card'));
+                if(idx < cards.length - 1) cards[idx+1].querySelector(type === 'syl' ? '.v-syl' : '.v-note').focus();
+                e.preventDefault();
+            } else if (e.key === 'ArrowLeft') {
+                let cards = Array.from(el.closest('.step-boxes').querySelectorAll('.v-card'));
+                let idx = cards.indexOf(el.closest('.v-card'));
+                if(idx > 0) cards[idx-1].querySelector(type === 'syl' ? '.v-syl' : '.v-note').focus();
+                e.preventDefault();
+            }
+        }
+        // -------------------------------------------
 
         window.onStepBoxInput = function(el, e) {
             let char = el.value.slice(-1);
@@ -888,20 +1091,33 @@
                     else if(parsed === 'AIG') displayVal = 'A'; else if(parsed === 'aig') displayVal = 'a';
                 }
                 el.value = displayVal;
-                let next = el.nextElementSibling; if (next && next.tagName === 'INPUT') { next.focus(); next.select(); }
+                
+                let next = el.nextElementSibling;
+                while (next && next.tagName !== 'INPUT') next = next.nextElementSibling;
+                if (next && next.tagName === 'INPUT') { next.focus(); next.select(); }
             } else {
                 c.activeSteps[sIdx] = 0; el.value = '';
-                if (char === ' ') { let next = el.nextElementSibling; if (next && next.tagName === 'INPUT') { next.focus(); next.select(); } }
+                if (char === ' ') { 
+                    let next = el.nextElementSibling; 
+                    while (next && next.tagName !== 'INPUT') next = next.nextElementSibling;
+                    if (next && next.tagName === 'INPUT') { next.focus(); next.select(); } 
+                }
             }
         };
 
         window.onStepBoxKey = function(el, e) {
             if (e.key === 'Backspace' && el.value === '') {
-                let prev = el.previousElementSibling; if(prev && prev.tagName === 'INPUT') { prev.focus(); prev.select(); } e.preventDefault();
+                let prev = el.previousElementSibling; 
+                while (prev && prev.tagName !== 'INPUT') prev = prev.previousElementSibling;
+                if(prev && prev.tagName === 'INPUT') { prev.focus(); prev.select(); } e.preventDefault();
             } else if (e.key === 'ArrowRight') {
-                let next = el.nextElementSibling; if(next && next.tagName === 'INPUT') { next.focus(); next.select(); } e.preventDefault();
+                let next = el.nextElementSibling; 
+                while (next && next.tagName !== 'INPUT') next = next.nextElementSibling;
+                if(next && next.tagName === 'INPUT') { next.focus(); next.select(); } e.preventDefault();
             } else if (e.key === 'ArrowLeft') {
-                let prev = el.previousElementSibling; if(prev && prev.tagName === 'INPUT') { prev.focus(); prev.select(); } e.preventDefault();
+                let prev = el.previousElementSibling; 
+                while (prev && prev.tagName !== 'INPUT') prev = prev.previousElementSibling;
+                if(prev && prev.tagName === 'INPUT') { prev.focus(); prev.select(); } e.preventDefault();
             }
         };
 
@@ -913,7 +1129,7 @@
         window.updateInstrument = function(id, instIdx) {
             let c = circles.find(x => x.id === id);
             if (c) {
-                c.instrumentIdx = parseInt(instIdx); c.activeSteps = Array(c.steps).fill(0); c.lyrics = Array(c.steps).fill("");
+                c.instrumentIdx = parseInt(instIdx); c.activeSteps = Array(c.steps).fill(0); c.lyrics = Array(c.steps).fill(""); c.notes = Array(c.steps).fill("");
                 let instId = instrumentsConfig[c.instrumentIdx].id; let db = Tone.gainToDb(c.volumeVal / 100); 
                 if (c.volumeVal <= 4) db = -Infinity; channels[instId].volume.value = db;
                 renderMixer();
@@ -928,9 +1144,10 @@
         window.updateSteps = function(id, s) {
             let c = circles.find(x => x.id === id);
             if (c) { 
-                let sn = parseInt(s) || 4; c.steps = sn; let na = Array(sn).fill(0); 
-                for(let i=0; i<Math.min(sn, c.activeSteps.length); i++) na[i] = c.activeSteps[i]; 
-                c.activeSteps = na; 
+                let sn = parseInt(s) || 4; c.steps = sn; 
+                let na = Array(sn).fill(0); let nl = Array(sn).fill(""); let nn = Array(sn).fill("");
+                for(let i=0; i<Math.min(sn, c.activeSteps.length); i++) { na[i] = c.activeSteps[i]; nl[i] = c.lyrics[i]; nn[i] = c.notes[i]; }
+                c.activeSteps = na; c.lyrics = nl; c.notes = nn;
                 renderMixer(); 
             }
         };
@@ -963,38 +1180,20 @@
                             } else if (inst.type === 'gongue') {
                                 if (current === 0) circle.activeSteps[i] = 'grv'; else if (current === 'grv') circle.activeSteps[i] = 'GRV'; else if (current === 'GRV') circle.activeSteps[i] = 'aig'; else if (current === 'aig') circle.activeSteps[i] = 'AIG'; else circle.activeSteps[i] = 0;
                             } else if (inst.type === 'voice') {
+                                // Sur le canevas, le clic inverse entre PUX, CORO et VIDE. On ne demande plus de popup !
                                 if (current === 0) {
-                                    let lyric = prompt("Paroles / Letras (ex: C5:Vou ou Vou) :");
-                                    if (lyric !== null && lyric.trim() !== '') {
-                                        if (lyric.includes(':')) {
-                                            let s = lyric.split(':');
-                                            circle.activeSteps[i] = s[0].trim(); circle.lyrics[i] = s[1].substring(0, 15);
-                                        } else {
-                                            circle.activeSteps[i] = 'X'; circle.lyrics[i] = lyric.trim().substring(0, 15);
-                                        }
-                                    }
-                                } else { circle.activeSteps[i] = 0; circle.lyrics[i] = ""; }
+                                    circle.activeSteps[i] = 'C'; 
+                                    if(!circle.lyrics[i]) circle.lyrics[i] = "La";
+                                } else if (current === 'C') {
+                                    circle.activeSteps[i] = 'P';
+                                } else {
+                                    circle.activeSteps[i] = 0;
+                                }
                             } else {
                                 if (current === 0) circle.activeSteps[i] = 'd'; else if (current === 'd') circle.activeSteps[i] = 'D'; else if (current === 'D') circle.activeSteps[i] = 'g'; else if (current === 'g') circle.activeSteps[i] = 'G'; else circle.activeSteps[i] = 0;
                             }
                             
-                            let inputEl = document.getElementById(`step-boxes-${circle.id}`);
-                            if (inputEl) {
-                                let boxIndex = 0;
-                                for(let node of inputEl.childNodes) {
-                                    if(node.tagName === 'INPUT') {
-                                        if (boxIndex === i) {
-                                            let dVal = circle.activeSteps[i];
-                                            if(dVal === 0) dVal = ''; else if(inst.type === 'gongue') { if(dVal === 'GRV') dVal = 'G'; else if(dVal === 'grv') dVal = 'g'; else if(dVal === 'AIG') dVal = 'A'; else if(dVal === 'aig') dVal = 'a'; }
-                                            node.value = dVal; break;
-                                        }
-                                        boxIndex++;
-                                    }
-                                }
-                            } else {
-                                let voiceEl = document.getElementById(`pattern-input-${circle.id}`);
-                                if(voiceEl) voiceEl.value = window.generatePatternString(circle);
-                            }
+                            renderMixer(); // On rafraîchit visuellement les boîtes
                             return;
                         }
                     }
@@ -1004,26 +1203,31 @@
 
         async function togglePlay() {
             if (!isPlaying) {
-                await Tone.start(); currentStepIndex = -1; measureCount = 0; mainLoop.stop(); Tone.Transport.stop(); Tone.Transport.cancel(0);
-                mainLoop.start(0); Tone.Transport.start("+0.02"); isPlaying = true;
+                await Tone.start(); 
+                mainLoop.start(0); Tone.Transport.start(); isPlaying = true;
             } else {
-                mainLoop.stop(); Tone.Transport.stop();
+                mainLoop.stop(); Tone.Transport.pause(); // LA BAGUETTE SE FIGE
                 instrumentsConfig.forEach(inst => { if (samplers[inst.id]) samplers[inst.id].stopAll(); if (voiceSynths[inst.id]) voiceSynths[inst.id].triggerRelease(); });
                 isPlaying = false;
             }
         }
 
-        // CORRECTION BPM (Garantit toujours un nombre entier !)
+        document.getElementById('rewindBtn').addEventListener('click', () => {
+            mainLoop.stop(); Tone.Transport.stop(); 
+            instrumentsConfig.forEach(inst => { if (samplers[inst.id]) samplers[inst.id].stopAll(); if (voiceSynths[inst.id]) voiceSynths[inst.id].triggerRelease(); });
+            isPlaying = false;
+            currentStepIndex = -1; measureCount = 0; Tone.Transport.seconds = 0; currentAngle = -Math.PI / 2; // Réinitialise au début !
+        });
+
         document.getElementById('bpm').addEventListener('change', (e) => { 
             let val = Math.round(Number(e.target.value));
             if (val < 40) val = 40; if (val > 240) val = 240;
-            e.target.value = val;
-            Tone.Transport.bpm.value = val;
+            e.target.value = val; Tone.Transport.bpm.value = val;
         });
         
         document.getElementById('masterVol').addEventListener('input', (e) => { let val = parseFloat(e.target.value); Tone.Destination.volume.value = val === -40 ? -Infinity : val; });
         const metroBtn = document.getElementById('metroBtn'); metroBtn.addEventListener('click', () => { isMetroOn = !isMetroOn; metroBtn.classList.toggle('metro-on', isMetroOn); });
-        document.getElementById('clearBtn').addEventListener('click', () => { circles = []; refreshCirclesLayout(); });
+        document.getElementById('clearBtn').addEventListener('click', () => { circles = []; document.getElementById('letras-textarea').innerHTML = ""; refreshCirclesLayout(); });
 
         const showAddBtn = document.getElementById('showAddBtn');
         const addSelect = document.getElementById('addInstrumentSelect');
@@ -1036,20 +1240,21 @@
 
         addSelect.addEventListener('change', function() {
             if (this.value !== "") {
-                if (circles.length >= 10) { alert("Nombre maximum de 10 instruments atteint !"); this.value = ""; return; }
+                if (circles.length >= 20) { alert("Limite maximale atteinte !"); this.value = ""; return; }
                 const instIdx = parseInt(this.value);
                 let defaultSteps = 16;
                 if (timeSignature === "3/4" || timeSignature === "6/8") defaultSteps = 12;
                 if (timeSignature === "2/4") defaultSteps = 8;
                 if (timeSignature === "12/8") defaultSteps = 24;
 
-                circles.push({ id: Date.now(), steps: defaultSteps, activeSteps: Array(defaultSteps).fill(0), instrumentIdx: instIdx, lyrics: Array(defaultSteps).fill(""), isMute: false, isSolo: false, isHidden: false, volumeVal: 100 });
+                circles.push({ id: Date.now(), steps: defaultSteps, activeSteps: Array(defaultSteps).fill(0), instrumentIdx: instIdx, lyrics: Array(defaultSteps).fill(""), notes: Array(defaultSteps).fill(""), isMute: false, isSolo: false, isHidden: false, volumeVal: 100 });
                 refreshCirclesLayout(); this.value = ""; this.style.display = 'none'; 
             }
         });
 
         document.getElementById('saveBtn').addEventListener('click', () => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ bpm: Tone.Transport.bpm.value, timeSig: timeSignature, circles: circles }));
+            let letrasText = document.getElementById('letras-textarea').innerHTML;
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ bpm: Tone.Transport.bpm.value, timeSig: timeSignature, letras: letrasText, circles: circles }));
             const dl = document.createElement('a'); dl.href = dataStr; dl.download = "rythme_samambaia.json"; dl.click();
         });
 
@@ -1060,8 +1265,9 @@
                 try { 
                     const d = JSON.parse(evt.target.result); 
                     if (d.bpm) { document.getElementById('bpm').value = Math.round(d.bpm); Tone.Transport.bpm.value = Math.round(d.bpm); } 
-                    if (d.circles) { circles = d.circles; } 
+                    if (d.circles) { circles = d.circles; circles.forEach(c => normalizeCircleData(c)); } 
                     if (d.timeSig) { updateTimeSig(d.timeSig, 'skip'); } else { updateTimeSig("4/4", 'skip'); }
+                    if (d.letras !== undefined) { document.getElementById('letras-textarea').innerHTML = d.letras; }
                     refreshCirclesLayout(); 
                 } catch (err) { alert("Fichier invalide !"); }
             }; reader.readAsText(file);
@@ -1072,9 +1278,10 @@
         function loadPresetFile(fileName) {
             fetch(fileName).then(res => { if (!res.ok) throw new Error("Fichier introuvable"); return res.json(); })
                 .then(data => { 
-                    if (data.circles) circles = JSON.parse(JSON.stringify(data.circles)); 
+                    if (data.circles) { circles = JSON.parse(JSON.stringify(data.circles)); circles.forEach(c => normalizeCircleData(c)); }
                     if (data.bpm) { document.getElementById('bpm').value = Math.round(data.bpm); Tone.Transport.bpm.value = Math.round(data.bpm); } 
                     if (data.timeSig) { updateTimeSig(data.timeSig, 'skip'); } else { updateTimeSig("4/4", 'skip'); }
+                    if (data.letras !== undefined) { document.getElementById('letras-textarea').innerHTML = data.letras; } else { document.getElementById('letras-textarea').innerHTML = ""; }
                     refreshCirclesLayout(); 
                 })
                 .catch(err => { loadFallbackPreset(fileName.includes("Imale") ? 'baque-de-imale' : 'vou-vadiar'); });
@@ -1083,10 +1290,11 @@
         function loadFallbackPreset(name) {
             let p = name === 'baque-de-imale' ? baqueDeImalePreset : vouVadiarPreset;
             if (p) { 
-                circles = JSON.parse(JSON.stringify(p.circles)); 
+                circles = JSON.parse(JSON.stringify(p.circles)); circles.forEach(c => normalizeCircleData(c));
                 document.getElementById('bpm').value = Math.round(p.bpm); Tone.Transport.bpm.value = Math.round(p.bpm); 
                 updateTimeSig(p.timeSig || "4/4", 'skip');
             }
+            document.getElementById('letras-textarea').innerHTML = "";
             refreshCirclesLayout(); measureCount = 0; 
         }
 
@@ -1100,7 +1308,7 @@
             .catch(err => { loadFallbackPreset('vou-vadiar'); document.getElementById('presetSelect').value = 'vou-vadiar'; });
 
         window.addEventListener('keydown', (e) => { 
-            if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') { 
+            if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && e.target.id !== 'letras-textarea') { 
                 e.preventDefault(); togglePlay(); 
             } 
         });
