@@ -99,7 +99,7 @@
         .v-type { font-size: 9px; font-weight: bold; text-align: center; cursor: pointer; padding: 3px 0; color: #fff; user-select: none; }
         .v-type.empty { background: #444; color: #aaa; cursor: default; }
         .v-type.pux { background: #0c19cf; }
-        .v-type.coro { background: #3498db; }
+        .v-type.coro { background: #7bcaff; }
         .v-card.inactive .v-syl, .v-card.inactive .v-note { color: #666; }
         .v-syl { width: 100%; border: none; border-bottom: 1px solid #333; background: transparent; color: var(--accent-gold); text-align: center; font-size: 13px; padding: 6px 0; outline: none; font-weight: bold; }
         .v-note { width: 100%; border: none; background: transparent; color: #aaa; text-align: center; font-size: 10px; padding: 4px 0; outline: none; }
@@ -511,7 +511,7 @@
                     if(c.activeSteps[i] !== 0 && c.lyrics[i]) {
                         let syl = c.lyrics[i].trim();
                         let isPux = c.activeSteps[i] === 'P';
-                        let color = isPux ? '#54a0ff' : '#3498db'; 
+                        let color = isPux ? '#4552f' : '#7bcaff'; 
                         
                         if (syl.endsWith('-')) {
                             if (!buffer) currentSpanColor = color;
