@@ -24,7 +24,7 @@
             font-family: 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
         }
 
-        /* --- BARRE GLOBALE DU HAUT (100vw) --- */
+        /* --- BARRE GLOBALE DU HAUT --- */
         #top-bar { 
             width: 100%; height: auto; min-height: 70px; background-color: var(--panel-bg); 
             border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; 
@@ -98,7 +98,6 @@
         .steps-config-right { display: flex; align-items: center; gap: 6px; }
 
         .pattern-row { display: flex; align-items: flex-start; gap: 8px; margin-top: 8px; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 8px; }
-        .pattern-label { font-size: 11px; color: var(--text-muted); white-space: nowrap; cursor: help; margin-top: 5px; }
         
         .step-boxes { display: flex; gap: 4px; flex-wrap: wrap; flex-grow: 1; align-items: center; justify-content: flex-start;}
         .step-box { width: 22px; height: 22px; background: #111; border: 1px solid #555; color: var(--accent-gold); font-family: monospace; font-size: 14px; font-weight: bold; text-align: center; border-radius: 4px; outline: none; padding: 0; box-sizing: border-box; transition: background-color 0.2s;}
@@ -124,12 +123,12 @@
         #letras-textarea {
             width: 100%; flex-grow: 1; background: #111; border: 1px solid #555; border-radius: 4px; 
             padding: 12px; box-sizing: border-box; overflow-y: auto; font-size: 16px; line-height: 1.8; 
-            font-family: sans-serif; color: #fff;
+            font-family: sans-serif; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
         }
-        #letras-textarea:empty:before { content: attr(data-placeholder); color: #555; pointer-events: none; display: block; }
+        #letras-textarea:empty:before { content: attr(data-placeholder); color: #555; pointer-events: none; display: block; text-shadow: none; }
         #letras-textarea:focus { border-color: var(--accent-gold); outline: none; }
         
-        .lyric-word { padding: 0 2px; border-radius: 3px; transition: all 0.1s; }
+        .lyric-word { padding: 0 1px; border-radius: 3px; transition: all 0.1s; }
         .lyric-word.highlight { background-color: rgba(255, 255, 255, 0.3) !important; box-shadow: 0 0 8px rgba(255,255,255,0.6); color: #fff !important; }
 
         /* --- INTERFACE CENTRALE --- */
@@ -421,7 +420,7 @@
                 seqLegend1: "Pressione <strong>Espaço</strong> no teclado para avançar.",
                 seqLegend2: "Use as <strong>Setas</strong> (←/→) para navegar.",
                 voiceLegendTitle: "🎤 Vozes / Coro",
-                voiceLegend1: "Clique no topo da caixa para alterar quem canta.",
+                voiceLegend1: "Clique no topo da caixa (PUX/CORO) para alterar quem canta.",
                 voiceLegend2: "Puxador: Laranja (Agudo). Coro: Ciano (Grave).",
                 goldRule: "💡 <strong>Regra de ouro:</strong><br>• <strong>Maiúscula</strong> = Golpe Forte<br>• <strong>Minúscula</strong> = Golpe Fraco",
                 alfaiaCaixa: "🥁 Alfaia & Caixa",
@@ -441,7 +440,7 @@
                 save: "Salvar",
                 load: "Carregar",
                 stepsNum: "Passos:",
-                promptVoice: "Sílaba / Letras :",
+                promptVoice: "Sílaba / Palavra (Use * no início para o Puxador) :",
                 selectInst: "Escolher um instrumento...",
                 toggleBtn: "Mostrar painel",
                 toggleLegendBtn: "Ocultar / Mostrar legenda",
@@ -452,7 +451,7 @@
                 confirmResize: "Deseja ajustar automaticamente o número de passos de todas as faixas?",
                 letrasTitle: "📝 Letras",
                 extractBtn: "🔄 Extrair do mixador",
-                letrasPlaceholder: "Cole as letras completas aqui..."
+                letrasPlaceholder: "Cole as letras completas aqui (Pressione Extrair para o Karaokê)..."
             },
             fr: {
                 loading: "Chargement des voix...",
@@ -482,7 +481,7 @@
                 save: "Sauvegarder",
                 load: "Charger",
                 stepsNum: "Pas:",
-                promptVoice: "Syllabe / Letras :",
+                promptVoice: "Syllabe / Mot (Utilisez * au début pour le Puxador) :",
                 selectInst: "Choisir un instrument...",
                 toggleBtn: "Afficher le panneau",
                 toggleLegendBtn: "Afficher / Masquer la légende",
@@ -493,7 +492,7 @@
                 confirmResize: "Voulez-vous ajuster automatiquement le nombre de pas de toutes les pistes ?",
                 letrasTitle: "📝 Paroles complètes",
                 extractBtn: "🔄 Extraire les paroles du mixeur",
-                letrasPlaceholder: "Collez vos paroles ici..."
+                letrasPlaceholder: "Collez vos paroles ici (Cliquez sur Extraire pour le karaoké)..."
             }
         };
 
@@ -525,11 +524,9 @@
             document.getElementById('legend-mi-1').innerHTML = `<span class="legend-badge" style="background:#1b5e20; color:#fff;">P / p</span> <span>${t('mineiroP')}</span>`;
             document.getElementById('legend-mi-2').innerHTML = `<span class="legend-badge" style="background:#4caf50; color:#121212;">T / t</span> <span>${t('mineiroT')}</span>`;
 
-            document.getElementById('showAddBtn').innerText = t('addInst');
             document.getElementById('clearBtn').title = t('clear');
             document.getElementById('saveBtn').title = t('save');
             document.getElementById('loadBtn').title = t('load');
-            document.getElementById('selectInstOpt').innerText = t('selectInst');
             document.getElementById('toggleLeftBtn').title = t('toggleBtn');
             document.getElementById('toggleLegendBtn').title = t('toggleLegendBtn');
             document.getElementById('toggleLetrasBtn').title = t('toggleLetrasBtn');
@@ -537,6 +534,7 @@
             document.getElementById('rewindBtn').title = t('rewindBtn');
             document.getElementById('letras-title').innerText = t('letrasTitle');
             document.getElementById('extractBtn').innerText = t('extractBtn');
+            
             document.getElementById('letras-textarea').setAttribute('data-placeholder', t('letrasPlaceholder'));
         }
 
@@ -645,7 +643,6 @@
 
         const channels = {}; const meters = {}; const samplers = {}; const voiceSynths = {};
 
-        // VRAIS CHEMINS DES ICONES (.SVG) DANS LE DOSSIER ICONES
         const instrumentsConfig = [
             { id: 'marcante', iconImg: 'icones/alfaia.svg', name: 'Alfaia Marcante', type: 'hands', mixerBg: '#3a1010', path: 'Alfaia/Marcante', colors: { 'd': '#5a0000', 'D': '#8b0000', 'g': '#ff7676', 'G': '#ff4d4d', text: '#fff' } },
             { id: 'meiao', iconImg: 'icones/alfaia.svg', name: 'Alfaia Meião', type: 'hands', mixerBg: '#3a2010', path: 'Alfaia/Meiao', colors: { 'd': '#a04000', 'D': '#d35400', 'g': '#fbc531', 'G': '#f39c12', text: '#fff' } },
@@ -1028,8 +1025,6 @@
             container.innerHTML = "";
             circles.forEach((circle, index) => {
                 const inst = instrumentsConfig[circle.instrumentIdx];
-                
-                let instSelectHtml = `<select onchange="updateInstrument(${circle.id}, this.value)" style="display:none;"></select>`;
 
                 let inputHtml = "";
                 if (inst.type === 'voice') {
