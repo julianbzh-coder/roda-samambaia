@@ -24,7 +24,7 @@
             font-family: 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
         }
 
-        /* --- BARRE GLOBALE DU HAUT --- */
+        /* --- BARRE GLOBALE DU HAUT (100vw) --- */
         #top-bar { 
             width: 100%; height: auto; min-height: 70px; background-color: var(--panel-bg); 
             border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; 
@@ -124,18 +124,13 @@
         #letras-textarea {
             width: 100%; flex-grow: 1; background: #111; border: 1px solid #555; border-radius: 4px; 
             padding: 12px; box-sizing: border-box; overflow-y: auto; font-size: 16px; line-height: 1.8; 
-            font-family: sans-serif; color: #fff; white-space: pre-wrap;
+            font-family: sans-serif; color: #fff;
         }
         #letras-textarea:empty:before { content: attr(data-placeholder); color: #555; pointer-events: none; display: block; }
         #letras-textarea:focus { border-color: var(--accent-gold); outline: none; }
         
-        /* KARAOKE HIGHLIGHT CSS */
         .lyric-word { padding: 0 2px; border-radius: 3px; transition: all 0.1s; }
-        .lyric-word.highlight {
-            background-color: rgba(255, 255, 255, 0.3) !important;
-            box-shadow: 0 0 8px rgba(255,255,255,0.6);
-            color: #fff !important;
-        }
+        .lyric-word.highlight { background-color: rgba(255, 255, 255, 0.3) !important; box-shadow: 0 0 8px rgba(255,255,255,0.6); color: #fff !important; }
 
         /* --- INTERFACE CENTRALE --- */
         #center-panel { flex-grow: 1; display: flex; flex-direction: column; position: relative; min-width: 0; }
@@ -147,6 +142,7 @@
         button#metroBtn.metro-on { background-color: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
         .icon-btn { font-size: 20px !important; padding: 4px 10px !important; line-height: 1; }
 
+        /* Animation enregistrement */
         @keyframes pulse-red {
             0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
             70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
@@ -154,12 +150,16 @@
         }
         #recordBtn.recording { background-color: var(--accent-red) !important; animation: pulse-red 1.5s infinite; }
 
+        #rewindBtn {
+            width: 40px; height: 40px; padding: 0 !important; border-radius: 50%;
+            background-color: var(--accent-red); border: 2px solid #121212;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.6); margin-right: 10px;
+        }
+        #rewindBtn:hover { background-color: #600000; }
+
         .control-separator { width: 1px; height: 28px; background-color: #444; margin: 0 4px; }
         label.control-label { font-size: 13px; display: flex; align-items: center; gap: 6px; color: var(--text-main); font-weight: bold; }
         #bpm { width: 48px; background-color: var(--control-bg); color: var(--text-main); border: 1px solid #444; padding: 4px; border-radius: 6px; text-align: center; font-size: 14px; }
-
-        .master-vol-fader { -webkit-appearance: none; height: 6px; border-radius: 3px; background: #444; outline: none; width: 70px; }
-        .master-vol-fader::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent-gold); cursor: pointer; }
 
         #canvas-container { 
             flex-grow: 1; display: flex; align-items: center; justify-content: center; 
@@ -236,6 +236,13 @@
                 </svg>
             </button>
             
+            <!-- BOUTON STOP (Design Pro) -->
+            <button id="rewindBtn" title="Parar e Voltar ao início / Stop & Rewind">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#121212" stroke="#121212" stroke-width="2" stroke-linejoin="round">
+                    <polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5" stroke-width="3"></line>
+                </svg>
+            </button>
+            
             <select id="presetSelect" class="preset-select" onchange="onPresetChange(this.value)">
                 <option value="vou-vadiar" selected>Vou vadiar carnaval</option>
                 <option value="baque-de-imale">Baque de Imale</option>
@@ -248,11 +255,11 @@
             <button id="tutorialBtn" class="control-btn icon-btn" title="Tutorial / Ajuda" onclick="window.open('https://www.youtube.com/results?search_query=maracatu+tutorial', '_blank')" style="background:#e67e22;">📺</button>
             <div class="control-separator"></div>
             
-            <!-- MENU ADD INSTRUMENT AVEC ICONES -->
+            <!-- ADD INSTRUMENT (Custom Dropdown) -->
             <div class="custom-dropdown" id="dropdown-add" tabindex="0" onblur="closeDropdown('dropdown-add')">
                 <button class="control-btn" style="background-color: var(--accent-green); color: #000; font-weight:bold;" onclick="toggleDropdown('list-add')">+ Instrumento</button>
                 <div class="dropdown-list" id="list-add" style="right:0; left:auto; top:40px; max-height:300px;">
-                    <!-- JS fills this -->
+                    <!-- Rempli par JS -->
                 </div>
             </div>
             
@@ -349,10 +356,10 @@
             </div>
 
         </div>
-    </div> <!-- Fin Main Workspace -->
+    </div>
 
     <script>
-        // Logique dropdowns cliquables
+        // Logique menus déroulants
         window.toggleDropdown = function(listId) {
             let list = document.getElementById(listId);
             if(list.classList.contains('show')) {
@@ -369,12 +376,12 @@
             }, 150);
         }
 
-        // Auto-collapse sur mobile
         document.addEventListener('DOMContentLoaded', () => {
             if (window.innerWidth <= 1000) {
                 document.getElementById('left-panel').classList.add('collapsed');
                 document.getElementById('toggleLeftBtn').style.display = 'flex';
             }
+            updateStaticTexts(); populateAddDropdown(); refreshCirclesLayout(); draw();
         });
 
         function togglePanel(side) { 
@@ -437,7 +444,7 @@
                 save: "Salvar",
                 load: "Carregar",
                 stepsNum: "Passos:",
-                promptVoice: "Sílaba / Palavra (Use * no início para o Puxador) :",
+                promptVoice: "Sílaba / Palavra :",
                 selectInst: "Escolher um instrumento...",
                 toggleBtn: "Mostrar painel",
                 toggleLegendBtn: "Ocultar / Mostrar legenda",
@@ -478,7 +485,7 @@
                 save: "Sauvegarder",
                 load: "Charger",
                 stepsNum: "Pas:",
-                promptVoice: "Syllabe / Letras :",
+                promptVoice: "Syllabe / Mot :",
                 selectInst: "Choisir un instrument...",
                 toggleBtn: "Afficher le panneau",
                 toggleLegendBtn: "Afficher / Masquer la légende",
@@ -525,7 +532,6 @@
             document.getElementById('legend-mi-1').innerHTML = `<span class="legend-badge" style="background:#1b5e20; color:#fff;">P / p</span> <span>${t('mineiroP')}</span>`;
             document.getElementById('legend-mi-2').innerHTML = `<span class="legend-badge" style="background:#4caf50; color:#121212;">T / t</span> <span>${t('mineiroT')}</span>`;
 
-            document.getElementById('showAddBtn').innerText = t('addInst');
             document.getElementById('clearBtn').title = t('clear');
             document.getElementById('saveBtn').title = t('save');
             document.getElementById('loadBtn').title = t('load');
@@ -533,6 +539,7 @@
             document.getElementById('toggleLegendBtn').title = t('toggleLegendBtn');
             document.getElementById('toggleLetrasBtn').title = t('toggleLetrasBtn');
             document.getElementById('tutorialBtn').title = t('tutorialBtn');
+            document.getElementById('rewindBtn').title = t('rewindBtn');
             document.getElementById('letras-title').innerText = t('letrasTitle');
             document.getElementById('extractBtn').innerText = t('extractBtn');
             
@@ -545,7 +552,6 @@
             updateStaticTexts(); renderMixer(); populateAddDropdown();
         }
 
-        // EXTRACTION INTELLIGENTE ET IDENTIFICATION KARAOKÉ
         window.extractLyrics = function() {
             let voiceCircles = circles.filter(c => instrumentsConfig[c.instrumentIdx].type === 'voice');
             let htmlArr = [];
@@ -560,7 +566,7 @@
                     if(c.activeSteps[i] !== 0 && c.lyrics[i]) {
                         let syl = c.lyrics[i].trim();
                         let isPux = c.activeSteps[i] === 'P';
-                        let color = isPux ? '#ff9f43' : '#00d2d3'; // Contraste Maximal Orange/Cyan
+                        let color = isPux ? '#ff9f43' : '#00d2d3'; 
                         
                         if (syl.endsWith('-')) {
                             if (!buffer) { currentSpanColor = color; startIdx = i; }
@@ -568,7 +574,6 @@
                         } else {
                             if (!buffer) { currentSpanColor = color; startIdx = i; }
                             buffer += syl;
-                            // Ajout de la class unique lyric-ref-ID-STEP
                             trackHtml += `<span class="lyric-word lyric-ref-${c.id}-${startIdx}" style="color: ${currentSpanColor}; font-weight: bold;">${buffer}</span> `;
                             buffer = "";
                         }
@@ -584,7 +589,6 @@
             ta.innerHTML = htmlArr.join('<br>');
         }
 
-        // ENREGISTREUR AUDIO TONE.JS
         let recorder = null;
         let isRecording = false;
 
@@ -594,7 +598,6 @@
                 recorder = new Tone.Recorder();
                 Tone.Destination.connect(recorder);
             }
-            
             if (!isRecording) {
                 recorder.start();
                 isRecording = true;
@@ -935,7 +938,6 @@
                 bMetroClick.triggerAttackRelease(note, "32n", time); 
             }
 
-            // KARAOKE RESET HIGHLIGHTS
             Tone.Draw.schedule(function(){
                 document.querySelectorAll('.lyric-word.highlight').forEach(el => el.classList.remove('highlight'));
             }, time);
@@ -955,7 +957,6 @@
                         let state = circle.activeSteps[stepIdx];
                         if (state !== 0) {
                             if (inst.type === 'voice') {
-                                // KARAOKE HIGHLIGHT
                                 Tone.Draw.schedule(function(){
                                     document.querySelectorAll(`.lyric-ref-${circle.id}-${stepIdx}`).forEach(el => {
                                         el.classList.add('highlight');
@@ -1005,6 +1006,7 @@
 
         function populateAddDropdown() {
             const list = document.getElementById('list-add');
+            if(!list) return;
             list.innerHTML = '';
             instrumentsConfig.forEach((inst, idx) => {
                 let div = document.createElement('div');
@@ -1016,7 +1018,7 @@
         }
 
         window.addInstrumentFromIdx = function(instIdx) {
-            if (circles.length >= 20) { alert(t('save') === 'Salvar' ? "Limite máxima atingida!" : "Limite atteinte !"); return; }
+            if (circles.length >= 20) { alert(t('save') === 'Salvar' ? "Limite máxima atingida!" : "Limite maximale atteinte !"); return; }
             let defaultSteps = 16;
             if (timeSignature === "3/4" || timeSignature === "6/8") defaultSteps = 12;
             if (timeSignature === "2/4") defaultSteps = 8;
@@ -1456,8 +1458,13 @@
             } 
         });
 
-        // Initialize App
-        updateStaticTexts(); populateAddDropdown(); refreshCirclesLayout(); draw();
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.innerWidth <= 1000) {
+                document.getElementById('left-panel').classList.add('collapsed');
+                document.getElementById('toggleLeftBtn').style.display = 'flex';
+            }
+            updateStaticTexts(); populateAddDropdown(); refreshCirclesLayout(); draw();
+        });
     </script>
 </body>
 </html>
