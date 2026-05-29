@@ -22,7 +22,7 @@
             font-family: 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
         }
 
-        /* --- NOUVELLE BARRE GLOBALE DU HAUT (100vw) --- */
+        /* --- BARRE GLOBALE DU HAUT (100vw) --- */
         #top-bar { 
             width: 100%; height: auto; min-height: 70px; background-color: var(--panel-bg); 
             border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; 
@@ -30,7 +30,8 @@
         }
         .topbar-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
         
-        #header-title-text { font-size: 18px; font-weight: 900; letter-spacing: 2px; color: var(--accent-gold); line-height: 1; }
+        /* Titre agrandi */
+        #header-title-text { font-size: 26px; font-weight: 900; letter-spacing: 2px; color: var(--accent-gold); line-height: 1; }
 
         /* --- CONTENEUR DE L'ESPACE DE TRAVAIL --- */
         #main-workspace { display: flex; flex-grow: 1; overflow: hidden; position: relative; width: 100%; }
@@ -43,15 +44,6 @@
         }
         #left-panel.collapsed { margin-left: -400px; }
 
-        /* --- CANEVAS CENTRAL --- */
-        #canvas-container { 
-            flex-grow: 1; display: flex; align-items: center; justify-content: center; 
-            background-color: var(--bg-dark); background-image: url('Pictures/atelier.png'); 
-            background-size: cover; background-position: center; background-repeat: no-repeat; 
-            padding: 10px; box-sizing: border-box; overflow: hidden; position: relative;
-        }
-        canvas { max-width: 100%; max-height: 100%; aspect-ratio: 1 / 1; cursor: pointer; }
-
         /* --- PANNEAU DROIT (LÉGENDE ET LETRAS) --- */
         #right-sidebar {
             width: 340px; min-width: 340px; background-color: var(--panel-bg); border-left: 1px solid #333;
@@ -62,7 +54,7 @@
         .sidebar-section { display: none; flex-direction: column; padding: 20px; height: 100%; overflow-y: auto; }
         .sidebar-section.active { display: flex; }
 
-        .panel-title { font-size: 13px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; }
+        .panel-title { font-size: 13px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; }
 
         #mixer-section { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
 
@@ -126,7 +118,7 @@
         #letras-textarea:focus { border-color: var(--accent-gold); outline: none; }
 
         /* -- BOUTONS ET ICONES -- */
-        .preset-select { background-color: var(--control-bg); color: var(--text-main); border: 1px solid #444; padding: 4px 8px; border-radius: 6px; font-size: 13px; font-weight: bold; }
+        .preset-select { background-color: var(--control-bg); color: var(--text-main); border: 1px solid #444; padding: 6px 8px; border-radius: 6px; font-size: 13px; font-weight: bold; }
         button.control-btn { background-color: #333; color: #fff; border: 1px solid #444; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; }
         button.control-btn:hover { background-color: #444; }
         button#metroBtn.metro-on { background-color: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
@@ -143,6 +135,14 @@
         label.control-label { font-size: 13px; display: flex; align-items: center; gap: 6px; color: var(--text-main); font-weight: bold; }
         #bpm { width: 48px; background-color: var(--control-bg); color: var(--text-main); border: 1px solid #444; padding: 4px; border-radius: 6px; text-align: center; font-size: 14px; }
 
+        #canvas-container { 
+            flex-grow: 1; display: flex; align-items: center; justify-content: center; 
+            background-color: var(--bg-dark); background-image: url('Pictures/atelier.png'); 
+            background-size: cover; background-position: center; background-repeat: no-repeat; 
+            padding: 10px; box-sizing: border-box; overflow: hidden; position: relative;
+        }
+        canvas { max-width: 100%; max-height: 100%; aspect-ratio: 1 / 1; cursor: pointer; }
+        
         #fileInput { display: none; }
         #loading-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(18,18,18,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; font-size: 18px; font-weight: bold; color: var(--accent-gold); }
 
@@ -151,9 +151,10 @@
             .topbar-group { justify-content: center; }
             .control-separator { display: none; }
             #main-workspace { flex-direction: column; overflow-y: auto; }
-            #left-panel, #right-sidebar { min-width: 100%; margin: 0 !important; height: auto; }
+            #left-panel, #right-sidebar { min-width: 100%; margin: 0 !important; height: auto; border: none; border-top: 1px solid #333; }
             #left-panel.collapsed, #right-sidebar.collapsed { display: none; }
             #canvas-container { padding: 5px; min-height: 400px; }
+            #header-title-text { display: none; } /* Cache le texte sur mobile pour faire de la place */
         }
     </style>
 </head>
@@ -170,13 +171,7 @@
                     <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>
                 </svg>
             </button>
-            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
-                <span id="header-title-text">BaqueMix</span>
-                <select id="presetSelect" class="preset-select" onchange="onPresetChange(this.value)">
-                    <option value="vou-vadiar" selected>Vou vadiar carnaval</option>
-                    <option value="baque-de-imale">Baque de Imale</option>
-                </select>
-            </div>
+            <span id="header-title-text">BaqueMix</span>
         </div>
         
         <!-- GROUPE CENTRE -->
@@ -210,21 +205,31 @@
 
         <!-- GROUPE DROITE -->
         <div class="topbar-group">
+            <!-- LE CATALOGUE EST MAINTENANT ICI -->
+            <select id="presetSelect" class="preset-select" onchange="onPresetChange(this.value)">
+                <option value="vou-vadiar" selected>Vou vadiar carnaval</option>
+                <option value="baque-de-imale">Baque de Imale</option>
+            </select>
+            
+            <div class="control-separator"></div>
             <button id="langBtn" class="control-btn icon-btn" onclick="toggleLang()" style="background:#8e44ad; font-size: 22px; width: 50px; padding: 4px;" title="Changer de langue / Mudar idioma">🇫🇷</button>
             <button id="tutorialBtn" class="control-btn icon-btn" title="Tutorial / Ajuda" onclick="window.open('https://www.youtube.com/results?search_query=maracatu+tutorial', '_blank')" style="background:#e67e22;">📺</button>
             <div class="control-separator"></div>
+            
             <div style="position:relative; display:flex; align-items:center;">
                 <button id="showAddBtn" class="control-btn" style="background-color: var(--accent-green); color: #000; font-weight:bold;">+ Instrumento</button>
                 <select id="addInstrumentSelect" class="preset-select" style="display:none; position:absolute; top:35px; right:0; z-index:100; box-shadow: 0 4px 10px rgba(0,0,0,0.8);">
                     <option value="" disabled selected id="selectInstOpt">Escolher um instrumento...</option>
                 </select>
             </div>
+            
             <button id="clearBtn" class="control-btn icon-btn" title="Limpar a Roda">🗑️</button>
             <button id="saveBtn" class="control-btn icon-btn" title="Salvar" style="background:#2980b9;">💾</button>
             <button id="loadBtn" class="control-btn icon-btn" title="Carregar" style="background:#2980b9;">📂</button>
             <input type="file" id="fileInput" accept=".json">
+
             <div class="control-separator"></div>
-            <button id="toggleLegendBtn" class="control-btn icon-btn" title="Legenda" onclick="toggleRightPanel('legend')" style="background: transparent; border: 1px solid #444;">📖</button>
+            <button id="toggleLegendBtn" class="control-btn icon-btn" title="Legenda" onclick="toggleRightPanel('legend')" style="background: transparent; border: 1px solid #444; margin-right:4px;">📖</button>
             <button id="toggleLetrasBtn" class="control-btn icon-btn" title="Letras" onclick="toggleRightPanel('letras')" style="background: transparent; border: 1px solid #444;">📝</button>
         </div>
     </div>
@@ -343,6 +348,9 @@
             letrasSec.classList.toggle('active', activeRightPanel === 'letras');
         }
 
+        // Cache initial du bouton gauche car le panneau est ouvert
+        document.getElementById('toggleLeftBtn').style.display = 'none';
+
         const i18n = {
             pt: {
                 loading: "Carregando vozes...",
@@ -354,6 +362,7 @@
                 voiceLegendTitle: "🎤 Vozes / Coro",
                 voiceLegend1: "Clique no topo da caixa (PUX/CORO) para alterar quem canta.",
                 voiceLegend2: "Puxador: Azul Escuro (Agudo). Coro: Azul Claro (Grave).",
+                voiceLegend3: "Dica: Se adicionar várias faixas de voz, elas se alternam na roda a cada compasso!",
                 goldRule: "💡 <strong>Regra de ouro:</strong><br>• <strong>Maiúscula</strong> = Golpe Forte<br>• <strong>Minúscula</strong> = Golpe Fraco",
                 alfaiaCaixa: "🥁 Alfaia & Caixa",
                 mainDroite: "Mão Direita",
@@ -396,6 +405,7 @@
                 voiceLegendTitle: "🎤 Voix / Chœur",
                 voiceLegend1: "Cliquez en haut de la case (PUX/CORO) pour changer qui chante.",
                 voiceLegend2: "Puxador: Bleu Foncé (Aigu). Chœur: Bleu Clair (Grave).",
+                voiceLegend3: "Astuce : Mettez plusieurs pistes de chant, elles défileront à chaque mesure !",
                 goldRule: "💡 <strong>Règle d'or :</strong><br>• <strong>Majuscule</strong> = Coup Fort<br>• <strong>Minuscule</strong> = Coup Faible",
                 alfaiaCaixa: "🥁 Alfaia & Caixa",
                 mainDroite: "Main Droite",
@@ -445,6 +455,9 @@
             document.getElementById('legend-voice-title').innerText = t('voiceLegendTitle');
             document.getElementById('legend-voice-1').innerHTML = `<span>${t('voiceLegend1')}</span>`;
             document.getElementById('legend-voice-2').innerHTML = `<span>${t('voiceLegend2')}</span>`;
+            
+            let lv3 = document.getElementById('legend-voice-3');
+            if(lv3) lv3.innerHTML = `<span>${t('voiceLegend3') || ''}</span>`;
 
             document.getElementById('legend-gold').innerHTML = t('goldRule');
             document.getElementById('tsLabel').innerText = t('tsLabel');
@@ -551,7 +564,7 @@
         let timeSignature = "4/4";
         let maxTicks = 96; 
         let flashAlpha = 0; 
-        let currentAngle = -Math.PI / 2; 
+        let currentAngle = -Math.PI / 2;
 
         Tone.context.lookAhead = 0.04; 
         Tone.context.latencyHint = "interactive"; 
