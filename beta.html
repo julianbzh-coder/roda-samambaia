@@ -1,3 +1,6 @@
+Voici le code complet avec les variables globales ajoutées et le doublon de chargement supprimé à la fin. Tu peux copier-coller l'intégralité de ce bloc pour remplacer ton fichier beta.html.
+
+HTML
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -201,9 +204,7 @@
 
     <div id="loading-overlay">🌿 <span id="loading-text">Carregando vozes...</span></div>
 
-    <!-- --- BARRE GLOBALE DU HAUT --- -->
     <div id="top-bar">
-        <!-- GROUPE GAUCHE -->
         <div class="topbar-group" id="header-main">
             <button id="toggleLeftBtn" class="control-btn icon-btn" title="Mostrar painel" onclick="togglePanel('left')" style="background: transparent; border: 1px solid #444; display: none;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -213,7 +214,6 @@
             <span id="header-title-text">BaqueMix</span>
         </div>
         
-        <!-- GROUPE CENTRE -->
         <div class="topbar-group">
             <label class="control-label">
                 <span id="tsLabel">Compasso:</span> 
@@ -237,7 +237,6 @@
                 </svg>
             </button>
             
-            <!-- BOUTON STOP (Design Pro Rond et Rouge foncé) -->
             <button id="rewindBtn" title="Parar e Voltar ao início / Stop & Rewind">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="#121212" stroke="#121212" stroke-width="2" stroke-linejoin="round">
                     <polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5" stroke-width="3"></line>
@@ -250,18 +249,15 @@
             </select>
         </div>
 
-        <!-- GROUPE DROITE -->
         <div class="topbar-group">
             <button id="langBtn" class="control-btn icon-btn" onclick="toggleLang()" style="background:#8e44ad; font-size: 22px; width: 50px; padding: 4px;" title="Changer de langue / Mudar idioma">🇫🇷</button>
             <button id="tutorialBtn" class="control-btn icon-btn" title="Tutorial / Ajuda" onclick="window.open('https://www.youtube.com/results?search_query=maracatu+tutorial', '_blank')" style="background:#e67e22;">📺</button>
             <div class="control-separator"></div>
             
-            <!-- MENU ADD INSTRUMENT AVEC ICONES -->
             <div class="custom-dropdown" id="dropdown-add" tabindex="0" onblur="closeDropdown('dropdown-add')">
                 <button class="control-btn" style="background-color: var(--accent-green); color: #000; font-weight:bold;" onclick="toggleDropdown('list-add')">+ Instrumento</button>
                 <div class="dropdown-list" id="list-add" style="right:0; left:auto; top:40px; max-height:300px;">
-                    <!-- Rempli par JS -->
-                </div>
+                    </div>
             </div>
             
             <button id="recordBtn" class="control-btn icon-btn" title="Gravar Áudio / Enregistrer Audio" onclick="toggleRecord()" style="background:#444;">🔴</button>
@@ -277,10 +273,8 @@
         </div>
     </div>
 
-    <!-- --- ESPACE DE TRAVAIL PRINCIPAL --- -->
     <div id="main-workspace">
         
-        <!-- PANNEAU GAUCHE : MIXEUR -->
         <div id="left-panel">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
                 <span class="panel-title" id="title-mixer" style="margin: 0; border: none; padding: 0;">🎛️ Misturador</span>
@@ -289,15 +283,12 @@
             <div id="mixer-section"><div id="tracks-mixer-container"></div></div>
         </div>
 
-        <!-- CENTRE : CANEVAS -->
         <div id="canvas-container">
             <canvas id="canvas" width="1200" height="1200"></canvas>
         </div>
 
-        <!-- PANNEAU DROIT : LEGENDE ET LETRAS -->
         <div id="right-sidebar" class="collapsed">
             
-            <!-- SECTION LEGENDE -->
             <div id="legend-section" class="sidebar-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
                     <span class="panel-title" id="title-legend" style="margin: 0; border: none; padding: 0;">📖 Legenda</span>
@@ -346,7 +337,6 @@
                 </div>
             </div>
 
-            <!-- SECTION LETRAS ET KARAOKE -->
             <div id="letras-section" class="sidebar-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
                     <span class="panel-title" id="letras-title" style="margin: 0; border: none; padding: 0;">📝 Letras (Paroles)</span>
@@ -357,9 +347,7 @@
             </div>
 
         </div>
-    </div> <!-- Fin Main Workspace -->
-
-    <script>
+    </div> <script>
         // Logique menus déroulants
         window.toggleDropdown = function(listId) {
             let list = document.getElementById(listId);
@@ -645,6 +633,10 @@
         let maxTicks = 96; 
         let flashAlpha = 0; 
         let currentAngle = -Math.PI / 2; // STOCKÉ GLOBALEMENT (Garantit que la baguette se fige à la bonne place)
+        
+        let isPlaying = false;
+        let isMetroOn = false;
+        let measureCount = 0;
 
         Tone.context.lookAhead = 0.04; 
         Tone.context.latencyHint = "interactive"; 
@@ -1491,14 +1483,6 @@
             if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && e.target.id !== 'letras-textarea') { 
                 e.preventDefault(); togglePlay(); 
             } 
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            if (window.innerWidth <= 1000) {
-                document.getElementById('left-panel').classList.add('collapsed');
-                document.getElementById('toggleLeftBtn').style.display = 'flex';
-            }
-            updateStaticTexts(); populateAddDropdown(); refreshCirclesLayout(); draw();
         });
     </script>
 </body>
