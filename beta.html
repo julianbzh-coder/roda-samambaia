@@ -16,7 +16,7 @@
         :root {
             --bg-dark: #121212; --panel-bg: #1e1e1e; --control-bg: #252525;
             --text-main: #f5f5f5; --text-muted: #888;
-            --accent-gold: #c69552; /* Ajusté pour correspondre à la baguette et au bois */
+            --accent-gold: #c69552; /* Orangé/Boisé assorti au fond */
             --accent-green: #2ecc71; --accent-red: #8b0000;
         }
 
@@ -33,7 +33,7 @@
         }
         .topbar-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
         
-        #header-title-text { font-size: 26px; font-weight: 900; letter-spacing: 2px; color: var(--accent-gold); line-height: 1; margin: 0; padding: 0; text-transform: uppercase;}
+        #header-title-text { font-size: 26px; font-weight: 900; letter-spacing: 2px; color: var(--accent-gold); line-height: 1; margin: 0; padding: 0; text-transform: uppercase; }
 
         /* --- CONTENEUR DE L'ESPACE DE TRAVAIL --- */
         #main-workspace { display: flex; flex-grow: 1; overflow: hidden; position: relative; width: 100%; }
@@ -58,27 +58,28 @@
 
         .panel-title { font-size: 13px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; }
 
-        #mixer-section { flex-grow: 1; overflow-y: auto; padding-right: 8px; }
+        #mixer-section { flex-grow: 1; overflow-y: auto; padding-right: 10px; }
 
-        /* --- DESIGN CORDEL / ATELIER POUR LES PISTES DU MIXEUR --- */
+        /* --- DESIGN CORDEL / BOIS POUR LE MIXEUR --- */
         .track-mixer { 
             position: relative;
+            background: rgba(30, 26, 22, 0.95);
             border: 2px solid var(--accent-gold); 
             border-radius: 4px; 
             padding: 16px; 
-            margin-bottom: 18px; 
-            box-shadow: 4px 4px 0px rgba(0,0,0,0.8);
+            margin-bottom: 20px; 
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.8); /* Effet bloc physique */
             transition: background 0.3s; 
         }
-        /* Couture pointillée intérieure (Effet Cordel) */
+        /* Liseré en pointillés façon couture artisanale */
         .track-mixer::before {
             content: ''; position: absolute;
             top: 4px; left: 4px; right: 4px; bottom: 4px;
-            border: 1px dashed rgba(198, 149, 82, 0.5); /* Couleur gold transparente */
-            border-radius: 2px; pointer-events: none;
+            border: 1px dashed var(--accent-gold);
+            opacity: 0.5; border-radius: 2px; pointer-events: none;
         }
 
-        .track-mixer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid rgba(198, 149, 82, 0.3); padding-bottom: 8px; }
+        .track-mixer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; position: relative; z-index: 2; border-bottom: 1px solid rgba(198, 149, 82, 0.3); padding-bottom: 8px;}
         
         .track-order-btns { display: flex; flex-direction: column; gap: 2px; margin-right: 8px; }
         .order-btn { background: #333; color: #fff; border: 1px solid #555; cursor: pointer; font-size: 8px; padding: 2px 6px; border-radius: 3px; }
@@ -94,11 +95,11 @@
         .dropdown-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer; font-size: 13px; color: #fff; border-bottom: 1px solid #333; }
         .dropdown-item:hover { background: var(--accent-gold); color: #000; }
         .dropdown-item img { width: 24px; height: 24px; object-fit: contain; border-radius: 3px; }
-        .dropdown-selected { display: flex; align-items: center; gap: 8px; background: #111; border: 1px solid #555; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; color: #fff; }
+        .dropdown-selected { display: flex; align-items: center; gap: 8px; background: #111; border: 1px solid #555; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; color: #fff; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.8);}
         .dropdown-selected img { width: 16px; height: 16px; object-fit: contain; border-radius: 2px; }
 
-        .track-mute-solo { display: flex; gap: 4px; z-index: 2; position: relative;}
-        .btn-mute-solo { width: 24px; height: 24px; background-color: #333; color: #fff; border: none; border-radius: 4px; font-weight: bold; font-size: 10px; cursor: pointer; }
+        .track-mute-solo { display: flex; gap: 4px; position: relative; z-index: 2;}
+        .btn-mute-solo { width: 24px; height: 24px; background-color: #333; color: #fff; border: 1px solid #222; border-radius: 4px; font-weight: bold; font-size: 10px; cursor: pointer; box-shadow: inset 1px 1px 2px rgba(255,255,255,0.1); }
         .btn-mute-solo.mute-on { background-color: var(--accent-red); }
         .btn-mute-solo.solo-on { background-color: var(--accent-gold); color: #000; }
         .btn-mute-solo.hidden-on { background-color: #34495e; color: #95a5a6; }
@@ -106,7 +107,7 @@
 
         .fader-group { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; position: relative; z-index: 2;}
         .fader { flex-grow: 1; -webkit-appearance: none; height: 6px; border-radius: 3px; background: #222; border: 1px solid #444; outline: none; width: 70px; }
-        .fader::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent-gold); cursor: pointer; }
+        .fader::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent-gold); cursor: pointer; box-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
 
         .vol-meter-bg { width: 35px; height: 8px; background-color: #000; border-radius: 2px; position: relative; overflow: hidden; border: 1px solid #333;}
         .vol-meter-bar { height: 100%; background-color: var(--accent-green); width: 0%; transition: width 0.05s; }
@@ -118,18 +119,23 @@
         .pattern-row { display: flex; align-items: flex-start; gap: 8px; margin-top: 8px; border-top: 1px dashed rgba(198, 149, 82, 0.3); padding-top: 8px; position: relative; z-index: 2;}
         
         .step-boxes { display: flex; gap: 4px; flex-wrap: wrap; flex-grow: 1; align-items: center; justify-content: flex-start;}
-        .step-box { width: 22px; height: 22px; background: #111; border: 1px solid #555; color: var(--accent-gold); font-family: monospace; font-size: 14px; font-weight: bold; text-align: center; border-radius: 4px; outline: none; padding: 0; box-sizing: border-box; transition: background-color 0.2s;}
-        .step-box:focus { border-color: var(--accent-gold) !important; box-shadow: 0 0 4px var(--accent-gold); }
+        .step-box { 
+            width: 24px; height: 24px; background: #111; border: 2px solid #555; 
+            color: var(--accent-gold); font-family: monospace; font-size: 14px; font-weight: bold; 
+            text-align: center; border-radius: 6px; outline: none; padding: 0; box-sizing: border-box; 
+            transition: all 0.2s; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.8);
+        }
+        .step-box:focus { border-color: var(--accent-gold) !important; box-shadow: 0 0 6px var(--accent-gold); transform: scale(1.05); position: relative; z-index: 5;}
         
         /* --- CARTES VOIX --- */
-        .v-card { display: flex; flex-direction: column; width: 48px; background: #1a1a1a; border: 1px solid #444; border-radius: 4px; overflow: hidden; margin-right: 4px; margin-bottom: 4px; box-shadow: 2px 2px 0px rgba(0,0,0,0.5);}
+        .v-card { display: flex; flex-direction: column; width: 48px; background: #1a1a1a; border: 2px solid #444; border-radius: 6px; overflow: hidden; margin-right: 4px; margin-bottom: 4px; box-shadow: 2px 2px 0px rgba(0,0,0,0.5);}
         .v-type { font-size: 9px; font-weight: bold; text-align: center; cursor: pointer; padding: 3px 0; color: #fff; user-select: none; border-bottom: 1px solid #111;}
         .v-type.empty { background: #444; color: #aaa; cursor: default; }
         .v-type.pux { background: #ff9f43; color:#121212; }
         .v-type.coro { background: #00d2d3; color:#121212; }
         .v-card.inactive .v-syl, .v-card.inactive .v-note { color: #666; }
-        .v-syl { width: 100%; border: none; border-bottom: 1px solid #333; background: transparent; color: #fff; text-align: center; font-size: 13px; padding: 6px 0; outline: none; font-weight: bold; }
-        .v-note { width: 100%; border: none; background: transparent; color: #aaa; text-align: center; font-size: 10px; padding: 4px 0; outline: none; text-transform: uppercase;}
+        .v-syl { width: 100%; border: none; border-bottom: 1px solid #333; background: transparent; color: var(--text-main); text-align: center; font-size: 13px; padding: 6px 0; outline: none; font-weight: bold; }
+        .v-note { width: 100%; border: none; background: transparent; color: var(--accent-gold); text-align: center; font-size: 10px; padding: 4px 0; outline: none; text-transform: uppercase;}
 
         .legend-container { display: flex; flex-direction: column; gap: 6px; padding-right: 5px; flex-grow: 1; }
         .legend-group { display: flex; flex-direction: column; gap: 4px; background: #181818; padding: 8px; border-radius: 6px; border: 1px solid #2a2a2a; }
@@ -147,8 +153,13 @@
         #letras-textarea:empty:before { content: attr(data-placeholder); color: #555; pointer-events: none; display: block; text-shadow: none; }
         #letras-textarea:focus { outline: none; border-color: #fff;}
         
-        .lyric-word { padding: 2px 1px; border-radius: 3px; transition: all 0.05s; }
-        .lyric-word.highlight { background-color: rgba(255, 255, 255, 0.4) !important; box-shadow: 0 0 10px rgba(255,255,255,0.8); color: #fff !important; text-shadow: none; }
+        .lyric-word { display: inline-block; padding: 0 1px; border-radius: 3px; transition: all 0.1s; }
+        .lyric-word.highlight { 
+            background-color: rgba(255, 255, 255, 0.4) !important; 
+            box-shadow: 0 0 10px rgba(255,255,255,0.8); 
+            color: #fff !important; text-shadow: none; 
+            transform: scale(1.1); /* Petit effet Pop visuel */
+        }
 
         /* --- INTERFACE CENTRALE --- */
         #center-panel { flex-grow: 1; display: flex; flex-direction: column; position: relative; min-width: 0; }
@@ -160,7 +171,6 @@
         button#metroBtn.metro-on { background-color: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
         .icon-btn { font-size: 20px !important; padding: 4px 10px !important; line-height: 1; }
 
-        /* Animation enregistrement */
         @keyframes pulse-red {
             0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
             70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
@@ -170,7 +180,7 @@
 
         #rewindBtn {
             width: 40px; height: 40px; padding: 0 !important; border-radius: 50%;
-            background-color: #a00000; border: 2px solid #121212;
+            background-color: var(--accent-red); border: 2px solid #121212;
             box-shadow: 0 3px 6px rgba(0,0,0,0.6); margin-right: 10px;
         }
         #rewindBtn:hover { background-color: #600000; }
@@ -255,7 +265,7 @@
             </button>
             
             <button id="rewindBtn" title="Parar e Voltar ao início / Stop & Rewind">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="#000" stroke="#000" stroke-width="2" stroke-linejoin="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#121212" stroke="#121212" stroke-width="2" stroke-linejoin="round">
                     <polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5" stroke-width="3"></line>
                 </svg>
             </button>
@@ -272,7 +282,6 @@
             <button id="tutorialBtn" class="control-btn icon-btn" title="Tutorial / Ajuda" onclick="window.open('https://www.youtube.com/results?search_query=maracatu+tutorial', '_blank')" style="background:#e67e22;">📺</button>
             <div class="control-separator"></div>
             
-            <!-- MENU ADD INSTRUMENT AVEC ICONES -->
             <div class="custom-dropdown" id="dropdown-add" tabindex="0" onblur="closeDropdown('dropdown-add')">
                 <button class="control-btn" style="background-color: var(--accent-green); color: #000; font-weight:bold;" onclick="toggleDropdown('list-add')">+ Instrumento</button>
                 <div class="dropdown-list" id="list-add" style="right:0; left:auto; top:40px; max-height:300px;">
@@ -391,6 +400,8 @@
         Tone.Transport.swing = 0.0; 
         Tone.Destination.volume.value = -6;
 
+        const channels = {}; const meters = {}; const samplers = {}; const voiceSynths = {};
+
         // VRAIS CHEMINS DES ICONES (.SVG)
         const instrumentsConfig = [
             { id: 'marcante', iconImg: 'icones/alfaia.svg', name: 'Alfaia Marcante', type: 'hands', mixerBg: '#3a1010', path: 'Alfaia/Marcante', colors: { 'd': '#5a0000', 'D': '#8b0000', 'g': '#ff7676', 'G': '#ff4d4d', text: '#fff' } },
@@ -402,8 +413,6 @@
             { id: 'mineiro', iconImg: 'icones/mineiro.svg', name: 'Mineiro', type: 'shake', mixerBg: '#203a10', path: 'Graines/Mineiro', colors: { 'p': '#113b14', 'P': '#1b5e20', 't': '#74d478', 'T': '#4caf50', text: '#fff' } },
             { id: 'chant', iconImg: 'icones/micro.svg', name: 'Voz / Coro', type: 'voice', mixerBg: '#10203a', path: 'internal', colors: { 'C': '#00d2d3', 'P': '#ff9f43', text: '#121212' } }
         ];
-
-        const channels = {}; const meters = {}; const samplers = {}; const voiceSynths = {};
 
         const bMetroClick = new Tone.Synth({
             oscillator: { type: "square" },
@@ -497,7 +506,7 @@
             }
         };
 
-        // Fonction extrêmement protectrice pour les anciens JSON
+        // Sécurité maximale pour charger d'anciens JSON
         function normalizeCircleData(c) {
             if (c.repeats === undefined) c.repeats = 1; 
             if (!c.notes) c.notes = Array(c.steps).fill("");
@@ -587,17 +596,14 @@
                 currentAngle = -Math.PI / 2 + (progress * Math.PI * 2);
             }
 
-            // --- DESSIN DE LA BAGUETTE EN PREMIER POUR ETRE EN DESSOUS ---
+            // --- BAGUETTE : DESSINÉE SOUS LES NOTES ---
             ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(currentAngle);
             const stickLength = circles.length > 0 ? circles[circles.length - 1].radius + 35 : 120;
             ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(stickLength - 20, -4); ctx.lineTo(stickLength - 20, 4); ctx.lineTo(0, 8);
             ctx.closePath(); ctx.fillStyle = '#a67c52'; ctx.fill();
             ctx.beginPath(); ctx.ellipse(stickLength - 10, 0, 10, 6, 0, 0, Math.PI * 2); ctx.fillStyle = '#8b5a2b'; ctx.fill();
             ctx.restore();
-            // --------------------------------------------------------------
-
-            let voiceCircles = circles.filter(c => instrumentsConfig[c.instrumentIdx].type === 'voice');
-            let activeVoiceCircleId = voiceCircles.length > 0 ? voiceCircles[measureCount % voiceCircles.length].id : null;
+            // ------------------------------------------
 
             circles.forEach((circle) => {
                 if (circle.isHidden) return;
@@ -623,7 +629,7 @@
                     let fillColor = 'rgba(255,255,255,0.2)'; 
                     let radiusSize = 6; 
                     let isAccent = false;
-                    let textSymbol = String(state); // FORCE STRING
+                    let textSymbol = String(state); 
 
                     if (state !== 0) {
                         radiusSize = 13;
@@ -717,12 +723,11 @@
                         let state = circle.activeSteps[stepIdx];
                         if (state !== 0) {
                             if (inst.type === 'voice') {
-                                // KARAOKE HIGHLIGHT CIBLE SEULEMENT CETTE SYLLABE !
+                                // KARAOKE HIGHLIGHT CIBLE SYLLABE
                                 Tone.Draw.schedule(function(){
                                     let sylSpans = document.querySelectorAll(`.lyric-ref-${circle.id}-${stepIdx}`);
                                     sylSpans.forEach(el => {
                                         el.classList.add('highlight');
-                                        // On l'éteint juste après
                                         setTimeout(() => { el.classList.remove('highlight'); }, 300);
                                     });
                                 }, time);
@@ -851,6 +856,7 @@
                         
                         if (isBeatEnd && i !== circle.steps - 1) { extraStyle = "margin-right: 10px;"; }
 
+                        // COULEURS ASSORTIES A LA RODA
                         let colorStyle = "";
                         if (val !== 0 && val !== '') {
                             let bgColor = inst.colors[val] || '#111';
@@ -872,7 +878,7 @@
                 }
 
                 const div = document.createElement('div'); div.className = "track-mixer";
-                div.style.background = `linear-gradient(145deg, #1c140d 40%, ${inst.mixerBg} 150%)`;
+                div.style.background = `linear-gradient(145deg, rgba(30,26,22,0.9) 30%, ${inst.mixerBg} 120%)`;
                 div.innerHTML = `
                     <div class="track-mixer-header">
                         <div style="display:flex; align-items:center;">
@@ -1084,76 +1090,7 @@
             }
         };
 
-        canvas.addEventListener('click', (e) => {
-            const rect = canvas.getBoundingClientRect(); 
-            const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width); 
-            const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
-            const dx = mouseX - centerX; const dy = mouseY - centerY; const distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance < 55) { togglePlay(); return; }
-
-            circles.forEach((circle) => {
-                if (circle.isHidden) return;
-                if (Math.abs(distance - circle.radius) < 18) {
-                    let clickAngle = Math.atan2(dy, dx) + Math.PI / 2; if (clickAngle < 0) clickAngle += Math.PI * 2;
-                    const stepAngleSize = (Math.PI * 2) / circle.steps;
-                    
-                    for (let i = 0; i < circle.steps; i++) {
-                        const targetAngle = i * stepAngleSize; let angleDiff = Math.abs(clickAngle - targetAngle);
-                        if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
-
-                        if (angleDiff < stepAngleSize / 2) {
-                            const inst = instrumentsConfig[circle.instrumentIdx]; let current = circle.activeSteps[i];
-                            
-                            if (inst.id === 'mineiro') {
-                                if (current === 0) circle.activeSteps[i] = 'p'; else if (current === 'p') circle.activeSteps[i] = 'P'; else if (current === 'P') circle.activeSteps[i] = 't'; else if (current === 't') circle.activeSteps[i] = 'T'; else circle.activeSteps[i] = 0;
-                            } else if (inst.id === 'agbe') {
-                                if (current === 0) circle.activeSteps[i] = 'g'; else if (current === 'g') circle.activeSteps[i] = 'G'; else if (current === 'G') circle.activeSteps[i] = 'd'; else if (current === 'd') circle.activeSteps[i] = 'D'; else circle.activeSteps[i] = 0;
-                            } else if (inst.type === 'gongue') {
-                                if (current === 0) circle.activeSteps[i] = 'grv'; else if (current === 'grv') circle.activeSteps[i] = 'GRV'; else if (current === 'GRV') circle.activeSteps[i] = 'aig'; else if (current === 'aig') circle.activeSteps[i] = 'AIG'; else circle.activeSteps[i] = 0;
-                            } else if (inst.type === 'voice') {
-                                // GESTION DU CLIC POUR LE CHANT (EDITION DIRECTE)
-                                let currentText = "";
-                                if (current !== 0) {
-                                    let notePart = (circle.notes && circle.notes[i]) ? circle.notes[i] + ":" : "";
-                                    currentText = notePart + (current === 'P' ? '*' : '') + (circle.lyrics[i] || "");
-                                }
-                                
-                                let lyric = prompt(t('promptVoice'), currentText);
-                                if (lyric !== null) {
-                                    lyric = lyric.trim();
-                                    if (lyric === '') {
-                                        circle.activeSteps[i] = 0; circle.lyrics[i] = ""; circle.notes[i] = "";
-                                    } else {
-                                        let noteVal = ""; let sylVal = lyric;
-                                        if (lyric.includes(':')) {
-                                            let parts = lyric.split(':');
-                                            noteVal = parts[0].trim(); sylVal = parts[1].trim();
-                                            if (/^[a-gA-G][#b]?$/.test(noteVal)) noteVal += "4"; // Autocompletion
-                                        }
-                                        
-                                        if (sylVal.startsWith('*')) {
-                                            circle.activeSteps[i] = 'P';
-                                            circle.lyrics[i] = sylVal.substring(1).substring(0, 15);
-                                        } else {
-                                            circle.activeSteps[i] = 'C';
-                                            circle.lyrics[i] = sylVal.substring(0, 15);
-                                        }
-                                        circle.notes[i] = noteVal.toUpperCase();
-                                    }
-                                }
-                            } else {
-                                if (current === 0) circle.activeSteps[i] = 'd'; else if (current === 'd') circle.activeSteps[i] = 'D'; else if (current === 'D') circle.activeSteps[i] = 'g'; else if (current === 'g') circle.activeSteps[i] = 'G'; else circle.activeSteps[i] = 0;
-                            }
-                            renderMixer();
-                            return;
-                        }
-                    }
-                }
-            });
-        });
-
-        async function togglePlay() {
+        window.togglePlay = async function() {
             if (!isPlaying) {
                 await Tone.start(); 
                 mainLoop.start(0); Tone.Transport.start(); isPlaying = true;
@@ -1180,6 +1117,11 @@
         document.getElementById('masterVol').addEventListener('input', (e) => { let val = parseFloat(e.target.value); Tone.Destination.volume.value = val === -40 ? -Infinity : val; });
         const metroBtn = document.getElementById('metroBtn'); metroBtn.addEventListener('click', () => { isMetroOn = !isMetroOn; metroBtn.classList.toggle('metro-on', isMetroOn); });
         document.getElementById('clearBtn').addEventListener('click', () => { circles = []; document.getElementById('letras-textarea').innerHTML = ""; refreshCirclesLayout(); });
+
+        const showAddBtn = document.getElementById('showAddBtn');
+        const addSelect = document.getElementById('addInstrumentSelect');
+
+        showAddBtn.addEventListener('click', () => { addSelect.style.display = addSelect.style.display === 'none' ? 'block' : 'none'; });
 
         document.getElementById('saveBtn').addEventListener('click', () => {
             let letrasText = document.getElementById('letras-textarea').innerHTML;
