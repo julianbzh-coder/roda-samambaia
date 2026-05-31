@@ -1063,7 +1063,7 @@ function updateStaticTexts() {
             currentStepIndex = -1; measureCount = 0; Tone.Transport.seconds = 0; currentAngle = -Math.PI / 2;
         });
 
-        document.getElementById('bpm').addEventListener('change', (e) => { 
+       document.getElementById('bpmInput').addEventListener('change', (e) => { 
             let val = Math.round(Number(e.target.value));
             if (val < 40) val = 40; if (val > 240) val = 240;
             e.target.value = val; Tone.Transport.bpm.value = val;
