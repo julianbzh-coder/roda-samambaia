@@ -1,12 +1,3 @@
-C'est une excellente idée d'ajouter ta police personnalisée pour renforcer l'identité visuelle de l'application !
-
-Pour le bug du Karaoké, le problème venait de la façon dont les mots avec des tirets (ex: va- di- ar) étaient fusionnés en un seul bloc HTML lors de l'extraction. Quand le séquenceur essayait d'illuminer la deuxième syllabe, il ne trouvait pas la balise correspondante. J'ai réécrit la logique d'extraction : désormais, chaque syllabe possède sa propre balise invisible, ce qui permet au séquenceur de les illuminer une par une au moment exact de la lecture, avec un bel effet de "pop" (agrandissement et lueur).
-
-⚠️ Important avant de tester : Assure-toi que ton fichier de police Cactus Regular.otf se trouve exactement dans le même dossier que ton fichier beta.html.
-
-Voici le code complet mis à jour. Tu peux copier-coller tout ce bloc :
-
-HTML
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
