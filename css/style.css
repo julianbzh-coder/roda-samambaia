@@ -2,7 +2,7 @@
 
             font-family: 'Cactus';
 
-            src: url('Cactus Regular.otf') format('opentype');
+            src: url('../Cactus Regular.otf') format('opentype');
 
             /* Fallback en cas d'erreur de lien vers le .otf */
 
@@ -300,7 +300,7 @@
 
             background-color: var(--bg-dark); 
 
-            background-image: url('Pictures/atelier.png'); 
+            background-image: url('../Pictures/atelier.png'); 
 
             background-size: cover; background-position: center; background-repeat: no-repeat; 
 
