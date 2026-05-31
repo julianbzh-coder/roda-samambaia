@@ -691,7 +691,40 @@
         }
         setTimeout(() => { const o = document.getElementById('loading-overlay'); if (o) o.style.display = 'none'; }, 1500);
 
-        const bgImg = new Image(); bgImg.src = 'Pictures/tambour.png'; let bgLoaded = false; bgImg.onload = () => { bgLoaded = true; };
+         // --- DRAW SVG ALFAIA RODA ---
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save(); ctx.shadowColor = 'rgba(0, 0, 0, 0.65)'; ctx.shadowBlur = 32; ctx.shadowOffsetY = 12;
+
+            // Peau (Gradient)
+            const bgGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 560);
+            bgGradient.addColorStop(0, '#1a1614'); bgGradient.addColorStop(0.7, '#0f0c0b'); bgGradient.addColorStop(1, '#000000'); 
+            ctx.beginPath(); ctx.arc(centerX, centerY, 560, 0, Math.PI * 2); ctx.fillStyle = bgGradient; ctx.fill();
+
+            // Cordes en V (24 équidistantes)
+            const numKnots = 24; const rimRadius = 550; ctx.lineWidth = 5; ctx.strokeStyle = '#a67c52'; ctx.lineJoin = 'round';
+            for (let i = 0; i < numKnots; i++) {
+                const a = (i * Math.PI * 2) / numKnots; const na = ((i + 1) * Math.PI * 2) / numKnots; const ma = ((i + 0.5) * Math.PI * 2) / numKnots;
+                ctx.beginPath(); ctx.moveTo(centerX + Math.cos(a)*rimRadius, centerY + Math.sin(a)*rimRadius); 
+                ctx.lineTo(centerX + Math.cos(ma)*(rimRadius+22), centerY + Math.sin(ma)*(rimRadius+22)); 
+                ctx.lineTo(centerX + Math.cos(na)*rimRadius, centerY + Math.sin(na)*rimRadius); ctx.stroke();
+            }
+
+            // Cerclage Bois
+            ctx.beginPath(); ctx.arc(centerX, centerY, rimRadius, 0, Math.PI * 2); ctx.lineWidth = 26; ctx.strokeStyle = '#3e2723'; ctx.stroke();
+            ctx.beginPath(); ctx.arc(centerX, centerY, rimRadius - 12, 0, Math.PI * 2); ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.stroke();
+            ctx.beginPath(); ctx.arc(centerX, centerY, rimRadius + 13, 0, Math.PI * 2); ctx.lineWidth = 4; ctx.strokeStyle = '#120a05'; ctx.stroke();
+
+            // Nœuds
+            ctx.fillStyle = '#c89d70'; ctx.strokeStyle = '#5e3a1f'; ctx.lineWidth = 2;
+            for (let i = 0; i < numKnots; i++) {
+                const a = (i * Math.PI * 2) / numKnots; ctx.save(); ctx.translate(centerX + Math.cos(a)*rimRadius, centerY + Math.sin(a)*rimRadius); ctx.rotate(a);
+                ctx.beginPath(); ctx.ellipse(0, 0, 10, 16, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(-8, -6); ctx.lineTo(8, -6); ctx.moveTo(-10, 0); ctx.lineTo(10, 0); ctx.moveTo(-8, 6); ctx.lineTo(8, 6); ctx.strokeStyle = '#7a4b28'; ctx.stroke(); ctx.restore();
+            }
+            ctx.restore(); 
+
+
         const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
         const centerX = canvas.width / 2; const centerY = canvas.height / 2;
 
