@@ -98,7 +98,7 @@
         .dropdown-selected { display: flex; align-items: center; gap: 8px; background: #111; border: 1px solid #555; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; color: #fff; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.8);}
         .dropdown-selected img { width: 16px; height: 16px; object-fit: contain; border-radius: 2px; }
 
-        .track-mute-solo { display: flex; gap: 4px; position: relative; z-index: 2;}
+        .track-mute-solo { display: flex; gap: 4px; z-index: 2; position: relative;}
         .btn-mute-solo { width: 24px; height: 24px; background-color: #333; color: #fff; border: 1px solid #222; border-radius: 4px; font-weight: bold; font-size: 10px; cursor: pointer; box-shadow: inset 1px 1px 2px rgba(255,255,255,0.1); }
         .btn-mute-solo.mute-on { background-color: var(--accent-red); }
         .btn-mute-solo.solo-on { background-color: var(--accent-gold); color: #000; }
@@ -153,12 +153,12 @@
         #letras-textarea:empty:before { content: attr(data-placeholder); color: #555; pointer-events: none; display: block; text-shadow: none; }
         #letras-textarea:focus { outline: none; border-color: #fff;}
         
-        .lyric-word { display: inline-block; padding: 0 1px; border-radius: 3px; transition: all 0.1s; }
+        .lyric-word { display: inline-block; padding: 2px 1px; border-radius: 3px; transition: all 0.05s; }
         .lyric-word.highlight { 
             background-color: rgba(255, 255, 255, 0.4) !important; 
             box-shadow: 0 0 10px rgba(255,255,255,0.8); 
             color: #fff !important; text-shadow: none; 
-            transform: scale(1.1); /* Petit effet Pop visuel */
+            transform: scale(1.1); /* Petit effet Pop visuel Karaoké */
         }
 
         /* --- INTERFACE CENTRALE --- */
@@ -180,7 +180,7 @@
 
         #rewindBtn {
             width: 40px; height: 40px; padding: 0 !important; border-radius: 50%;
-            background-color: var(--accent-red); border: 2px solid #121212;
+            background-color: #a00000; border: 2px solid #121212;
             box-shadow: 0 3px 6px rgba(0,0,0,0.6); margin-right: 10px;
         }
         #rewindBtn:hover { background-color: #600000; }
@@ -232,7 +232,7 @@
     <div id="top-bar">
         <!-- GROUPE GAUCHE -->
         <div class="topbar-group" id="header-main">
-            <button id="toggleLeftBtn" class="control-btn icon-btn" title="Mostrar painel" onclick="togglePanel('left')" style="background: transparent; border: 1px solid #444; display: none;">
+            <button id="toggleLeftBtn" class="control-btn icon-btn" title="Mostrar painel" onclick="togglePanel('left')">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>
                 </svg>
@@ -264,6 +264,7 @@
                 </svg>
             </button>
             
+            <!-- BOUTON STOP (Design Pro) -->
             <button id="rewindBtn" title="Parar e Voltar ao início / Stop & Rewind">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="#121212" stroke="#121212" stroke-width="2" stroke-linejoin="round">
                     <polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5" stroke-width="3"></line>
@@ -282,6 +283,7 @@
             <button id="tutorialBtn" class="control-btn icon-btn" title="Tutorial / Ajuda" onclick="window.open('https://www.youtube.com/results?search_query=maracatu+tutorial', '_blank')" style="background:#e67e22;">📺</button>
             <div class="control-separator"></div>
             
+            <!-- MENU ADD INSTRUMENT AVEC ICONES -->
             <div class="custom-dropdown" id="dropdown-add" tabindex="0" onblur="closeDropdown('dropdown-add')">
                 <button class="control-btn" style="background-color: var(--accent-green); color: #000; font-weight:bold;" onclick="toggleDropdown('list-add')">+ Instrumento</button>
                 <div class="dropdown-list" id="list-add" style="right:0; left:auto; top:40px; max-height:300px;">
@@ -400,8 +402,6 @@
         Tone.Transport.swing = 0.0; 
         Tone.Destination.volume.value = -6;
 
-        const channels = {}; const meters = {}; const samplers = {}; const voiceSynths = {};
-
         // VRAIS CHEMINS DES ICONES (.SVG)
         const instrumentsConfig = [
             { id: 'marcante', iconImg: 'icones/alfaia.svg', name: 'Alfaia Marcante', type: 'hands', mixerBg: '#3a1010', path: 'Alfaia/Marcante', colors: { 'd': '#5a0000', 'D': '#8b0000', 'g': '#ff7676', 'G': '#ff4d4d', text: '#fff' } },
@@ -413,6 +413,8 @@
             { id: 'mineiro', iconImg: 'icones/mineiro.svg', name: 'Mineiro', type: 'shake', mixerBg: '#203a10', path: 'Graines/Mineiro', colors: { 'p': '#113b14', 'P': '#1b5e20', 't': '#74d478', 'T': '#4caf50', text: '#fff' } },
             { id: 'chant', iconImg: 'icones/micro.svg', name: 'Voz / Coro', type: 'voice', mixerBg: '#10203a', path: 'internal', colors: { 'C': '#00d2d3', 'P': '#ff9f43', text: '#121212' } }
         ];
+
+        const channels = {}; const meters = {}; const samplers = {}; const voiceSynths = {};
 
         const bMetroClick = new Tone.Synth({
             oscillator: { type: "square" },
@@ -506,7 +508,6 @@
             }
         };
 
-        // Sécurité maximale pour charger d'anciens JSON
         function normalizeCircleData(c) {
             if (c.repeats === undefined) c.repeats = 1; 
             if (!c.notes) c.notes = Array(c.steps).fill("");
@@ -629,7 +630,7 @@
                     let fillColor = 'rgba(255,255,255,0.2)'; 
                     let radiusSize = 6; 
                     let isAccent = false;
-                    let textSymbol = String(state); 
+                    let textSymbol = String(state); // FORCE STRING
 
                     if (state !== 0) {
                         radiusSize = 13;
@@ -691,7 +692,7 @@
 
             requestAnimationFrame(draw);
         }
-
+        
         const mainLoop = new Tone.Loop((time) => {
             if (currentStepIndex === maxTicks - 1) measureCount++; 
             currentStepIndex = (currentStepIndex + 1) % maxTicks;
@@ -703,7 +704,6 @@
                 bMetroClick.triggerAttackRelease(note, "32n", time); 
             }
 
-            // KARAOKE RESET HIGHLIGHTS
             Tone.Draw.schedule(function(){
                 document.querySelectorAll('.lyric-word.highlight').forEach(el => el.classList.remove('highlight'));
             }, time);
@@ -878,10 +878,11 @@
                 }
 
                 const div = document.createElement('div'); div.className = "track-mixer";
-                div.style.background = `linear-gradient(145deg, rgba(30,26,22,0.9) 30%, ${inst.mixerBg} 120%)`;
+                // NOUVEAU DESIGN BOIS / CORDEL DU MIXEUR
+                div.style.background = `linear-gradient(145deg, rgba(30,26,22,0.95) 30%, ${inst.mixerBg} 150%)`;
                 div.innerHTML = `
                     <div class="track-mixer-header">
-                        <div style="display:flex; align-items:center;">
+                        <div style="display:flex; align-items:center; position:relative; z-index:2;">
                             <div class="track-order-btns">
                                 <button class="order-btn" onclick="moveCircleUp(${circle.id})" ${index === 0 ? 'disabled' : ''}>▲</button>
                                 <button class="order-btn" onclick="moveCircleDown(${circle.id})" ${index === circles.length - 1 ? 'disabled' : ''}>▼</button>
@@ -1090,7 +1091,70 @@
             }
         };
 
-        window.togglePlay = async function() {
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect(); 
+            const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width); 
+            const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+            const dx = mouseX - centerX; const dy = mouseY - centerY; const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < 55) { togglePlay(); return; }
+
+            circles.forEach((circle) => {
+                if (circle.isHidden) return;
+                if (Math.abs(distance - circle.radius) < 18) {
+                    let clickAngle = Math.atan2(dy, dx) + Math.PI / 2; if (clickAngle < 0) clickAngle += Math.PI * 2;
+                    const stepAngleSize = (Math.PI * 2) / circle.steps;
+                    
+                    for (let i = 0; i < circle.steps; i++) {
+                        const targetAngle = i * stepAngleSize; let angleDiff = Math.abs(clickAngle - targetAngle);
+                        if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
+
+                        if (angleDiff < stepAngleSize / 2) {
+                            const inst = instrumentsConfig[circle.instrumentIdx]; let current = circle.activeSteps[i];
+                            
+                            if (inst.id === 'mineiro') {
+                                if (current === 0) circle.activeSteps[i] = 'p'; else if (current === 'p') circle.activeSteps[i] = 'P'; else if (current === 'P') circle.activeSteps[i] = 't'; else if (current === 't') circle.activeSteps[i] = 'T'; else circle.activeSteps[i] = 0;
+                            } else if (inst.id === 'agbe') {
+                                if (current === 0) circle.activeSteps[i] = 'g'; else if (current === 'g') circle.activeSteps[i] = 'G'; else if (current === 'G') circle.activeSteps[i] = 'd'; else if (current === 'd') circle.activeSteps[i] = 'D'; else circle.activeSteps[i] = 0;
+                            } else if (inst.type === 'gongue') {
+                                if (current === 0) circle.activeSteps[i] = 'grv'; else if (current === 'grv') circle.activeSteps[i] = 'GRV'; else if (current === 'GRV') circle.activeSteps[i] = 'aig'; else if (current === 'aig') circle.activeSteps[i] = 'AIG'; else circle.activeSteps[i] = 0;
+                            } else if (inst.type === 'voice') {
+                                let currentText = "";
+                                if (current !== 0) {
+                                    let notePart = (circle.notes && circle.notes[i]) ? circle.notes[i] + ":" : "";
+                                    currentText = notePart + (current === 'P' ? '*' : '') + (circle.lyrics[i] || "");
+                                }
+                                let lyric = prompt(t('promptVoice'), currentText);
+                                if (lyric !== null) {
+                                    if (lyric.trim() === '') {
+                                        circle.activeSteps[i] = 0; circle.lyrics[i] = ""; circle.notes[i] = "";
+                                    } else {
+                                        let noteVal = ""; let sylVal = lyric;
+                                        if (lyric.includes(':')) {
+                                            let parts = lyric.split(':');
+                                            noteVal = parts[0].trim(); sylVal = parts[1].trim();
+                                            if (/^[a-gA-G][#b]?$/.test(noteVal)) noteVal += "4"; 
+                                        }
+                                        if (sylVal.startsWith('*')) {
+                                            circle.activeSteps[i] = 'P'; circle.lyrics[i] = sylVal.substring(1).substring(0, 15);
+                                        } else {
+                                            circle.activeSteps[i] = 'C'; circle.lyrics[i] = sylVal.substring(0, 15);
+                                        }
+                                        circle.notes[i] = noteVal.toUpperCase();
+                                    }
+                                }
+                            } else {
+                                if (current === 0) circle.activeSteps[i] = 'd'; else if (current === 'd') circle.activeSteps[i] = 'D'; else if (current === 'D') circle.activeSteps[i] = 'g'; else if (current === 'g') circle.activeSteps[i] = 'G'; else circle.activeSteps[i] = 0;
+                            }
+                            renderMixer();
+                            return;
+                        }
+                    }
+                }
+            });
+        });
+
+        async function togglePlay() {
             if (!isPlaying) {
                 await Tone.start(); 
                 mainLoop.start(0); Tone.Transport.start(); isPlaying = true;
@@ -1122,6 +1186,24 @@
         const addSelect = document.getElementById('addInstrumentSelect');
 
         showAddBtn.addEventListener('click', () => { addSelect.style.display = addSelect.style.display === 'none' ? 'block' : 'none'; });
+
+        if (addSelect) {
+            instrumentsConfig.forEach((inst, idx) => { const opt = document.createElement('option'); opt.value = idx; opt.textContent = inst.name; addSelect.appendChild(opt); });
+        }
+
+        addSelect.addEventListener('change', function() {
+            if (this.value !== "") {
+                if (circles.length >= 20) { alert("Limite máxima atingida!"); this.value = ""; return; }
+                const instIdx = parseInt(this.value);
+                let defaultSteps = 16;
+                if (timeSignature === "3/4" || timeSignature === "6/8") defaultSteps = 12;
+                if (timeSignature === "2/4") defaultSteps = 8;
+                if (timeSignature === "12/8") defaultSteps = 24;
+
+                circles.push({ id: Date.now(), steps: defaultSteps, repeats: 1, activeSteps: Array(defaultSteps).fill(0), instrumentIdx: instIdx, lyrics: Array(defaultSteps).fill(""), notes: Array(defaultSteps).fill(""), isMute: false, isSolo: false, isHidden: false, volumeVal: 100 });
+                refreshCirclesLayout(); this.value = ""; this.style.display = 'none'; 
+            }
+        });
 
         document.getElementById('saveBtn').addEventListener('click', () => {
             let letrasText = document.getElementById('letras-textarea').innerHTML;
@@ -1184,13 +1266,18 @@
             } 
         });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            if (window.innerWidth <= 1000) {
-                document.getElementById('left-panel').classList.add('collapsed');
-                document.getElementById('toggleLeftBtn').style.display = 'flex';
-            }
-            updateStaticTexts(); populateAddDropdown(); refreshCirclesLayout(); draw();
-        });
+        // INITIALISATION FINALE CORRECTE !
+        if (window.innerWidth <= 1000) {
+            document.getElementById('left-panel').classList.add('collapsed');
+            document.getElementById('toggleLeftBtn').style.display = 'flex';
+        } else {
+            document.getElementById('toggleLeftBtn').style.display = 'none';
+        }
+        
+        updateStaticTexts(); 
+        populateAddDropdown(); 
+        refreshCirclesLayout(); 
+        draw();
     </script>
 </body>
 </html>
