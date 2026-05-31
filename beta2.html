@@ -551,19 +551,32 @@
 
 window.extractLyrics = function() {
     let voiceCircles = circles.filter(c => instrumentsConfig[c.instrumentIdx].type === 'voice');
-    let htmlArr = [];
+    let ta = document.getElementById('letras-textarea');
+    ta.innerHTML = ""; // Vide le bloc
+    
     voiceCircles.forEach(c => {
-        let trackHtml = "";
+        let container = document.createElement('div');
+        container.style.marginBottom = "15px";
+        
         for(let i=0; i<c.steps; i++) {
             if(c.activeSteps[i] !== 0 && c.lyrics[i]) {
-                let syl = c.lyrics[i].trim();
-                let color = c.activeSteps[i] === 'P' ? '#ff9f43' : '#00d2d3'; 
-                trackHtml += `<span class="lyric-word lyric-track-${c.id} lyric-ref-${c.id}-${i}" style="color: ${color}; font-weight: bold;">${syl.replace(/-/g, '')}</span>${syl.endsWith('-') ? '' : ' '}`;
+                let rawSyl = c.lyrics[i].trim();
+                let cleanSyl = rawSyl.replace(/-/g, ''); // Enlève le tiret pour l'affichage
+                
+                let span = document.createElement('span');
+                span.className = `lyric-word lyric-ref-${c.id}-${i}`;
+                span.innerText = cleanSyl;
+                
+                container.appendChild(span);
+                
+                // Si le mot n'est pas coupé par un tiret, on ajoute un espace visuel après
+                if (!rawSyl.endsWith('-')) {
+                    container.appendChild(document.createTextNode(' '));
+                }
             }
         }
-        if(trackHtml) htmlArr.push(`<div style="margin-bottom: 10px;">${trackHtml.trim()}</div>`);
+        ta.appendChild(container);
     });
-    document.getElementById('letras-textarea').innerHTML = htmlArr.join('');
 };
 
         let recorder = null;
