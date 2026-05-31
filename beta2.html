@@ -64,6 +64,20 @@
         .sidebar-section { display: none; flex-direction: column; padding: 20px; height: 100%; overflow-y: auto; }
         .sidebar-section.active { display: flex; }
 
+/* Style pour que les syllabes collent les unes aux autres */
+.lyric-word { 
+    display: inline-block; 
+    transition: all 0.1s ease; 
+    color: #888; /* Couleur par défaut (non chanté) */
+}
+
+/* Style de la syllabe quand elle est active */
+.lyric-word.highlight { 
+    color: var(--accent-gold) !important; /* Couleur quand c'est chanté */
+    text-shadow: 0 0 8px var(--accent-gold);
+    transform: scale(1.1);
+}
+        
         /* --- TYPOGRAPHIE CORDEL --- */
         .panel-title { 
             font-family: 'Cactus', sans-serif; 
