@@ -701,8 +701,8 @@
             bgGradient.addColorStop(0, '#1a1614'); bgGradient.addColorStop(0.7, '#0f0c0b'); bgGradient.addColorStop(1, '#000000'); 
             ctx.beginPath(); ctx.arc(centerX, centerY, 560, 0, Math.PI * 2); ctx.fillStyle = bgGradient; ctx.fill();
 
-            // Cordes en V (8 équidistantes)
-            const numKnots = 8; const rimRadius = 550; ctx.lineWidth = 5; ctx.strokeStyle = '#a67c52'; ctx.lineJoin = 'round';
+            // Cordes en V (24 équidistantes)
+            const numKnots = 24; const rimRadius = 550; ctx.lineWidth = 5; ctx.strokeStyle = '#a67c52'; ctx.lineJoin = 'round';
             for (let i = 0; i < numKnots; i++) {
                 const a = (i * Math.PI * 2) / numKnots; const na = ((i + 1) * Math.PI * 2) / numKnots; const ma = ((i + 0.5) * Math.PI * 2) / numKnots;
                 ctx.beginPath(); ctx.moveTo(centerX + Math.cos(a)*rimRadius, centerY + Math.sin(a)*rimRadius); 
@@ -1528,4 +1528,3 @@
     </script>
 </body>
 </html>
-
