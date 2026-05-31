@@ -142,48 +142,47 @@
         let currentLang = 'pt';
         function t(key) { return i18n[currentLang][key] || key; }
 
-        function updateStaticTexts() {
-            document.getElementById('loading-text').innerText = t('loading');
-            document.getElementById('title-mixer').innerText = t('mixer');
-            document.getElementById('title-legend').innerText = t('legend');
-            
-            document.getElementById('legend-seq-title').innerText = t('seqLegendTitle');
-            document.getElementById('legend-seq-1').innerHTML = `<span>${t('seqLegend1')}</span>`;
-            document.getElementById('legend-seq-2').innerHTML = `<span>${t('seqLegend2')}</span>`;
+function updateStaticTexts() {
+    // Mise à jour pour correspondre aux nouveaux IDs de votre index.html
+    document.getElementById('loading-text').innerText = t('loading');
+    document.getElementById('lblPanMixer').innerText = t('mixer');
+    document.getElementById('lblPanLegenda').innerText = t('legend');
+    
+    document.getElementById('txtL1tit').innerText = t('seqLegendTitle');
+    document.getElementById('txtL1_1').innerHTML = `<span>${t('seqLegend1')}</span>`;
+    document.getElementById('txtL1_2').innerHTML = `<span>${t('seqLegend2')}</span>`;
 
-            document.getElementById('legend-voice-title').innerText = t('voiceLegendTitle');
-            document.getElementById('legend-voice-1').innerHTML = `<span>${t('voiceLegend1')}</span>`;
-            document.getElementById('legend-voice-2').innerHTML = `<span>${t('voiceLegend2')}</span>`;
+    document.getElementById('txtL2tit').innerText = t('voiceLegendTitle');
+    document.getElementById('txtL2_1').innerHTML = `<span>${t('voiceLegend1')}</span>`;
+    document.getElementById('txtL2_2').innerHTML = `<span>${t('voiceLegend2')}</span>`;
 
-            document.getElementById('legend-gold').innerHTML = t('goldRule');
-            document.getElementById('tsLabel').innerText = t('tsLabel');
-            
-            document.getElementById('legend-ac-title').innerText = t('alfaiaCaixa');
-            document.getElementById('legend-ac-1').innerHTML = `<span class="legend-badge" style="background:#8b0000; color:#fff;">D / d</span> <span>${t('mainDroite')}</span>`;
-            document.getElementById('legend-ac-2').innerHTML = `<span class="legend-badge" style="background:#f39c12; color:#121212;">G / g</span> <span>${t('mainGauche')}</span>`;
-            document.getElementById('legend-go-title').innerText = t('gongueLegend');
-            document.getElementById('legend-go-1').innerHTML = `<span class="legend-badge" style="background:#222; color:#fff;">G / g</span> <span>${t('gongueGrave')}</span>`;
-            document.getElementById('legend-go-2').innerHTML = `<span class="legend-badge" style="background:#bdc3c7; color:#000;">A / a</span> <span>${t('gongueAigu')}</span>`;
-            document.getElementById('legend-ag-title').innerText = t('agbeLegend');
-            document.getElementById('legend-ag-1').innerHTML = `<span class="legend-badge" style="background:#1b5e20; color:#fff;">G / g</span> <span>${t('agbeG')}</span>`;
-            document.getElementById('legend-ag-2').innerHTML = `<span class="legend-badge" style="background:#4caf50; color:#121212;">D / d</span> <span>${t('agbeD')}</span>`;
-            document.getElementById('legend-mi-title').innerText = t('mineiroLegend');
-            document.getElementById('legend-mi-1').innerHTML = `<span class="legend-badge" style="background:#1b5e20; color:#fff;">P / p</span> <span>${t('mineiroP')}</span>`;
-            document.getElementById('legend-mi-2').innerHTML = `<span class="legend-badge" style="background:#4caf50; color:#121212;">T / t</span> <span>${t('mineiroT')}</span>`;
+    document.getElementById('txtRLgGold').innerHTML = t('goldRule');
+    document.getElementById('tsLabel').innerText = t('tsLabel');
+    
+    document.getElementById('txtL4tit').innerText = t('alfaiaCaixa');
+    document.getElementById('txtDnd1').innerText = t('mainDroite');
+    document.getElementById('txtEsq1').innerText = t('mainGauche');
+    
+    document.getElementById('txtL5tit').innerText = t('gongueLegend');
+    document.getElementById('txtGrv1').innerText = t('gongueGrave');
+    document.getElementById('txtAgud1').innerText = t('gongueAigu');
+    
+    document.getElementById('txtL3tit').innerText = t('mineiroLegend');
+    document.getElementById('txtSh1').innerText = "Movimentações / Esquerdas et Altas."; // ou votre traduction
 
-            document.getElementById('clearBtn').title = t('clear');
-            document.getElementById('saveBtn').title = t('save');
-            document.getElementById('loadBtn').title = t('load');
-            document.getElementById('toggleLeftBtn').title = t('toggleBtn');
-            document.getElementById('toggleLegendBtn').title = t('toggleLegendBtn');
-            document.getElementById('toggleLetrasBtn').title = t('toggleLetrasBtn');
-            document.getElementById('tutorialBtn').title = t('tutorialBtn');
-            document.getElementById('rewindBtn').title = t('rewindBtn');
-            document.getElementById('letras-title').innerText = t('letrasTitle');
-            document.getElementById('extractBtn').innerText = t('extractBtn');
-            
-            document.getElementById('letras-textarea').setAttribute('data-placeholder', t('letrasPlaceholder'));
-        }
+    document.getElementById('delAllBtn').title = t('clear');
+    document.getElementById('savFlBtn').title = t('save');
+    document.getElementById('lodFlBtn').title = t('load');
+    document.getElementById('lblAdd').innerText = t('addInst');
+    
+    document.getElementById('btgLegend').title = t('toggleLegendBtn');
+    document.getElementById('btgLetras').title = t('toggleLetrasBtn');
+    document.getElementById('rewindBtn').title = t('rewindBtn');
+    document.getElementById('lblPanLetras').innerText = t('letrasTitle');
+    document.getElementById('btGenerateWords').innerText = t('extractBtn');
+    
+    document.getElementById('textLivro').setAttribute('data-placeholder', t('letrasPlaceholder'));
+}
 
         function toggleLang() {
             currentLang = currentLang === 'pt' ? 'fr' : 'pt';
