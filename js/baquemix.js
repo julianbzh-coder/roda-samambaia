@@ -1069,17 +1069,17 @@ function updateStaticTexts() {
             e.target.value = val; Tone.Transport.bpm.value = val;
         });
         
-        document.getElementById('masterVol').addEventListener('input', (e) => { let val = parseFloat(e.target.value); Tone.Destination.volume.value = val === -40 ? -Infinity : val; });
+        document.getElementById('volFader').addEventListener('input', (e) => { let val = parseFloat(e.target.value); Tone.Destination.volume.value = val === -40 ? -Infinity : val; });
         const metroBtn = document.getElementById('metroBtn'); metroBtn.addEventListener('click', () => { isMetroOn = !isMetroOn; metroBtn.classList.toggle('metro-on', isMetroOn); });
-        document.getElementById('clearBtn').addEventListener('click', () => { circles = []; document.getElementById('letras-textarea').innerHTML = ""; refreshCirclesLayout(); });
+        document.getElementById('delAllBtn').addEventListener('click', () => { circles = []; document.getElementById('letras-textarea').innerHTML = ""; refreshCirclesLayout(); });
 
-        document.getElementById('saveBtn').addEventListener('click', () => {
+        document.getElementById('savFlBtn').addEventListener('click', () => {
             let letrasText = document.getElementById('letras-textarea').innerHTML;
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ bpm: Tone.Transport.bpm.value, timeSig: timeSignature, letras: letrasText, circles: circles }));
             const dl = document.createElement('a'); dl.href = dataStr; dl.download = "rythme_samambaia.json"; dl.click();
         });
 
-        const fileInput = document.getElementById('fileInput'); document.getElementById('loadBtn').addEventListener('click', () => fileInput.click());
+        const fileInput = document.getElementById('fileInput'); document.getElementById('lodFlBtn').addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0]; if (!file) return; const reader = new FileReader();
             reader.onload = function(evt) {
