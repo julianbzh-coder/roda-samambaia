@@ -1,3 +1,12 @@
+C'est une excellente idée d'ajouter ta police personnalisée pour renforcer l'identité visuelle de l'application !
+
+Pour le bug du Karaoké, le problème venait de la façon dont les mots avec des tirets (ex: va- di- ar) étaient fusionnés en un seul bloc HTML lors de l'extraction. Quand le séquenceur essayait d'illuminer la deuxième syllabe, il ne trouvait pas la balise correspondante. J'ai réécrit la logique d'extraction : désormais, chaque syllabe possède sa propre balise invisible, ce qui permet au séquenceur de les illuminer une par une au moment exact de la lecture, avec un bel effet de "pop" (agrandissement et lueur).
+
+⚠️ Important avant de tester : Assure-toi que ton fichier de police Cactus Regular.otf se trouve exactement dans le même dossier que ton fichier beta.html.
+
+Voici le code complet mis à jour. Tu peux copier-coller tout ce bloc :
+
+HTML
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -13,6 +22,12 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
+        /* --- INTEGRATION DE LA POLICE CACTUS --- */
+        @font-face {
+            font-family: 'Cactus';
+            src: url('Cactus Regular.otf') format('opentype');
+        }
+
         :root {
             --bg-dark: #121212; --panel-bg: #1e1e1e; --control-bg: #252525;
             --text-main: #f5f5f5; --text-muted: #888;
@@ -32,7 +47,17 @@
         }
         .topbar-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
         
-        #header-title-text { font-size: 26px; font-weight: 900; letter-spacing: 2px; color: var(--accent-gold); line-height: 1; margin: 0; padding: 0; }
+        #header-title-text { 
+            font-family: 'Cactus', sans-serif; /* Utilisation de la nouvelle police */
+            font-size: 38px; /* Taille augmentée pour compenser la typographie manuscrite */
+            font-weight: normal; 
+            letter-spacing: 2px; 
+            color: var(--accent-gold); 
+            line-height: 1; 
+            margin: 0; 
+            padding: 0; 
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
 
         /* --- CONTENEUR DE L'ESPACE DE TRAVAIL --- */
         #main-workspace { display: flex; flex-grow: 1; overflow: hidden; position: relative; width: 100%; }
@@ -129,8 +154,21 @@
         #letras-textarea:empty:before { content: attr(data-placeholder); color: #555; pointer-events: none; display: block; text-shadow: none; }
         #letras-textarea:focus { border-color: var(--accent-gold); outline: none; }
         
-        .lyric-word { padding: 0 1px; border-radius: 3px; transition: all 0.1s; }
-        .lyric-word.highlight { background-color: rgba(255, 255, 255, 0.3) !important; box-shadow: 0 0 8px rgba(255,255,255,0.6); color: #fff !important; }
+        /* --- NOUVEAU STYLE KARAOKE AMELIORE --- */
+        .lyric-word { 
+            padding: 0 2px; 
+            border-radius: 3px; 
+            transition: all 0.1s ease-in-out; 
+            display: inline-block; /* Permet les transformations d'échelle */
+        }
+        .lyric-word.highlight { 
+            background-color: rgba(255, 255, 255, 0.25) !important; 
+            box-shadow: 0 0 10px rgba(255,255,255,0.6); 
+            color: #fff !important; 
+            transform: scale(1.15); /* Effet de "pop" */
+            z-index: 2;
+            position: relative;
+        }
 
         /* --- INTERFACE CENTRALE --- */
         #center-panel { flex-grow: 1; display: flex; flex-direction: column; position: relative; min-width: 0; }
@@ -533,42 +571,34 @@
             updateStaticTexts(); renderMixer(); populateAddDropdown();
         }
 
-        // EXTRACTION INTELLIGENTE : Recollage des tirets et Couleurs
+        // --- NOUVELLE EXTRACTION KARAOKE (Syllabe par syllabe) ---
         window.extractLyrics = function() {
             let voiceCircles = circles.filter(c => instrumentsConfig[c.instrumentIdx].type === 'voice');
             let htmlArr = [];
             
             voiceCircles.forEach(c => {
                 let trackHtml = "";
-                let buffer = "";
-                let currentSpanColor = "";
-                let startIdx = 0;
-                
                 for(let i=0; i<c.steps; i++) {
                     if(c.activeSteps[i] !== 0 && c.lyrics[i]) {
                         let syl = c.lyrics[i].trim();
                         let isPux = c.activeSteps[i] === 'P';
                         let color = isPux ? '#ff9f43' : '#00d2d3'; 
                         
-                        if (syl.endsWith('-')) {
-                            if (!buffer) { currentSpanColor = color; startIdx = i; }
-                            buffer += syl.slice(0, -1);
-                        } else {
-                            if (!buffer) { currentSpanColor = color; startIdx = i; }
-                            buffer += syl;
-                            trackHtml += `<span class="lyric-word lyric-ref-${c.id}-${startIdx}" style="color: ${currentSpanColor}; font-weight: bold;">${buffer}</span> `;
-                            buffer = "";
-                        }
+                        // Nettoyage du tiret pour l'affichage visuel, mais on l'utilise pour savoir s'il faut un espace
+                        let cleanSyl = syl.replace(/-/g, '');
+                        let separator = syl.endsWith('-') ? '' : ' ';
+                        
+                        // On crée un span par syllabe et par case du séquenceur (ID exact: i)
+                        trackHtml += `<span class="lyric-word lyric-track-${c.id} lyric-ref-${c.id}-${i}" style="color: ${color}; font-weight: bold;">${cleanSyl}</span>${separator}`;
                     }
                 }
-                if (buffer.length > 0) {
-                     trackHtml += `<span class="lyric-word lyric-ref-${c.id}-${startIdx}" style="color: ${currentSpanColor}; font-weight: bold;">${buffer}</span> `;
+                if(trackHtml) {
+                    htmlArr.push(`<div style="margin-bottom: 10px;">${trackHtml.trim()}</div>`);
                 }
-                if(trackHtml) htmlArr.push(trackHtml.trim());
             });
 
             let ta = document.getElementById('letras-textarea');
-            ta.innerHTML = htmlArr.join('<br>');
+            ta.innerHTML = htmlArr.join('');
         }
 
         let recorder = null;
@@ -624,7 +654,7 @@
         let timeSignature = "4/4";
         let maxTicks = 96; 
         let flashAlpha = 0; 
-        let currentAngle = -Math.PI / 2; // STOCKÉ GLOBALEMENT
+        let currentAngle = -Math.PI / 2;
         
         let isPlaying = false;
         let isMetroOn = false;
@@ -787,23 +817,20 @@
             ctx.shadowOffsetY = 12;
 
             // --- FOND ALFAIA VECTORIEL ---
-            
-            // 1. Peau tendue (Gradient radial)
             const bgGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 560);
-            bgGradient.addColorStop(0, '#1a1614'); // Centre brun très sombre pour la lisibilité
+            bgGradient.addColorStop(0, '#1a1614'); 
             bgGradient.addColorStop(0.7, '#0f0c0b');
-            bgGradient.addColorStop(1, '#000000'); // Bord fondu dans le noir
+            bgGradient.addColorStop(1, '#000000'); 
 
             ctx.beginPath(); 
             ctx.arc(centerX, centerY, 560, 0, Math.PI * 2);
             ctx.fillStyle = bgGradient; 
             ctx.fill();
 
-            // 2. Cordes de tension en 'V' autour de l'Alfaia
-            const numKnots = 24; // 24 nœuds parfaitement équidistants
+            const numKnots = 24; 
             const rimRadius = 550;
             ctx.lineWidth = 5; 
-            ctx.strokeStyle = '#a67c52'; // Couleur corde sisal
+            ctx.strokeStyle = '#a67c52'; 
             ctx.lineJoin = 'round';
             
             for (let i = 0; i < numKnots; i++) {
@@ -813,74 +840,40 @@
                 
                 const x1 = centerX + Math.cos(angle) * rimRadius; 
                 const y1 = centerY + Math.sin(angle) * rimRadius;
-                
                 const x2 = centerX + Math.cos(nextAngle) * rimRadius; 
                 const y2 = centerY + Math.sin(nextAngle) * rimRadius;
-                
-                // Point de tension vers l'extérieur
                 const midX = centerX + Math.cos(midAngle) * (rimRadius + 22); 
                 const midY = centerY + Math.sin(midAngle) * (rimRadius + 22);
                 
-                ctx.beginPath(); 
-                ctx.moveTo(x1, y1); 
-                ctx.lineTo(midX, midY); 
-                ctx.lineTo(x2, y2); 
-                ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(midX, midY); ctx.lineTo(x2, y2); ctx.stroke();
             }
 
-            // 3. Cerclage en bois de l'Alfaia
-            ctx.beginPath(); 
-            ctx.arc(centerX, centerY, rimRadius, 0, Math.PI * 2);
-            ctx.lineWidth = 26; 
-            ctx.strokeStyle = '#3e2723'; // Acajou foncé
-            ctx.stroke();
+            ctx.beginPath(); ctx.arc(centerX, centerY, rimRadius, 0, Math.PI * 2);
+            ctx.lineWidth = 26; ctx.strokeStyle = '#3e2723'; ctx.stroke();
             
-            // Effet de lumière interne (volume du bois)
-            ctx.beginPath(); 
-            ctx.arc(centerX, centerY, rimRadius - 12, 0, Math.PI * 2);
-            ctx.lineWidth = 2; 
-            ctx.strokeStyle = 'rgba(255,255,255,0.1)'; 
-            ctx.stroke();
+            ctx.beginPath(); ctx.arc(centerX, centerY, rimRadius - 12, 0, Math.PI * 2);
+            ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.stroke();
             
-            // Effet d'ombre externe (volume du bois)
-            ctx.beginPath(); 
-            ctx.arc(centerX, centerY, rimRadius + 13, 0, Math.PI * 2);
-            ctx.lineWidth = 4; 
-            ctx.strokeStyle = '#120a05'; 
-            ctx.stroke();
+            ctx.beginPath(); ctx.arc(centerX, centerY, rimRadius + 13, 0, Math.PI * 2);
+            ctx.lineWidth = 4; ctx.strokeStyle = '#120a05'; ctx.stroke();
 
-            // 4. Nœuds d'attache sur le cerclage
-            ctx.fillStyle = '#c89d70'; 
-            ctx.strokeStyle = '#5e3a1f'; 
-            ctx.lineWidth = 2;
+            ctx.fillStyle = '#c89d70'; ctx.strokeStyle = '#5e3a1f'; ctx.lineWidth = 2;
             
             for (let i = 0; i < numKnots; i++) {
                 const angle = (i * Math.PI * 2) / numKnots;
                 const x = centerX + Math.cos(angle) * rimRadius; 
                 const y = centerY + Math.sin(angle) * rimRadius;
                 
-                ctx.save(); 
-                ctx.translate(x, y); 
-                ctx.rotate(angle);
+                ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
                 
-                // Forme ovale du nœud
-                ctx.beginPath(); 
-                ctx.ellipse(0, 0, 10, 16, 0, 0, Math.PI * 2); 
-                ctx.fill(); 
-                ctx.stroke();
-                
-                // Détail d'enroulement de la corde sur le nœud
-                ctx.beginPath(); 
-                ctx.moveTo(-8, -6); ctx.lineTo(8, -6); 
-                ctx.moveTo(-10, 0); ctx.lineTo(10, 0); 
-                ctx.moveTo(-8, 6); ctx.lineTo(8, 6);
-                ctx.strokeStyle = '#7a4b28'; 
-                ctx.stroke();
+                ctx.beginPath(); ctx.ellipse(0, 0, 10, 16, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(-8, -6); ctx.lineTo(8, -6); ctx.moveTo(-10, 0); ctx.lineTo(10, 0); ctx.moveTo(-8, 6); ctx.lineTo(8, 6);
+                ctx.strokeStyle = '#7a4b28'; ctx.stroke();
                 
                 ctx.restore();
             }
 
-            ctx.restore(); // Fin des ombres globales
+            ctx.restore(); 
 
             if (flashAlpha > 0) {
                 ctx.save();
@@ -899,7 +892,7 @@
             const markers = getMarkers();
             markers.forEach((tick, idx) => {
                 const angle = -Math.PI / 2 + ((tick / maxTicks) * Math.PI * 2);
-                const inRad = 525, outRad = 538; // S'arrête juste avant le cerclage
+                const inRad = 525, outRad = 538;
                 ctx.beginPath();
                 ctx.moveTo(centerX + Math.cos(angle)*inRad, centerY + Math.sin(angle)*inRad);
                 ctx.lineTo(centerX + Math.cos(angle)*outRad, centerY + Math.sin(angle)*outRad);
@@ -1027,10 +1020,6 @@
                 bMetroClick.triggerAttackRelease(note, "32n", time); 
             }
 
-            Tone.Draw.schedule(function(){
-                document.querySelectorAll('.lyric-word.highlight').forEach(el => el.classList.remove('highlight'));
-            }, time);
-
             const hasActiveSolo = circles.some(c => c.isSolo);
             circles.forEach(circle => {
                 let canPlay = hasActiveSolo ? circle.isSolo : !circle.isMute;
@@ -1046,10 +1035,16 @@
                         let state = circle.activeSteps[stepIdx];
                         if (state !== 0) {
                             if (inst.type === 'voice') {
+                                // --- GESTION DU KARAOKE SYNCHRONISE ---
                                 Tone.Draw.schedule(function(){
+                                    // 1. On efface les anciens highlights de CE cercle précis
+                                    document.querySelectorAll(`.lyric-track-${circle.id}`).forEach(el => el.classList.remove('highlight'));
+                                    
+                                    // 2. On illumine la syllabe actuelle
                                     document.querySelectorAll(`.lyric-ref-${circle.id}-${stepIdx}`).forEach(el => {
                                         el.classList.add('highlight');
-                                        setTimeout(() => { el.classList.remove('highlight'); }, 300);
+                                        // On éteint automatiquement la syllabe après un court délai (basé sur le BPM)
+                                        setTimeout(() => { el.classList.remove('highlight'); }, (60 / Tone.Transport.bpm.value) * 500);
                                     });
                                 }, time);
 
