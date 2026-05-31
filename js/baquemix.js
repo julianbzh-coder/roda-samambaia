@@ -334,7 +334,7 @@
         setTimeout(() => { const o = document.getElementById('loading-overlay'); if (o) o.style.display = 'none'; }, 1500);
 
         const bgImg = new Image(); bgImg.src = 'Pictures/tambour.png'; let bgLoaded = false; bgImg.onload = () => { bgLoaded = true; };
-        const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
+        const canvas = document.getElementById('appWheelDraw'); const ctx = canvas.getContext('2d');
         const centerX = canvas.width / 2; const centerY = canvas.height / 2;
 
         window.updateTimeSig = function(val, forceResize = false) {
