@@ -82,8 +82,8 @@
             <input type="file" id="hidLoadInp" accept=".json">
 
             <div class="control-separator"></div>
-            <button id="btgLegend" class="control-btn icon-btn" title="Legenda" onclick="toggleRightSide('legend')" style="margin-right:6px;">📖</button>
-            <button id="btgLetras" class="control-btn icon-btn" title="Letras Karaoké" onclick="toggleRightSide('letras')">📝</button>
+            <button id="btgLegend" class="control-btn icon-btn" title="Legenda" onclick="toggleRightPanel('legend')" style="margin-right:6px;">📖</button>
+            <button id="btgLetras" class="control-btn icon-btn" title="Letras Karaoké" onclick="toggleRightPanel('letras')">📝</button>
         </div>
     </div>
 
@@ -105,7 +105,7 @@
             <div id="blkLegend" class="sidebar-section">
                 <div class="panel-header-cordel">
                     <span class="panel-title" id="lblPanLegenda">Legenda</span>
-                    <button class="control-btn icon-btn" onclick="toggleRightSide('legend')" style="font-size: 16px !important; padding:4px 10px !important;">▶</button>
+                    <button class="control-btn icon-btn" onclick="toggleRightPanel('legend')" style="font-size: 16px !important; padding:4px 10px !important;">▶</button>
                 </div>
                 <div class="legend-container">
                     <div class="legend-group"><span class="legend-group-title" id="txtL1tit">⌨️ DICAS</span><div class="legend-item" id="txtL1_1"><span><strong>Espaço</strong> avança / silêncio.</span></div><div class="legend-item" id="txtL1_2"><span><strong>Setas</strong> cruzam.</span></div></div>
@@ -120,7 +120,7 @@
             <div id="blkLetras" class="sidebar-section">
                 <div class="panel-header-cordel">
                     <span class="panel-title" id="lblPanLetras">Letras (Karaokê)</span>
-                    <button class="control-btn icon-btn" onclick="toggleRightSide('letras')" style="font-size: 16px !important; padding:4px 10px !important;">▶</button>
+                    <button class="control-btn icon-btn" onclick="toggleRightPanel('letras')" style="font-size: 16px !important; padding:4px 10px !important;">▶</button>
                 </div>
                 <button class="control-btn" id="btGenerateWords" onclick="extractLyricsToCordelZoneArrayStringsBuilderAppMngtUI()" style="margin-bottom: 20px; width: 100%; border:2px solid var(--accent-gold); color:#121212; background-color:var(--accent-gold); font-size:15px; letter-spacing:0.5px;">⬇ Extrair e Sincronizar o Karaokê!</button>
                 <div id="textLivro" contenteditable="true" data-placeholder="Vazio no momento. Extrair suas falas para animá-las.."></div>
