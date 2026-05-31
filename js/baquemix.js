@@ -1056,6 +1056,8 @@ function updateStaticTexts() {
             }
         }
 
+        // --- CORRECTION DES ÉVÉNEMENTS (IDs mis à jour selon beta.html) ---
+
         document.getElementById('rewindBtn').addEventListener('click', () => {
             mainLoop.stop(); Tone.Transport.stop(); 
             instrumentsConfig.forEach(inst => { if (samplers[inst.id]) samplers[inst.id].stopAll(); if (voiceSynths[inst.id]) voiceSynths[inst.id].triggerRelease(); });
@@ -1063,73 +1065,49 @@ function updateStaticTexts() {
             currentStepIndex = -1; measureCount = 0; Tone.Transport.seconds = 0; currentAngle = -Math.PI / 2;
         });
 
-       document.getElementById('bpmInput').addEventListener('change', (e) => { 
+        document.getElementById('bpmInput').addEventListener('change', (e) => { 
             let val = Math.round(Number(e.target.value));
             if (val < 40) val = 40; if (val > 240) val = 240;
             e.target.value = val; Tone.Transport.bpm.value = val;
         });
         
-        document.getElementById('volFader').addEventListener('input', (e) => { let val = parseFloat(e.target.value); Tone.Destination.volume.value = val === -40 ? -Infinity : val; });
-        const metroBtn = document.getElementById('metroBtn'); metroBtn.addEventListener('click', () => { isMetroOn = !isMetroOn; metroBtn.classList.toggle('metro-on', isMetroOn); });
-        document.getElementById('delAllBtn').addEventListener('click', () => { circles = []; document.getElementById('letras-textarea').innerHTML = ""; refreshCirclesLayout(); });
+        document.getElementById('volFader').addEventListener('input', (e) => { 
+            let val = parseFloat(e.target.value); 
+            Tone.Destination.volume.value = val === -40 ? -Infinity : val; 
+        });
+
+        const metroBtn = document.getElementById('metroBtn'); 
+        metroBtn.addEventListener('click', () => { 
+            isMetroOn = !isMetroOn; 
+            metroBtn.classList.toggle('metro-on', isMetroOn); 
+        });
+
+        document.getElementById('delAllBtn').addEventListener('click', () => { 
+            circles =[]; 
+            document.getElementById('textLivro').innerHTML = ""; 
+            refreshCirclesLayout(); 
+        });
 
         document.getElementById('savFlBtn').addEventListener('click', () => {
-            let letrasText = document.getElementById('letras-textarea').innerHTML;
+            let letrasText = document.getElementById('textLivro').innerHTML; // Corrigé : textLivro au lieu de letras-textarea
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ bpm: Tone.Transport.bpm.value, timeSig: timeSignature, letras: letrasText, circles: circles }));
             const dl = document.createElement('a'); dl.href = dataStr; dl.download = "rythme_samambaia.json"; dl.click();
         });
 
-        const fileInput = document.getElementById('fileInput'); document.getElementById('lodFlBtn').addEventListener('click', () => fileInput.click());
+        // Gestion du chargement de fichier
+        const fileInput = document.getElementById('hidLoadInp'); 
+        document.getElementById('lodFlBtn').addEventListener('click', () => fileInput.click());
+        
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0]; if (!file) return; const reader = new FileReader();
             reader.onload = function(evt) {
                 try { 
                     const d = JSON.parse(evt.target.result); 
-                    if (d.bpm) { document.getElementById('bpm').value = Math.round(d.bpm); Tone.Transport.bpm.value = Math.round(d.bpm); } 
+                    if (d.bpm) { document.getElementById('bpmInput').value = Math.round(d.bpm); Tone.Transport.bpm.value = Math.round(d.bpm); } 
                     if (d.circles) { circles = d.circles; circles.forEach(c => normalizeCircleData(c)); } 
                     if (d.timeSig) { updateTimeSig(d.timeSig, 'skip'); } else { updateTimeSig("4/4", 'skip'); }
-                    if (d.letras !== undefined) { document.getElementById('letras-textarea').innerHTML = d.letras; }
+                    if (d.letras !== undefined) { document.getElementById('textLivro').innerHTML = d.letras; }
                     refreshCirclesLayout(); 
                 } catch (err) { alert("Fichier invalide !"); }
             }; reader.readAsText(file);
-        });
-
-        function onPresetChange(value) { if (value.endsWith('.json')) loadPresetFile(value); else loadFallbackPreset(value); }
-
-        function loadPresetFile(fileName) {
-            fetch(fileName).then(res => { if (!res.ok) throw new Error("Fichier introuvable"); return res.json(); })
-                .then(data => { 
-                    if (data.circles) { circles = JSON.parse(JSON.stringify(data.circles)); circles.forEach(c => normalizeCircleData(c)); }
-                    if (data.bpm) { document.getElementById('bpm').value = Math.round(data.bpm); Tone.Transport.bpm.value = Math.round(data.bpm); } 
-                    if (data.timeSig) { updateTimeSig(data.timeSig, 'skip'); } else { updateTimeSig("4/4", 'skip'); }
-                    if (data.letras !== undefined) { document.getElementById('letras-textarea').innerHTML = data.letras; } else { document.getElementById('letras-textarea').innerHTML = ""; }
-                    refreshCirclesLayout(); 
-                })
-                .catch(err => { loadFallbackPreset(fileName.includes("Imale") ? 'baque-de-imale' : 'vou-vadiar'); });
-        }
-
-        function loadFallbackPreset(name) {
-            let p = name === 'baque-de-imale' ? baqueDeImalePreset : vouVadiarPreset;
-            if (p) { 
-                circles = JSON.parse(JSON.stringify(p.circles)); circles.forEach(c => normalizeCircleData(c));
-                document.getElementById('bpm').value = Math.round(p.bpm); Tone.Transport.bpm.value = Math.round(p.bpm); 
-                updateTimeSig(p.timeSig || "4/4", 'skip');
-            }
-            document.getElementById('letras-textarea').innerHTML = "";
-            refreshCirclesLayout(); measureCount = 0; 
-        }
-
-        fetch('catalog.json')
-            .then(response => { if (!response.ok) throw new Error("Fichier manquant"); return response.json(); })
-            .then(presets => {
-                const select = document.getElementById('presetSelect'); select.innerHTML = ''; 
-                presets.forEach(p => { const opt = document.createElement('option'); opt.value = p.file; opt.textContent = p.name; select.appendChild(opt); });
-                if (presets.length > 0) loadPresetFile(presets[0].file);
-            })
-            .catch(err => { loadFallbackPreset('vou-vadiar'); document.getElementById('presetSelect').value = 'vou-vadiar'; });
-
-        window.addEventListener('keydown', (e) => { 
-            if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && e.target.id !== 'letras-textarea') { 
-                e.preventDefault(); togglePlay(); 
-            } 
         });
