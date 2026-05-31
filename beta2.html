@@ -64,20 +64,6 @@
         .sidebar-section { display: none; flex-direction: column; padding: 20px; height: 100%; overflow-y: auto; }
         .sidebar-section.active { display: flex; }
 
-/* Style pour que les syllabes collent les unes aux autres */
-.lyric-word { 
-    display: inline-block; 
-    transition: all 0.1s ease; 
-    color: #888; /* Couleur par défaut (non chanté) */
-}
-
-/* Style de la syllabe quand elle est active */
-.lyric-word.highlight { 
-    color: var(--accent-gold) !important; /* Couleur quand c'est chanté */
-    text-shadow: 0 0 8px var(--accent-gold);
-    transform: scale(1.1);
-}
-        
         /* --- TYPOGRAPHIE CORDEL --- */
         .panel-title { 
             font-family: 'Cactus', sans-serif; 
@@ -565,32 +551,19 @@
 
 window.extractLyrics = function() {
     let voiceCircles = circles.filter(c => instrumentsConfig[c.instrumentIdx].type === 'voice');
-    let ta = document.getElementById('letras-textarea');
-    ta.innerHTML = ""; // Vide le bloc
-    
+    let htmlArr = [];
     voiceCircles.forEach(c => {
-        let container = document.createElement('div');
-        container.style.marginBottom = "15px";
-        
+        let trackHtml = "";
         for(let i=0; i<c.steps; i++) {
             if(c.activeSteps[i] !== 0 && c.lyrics[i]) {
-                let rawSyl = c.lyrics[i].trim();
-                let cleanSyl = rawSyl.replace(/-/g, ''); // Enlève le tiret pour l'affichage
-                
-                let span = document.createElement('span');
-                span.className = `lyric-word lyric-ref-${c.id}-${i}`;
-                span.innerText = cleanSyl;
-                
-                container.appendChild(span);
-                
-                // Si le mot n'est pas coupé par un tiret, on ajoute un espace visuel après
-                if (!rawSyl.endsWith('-')) {
-                    container.appendChild(document.createTextNode(' '));
-                }
+                let syl = c.lyrics[i].trim();
+                let color = c.activeSteps[i] === 'P' ? '#ff9f43' : '#00d2d3'; 
+                trackHtml += `<span class="lyric-word lyric-track-${c.id} lyric-ref-${c.id}-${i}" style="color: ${color}; font-weight: bold;">${syl.replace(/-/g, '')}</span>${syl.endsWith('-') ? '' : ' '}`;
             }
         }
-        ta.appendChild(container);
+        if(trackHtml) htmlArr.push(`<div style="margin-bottom: 10px;">${trackHtml.trim()}</div>`);
     });
+    document.getElementById('letras-textarea').innerHTML = htmlArr.join('');
 };
 
         let recorder = null;
