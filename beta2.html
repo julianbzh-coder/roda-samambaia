@@ -549,43 +549,22 @@
             updateStaticTexts(); renderMixer(); populateAddDropdown();
         }
 
-        // EXTRACTION INTELLIGENTE : Recollage des tirets et Couleurs
-        window.extractLyrics = function() {
-            let voiceCircles = circles.filter(c => instrumentsConfig[c.instrumentIdx].type === 'voice');
-            let htmlArr = [];
-            
-            voiceCircles.forEach(c => {
-                let trackHtml = "";
-                let buffer = "";
-                let currentSpanColor = "";
-                let startIdx = 0;
-                
-                for(let i=0; i<c.steps; i++) {
-                    if(c.activeSteps[i] !== 0 && c.lyrics[i]) {
-                        let syl = c.lyrics[i].trim();
-                        let isPux = c.activeSteps[i] === 'P';
-                        let color = isPux ? '#ff9f43' : '#00d2d3'; 
-                        
-                        if (syl.endsWith('-')) {
-                            if (!buffer) { currentSpanColor = color; startIdx = i; }
-                            buffer += syl.slice(0, -1);
-                        } else {
-                            if (!buffer) { currentSpanColor = color; startIdx = i; }
-                            buffer += syl;
-                            trackHtml += `<span class="lyric-word lyric-ref-${c.id}-${startIdx}" style="color: ${currentSpanColor}; font-weight: bold;">${buffer}</span> `;
-                            buffer = "";
-                        }
-                    }
-                }
-                if (buffer.length > 0) {
-                     trackHtml += `<span class="lyric-word lyric-ref-${c.id}-${startIdx}" style="color: ${currentSpanColor}; font-weight: bold;">${buffer}</span> `;
-                }
-                if(trackHtml) htmlArr.push(trackHtml.trim());
-            });
-
-            let ta = document.getElementById('letras-textarea');
-            ta.innerHTML = htmlArr.join('<br>');
+window.extractLyrics = function() {
+    let voiceCircles = circles.filter(c => instrumentsConfig[c.instrumentIdx].type === 'voice');
+    let htmlArr = [];
+    voiceCircles.forEach(c => {
+        let trackHtml = "";
+        for(let i=0; i<c.steps; i++) {
+            if(c.activeSteps[i] !== 0 && c.lyrics[i]) {
+                let syl = c.lyrics[i].trim();
+                let color = c.activeSteps[i] === 'P' ? '#ff9f43' : '#00d2d3'; 
+                trackHtml += `<span class="lyric-word lyric-track-${c.id} lyric-ref-${c.id}-${i}" style="color: ${color}; font-weight: bold;">${syl.replace(/-/g, '')}</span>${syl.endsWith('-') ? '' : ' '}`;
+            }
         }
+        if(trackHtml) htmlArr.push(`<div style="margin-bottom: 10px;">${trackHtml.trim()}</div>`);
+    });
+    document.getElementById('letras-textarea').innerHTML = htmlArr.join('');
+};
 
         let recorder = null;
         let isRecording = false;
